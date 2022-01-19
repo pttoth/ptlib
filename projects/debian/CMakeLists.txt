@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(ptlib_debian LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
@@ -25,10 +25,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MY_OUTPUT_DIR})
 #build an archive (.a), for static linking
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/main.cpp
+    ${MY_PROJ_ROOT}/src/config.cpp
+    ${MY_PROJ_ROOT}/include/pt/config.h
+    ${MY_PROJ_ROOT}/include/pt/std_extension.hpp
+    ${MY_PROJ_ROOT}/include/pt/event.hpp
     )
 
 target_include_directories(ptlib PRIVATE
-    /usr/include
     ${MY_PROJ_ROOT}/include
     )
 
@@ -36,10 +39,10 @@ target_include_directories(ptlib PRIVATE
 #build Test app
 add_executable(ptlib_test
     ${MY_PROJ_ROOT}/src/main.cpp
+    ${MY_PROJ_ROOT}/test/test_config.hpp
     )
 
 target_include_directories(ptlib_test PRIVATE
-    /usr/include
     ${MY_PROJ_ROOT}/include
     )
 

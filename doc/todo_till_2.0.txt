@@ -1,0 +1,18 @@
+test the EventBase and Event class usage
+
+add logger class
+	switch all output writing references to logger
+
+finish config refactor
+
+rename 'std_extensions'
+
+add array class
+	can use std::vector internally for now, but have the interface ready
+
+
+
+
+
+
+

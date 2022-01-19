@@ -1,0 +1,126 @@
+
+example: 
+
+[Config1 name here]
+key1=value1
+key2=value2
+key3=value3
+key4=value4
+key5=value5 ; some comment here
+key6=value6
+key7=value7
+
+[Config2 name here]
+key1=value1
+key2=value2
+key3=value3 ; some comment here
+key4=value4
+
+[Config3 name here]
+array_key={val1, val2, val3}
+
+
+--------------------------------------------------
+key   - value   separator character:    "="
+value - comment separator character:    ";"
+
+values can only be single-lines
+
+newlines can be '\n' and '\r\n'
+
+decimal separator can only be '.'
+
+
+naming the config files:
+	config names:
+		names cannot be empty
+		valid characters: A-Z, a-z, 0-9, -, _, ., <space>
+		whitespaces are trimmed at the start and end of the name!
+		
+	the opening brace has to be at the exact start of the line
+	the closing brace has to be the last character of the line
+		name lines cannot have comments
+
+
+---
+Config classes don't contain the names
+	they could be renamed after being added to the writer, can cause conflict
+	
+	they are added during Config class registration
+		CRW::addConfig(Config* c, str name) //exception when (ptr || name) conflicts
+		CRW::rmConfig(Config* c)			//exception when doesn't exist
+		CRW::rmConfig(str name)				//exception when doesn't exist
+	
+	
+Config classes need to be pre-assembled before loading file
+	loading iterates through the connected config files
+		loads the last matching entry for the appropriate config class' variable
+		ignores every other config entry
+			may log a warning for them
+	
+	
+	
+	---think this through, this may be needed---
+	after finishing all Configs, they need to be validated
+	validation:
+		checks, whether the Config has read a value for EVERY registered key
+		if not, the loadFile throws an exception
+	
+	
+-----------
+example cases for regex testing
+-----------
+
+;asdasdasd
+[]
+
+[cfg]
+value=dfgdfg
+value= dfgdfg
+value =dfgdfg
+value = dfgdfg
+value = 5464.34
+value1 = asdasd
+value1 = asdasd ; sfi53645/+_--.E:__"53654e6756765783453445
+
+[dfg;fdgd]
+
+array = {val, val1, val2, val3, 5, 8, 5.6}
+
+    [cfg1]
+invalid 4 = 3453
+valid = "valid string that is; NOT! a comment"
+[fg]
+valid = "string;dsfgdfg" ;sdfdfgdfg
+[]
+valid = óüöúőűáéíÓÜÖÚŐŰÁÉÍ<>#&@{}>*$ß¤~¬*-+äđĐÄ€ÍíłŁ
+
+     []
+
+invalid;string = sdfgkldjfg
+invalid;string = sdfgkldjfg ;dfgdfgdfg
+
+[cfg_sdf]
+
+[cfg_sdfg4]
+
+[cfg_sdfg_4]
+
+
+
+[invalid
+
+[invalid = value5
+
+[invalid cfg 1]
+
+;[valid_but_as_comment]
+value5 = 1342
+
+
+
+
+
+
+
+

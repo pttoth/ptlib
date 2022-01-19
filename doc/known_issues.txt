@@ -1,0 +1,27 @@
+in progress:
+    - invalid query exceptions don't contain info about the key and value pair
+        fix: added _buildErrorStringInvalidValue(int eKey) prototype, need testing
+
+	std_extension
+		SplitString
+			check whether it fails if there is no occurence of separator sequence
+
+other:
+    - Logger is unfinished
+        - no multicore handling
+        (win only)
+            - missing folder creation
+            - missing timestamp creation for log filenames
+
+    - event doesn't handle multiple registrations of the same function
+    - event.add() should be named event.addListener()/addCallback()
+        same for remove()
+
+    - various camelcase problems
+
+Config:
+    - error prints should use "CONFIG: " in front of every message
+        maybe even print config file path
+        it should use logger::debug as message output
+	- outputs wrong error message when trying to write read-only config file
+	- need to check other behaviors regarding read / write access to files
