@@ -1,3 +1,3 @@
 # ptlib
 
-A library for some generic purpose tools and use cases.
+A library for some generic purpose tools.

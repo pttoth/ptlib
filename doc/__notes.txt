@@ -1,0 +1,6 @@
+--------------------------------------------------------------------------------------------------------
+GCC compiler flag for mistaken operator= calls instead of operator==
+	project-wide setting of this flag eliminates the need for yoda conditions
+		-Wparentheses  
+
+--------------------------------------------------------------------------------------------------------
