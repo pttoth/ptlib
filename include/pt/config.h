@@ -13,7 +13,7 @@
 #include <vector>
 #include <istream>
 
-namespace PT{
+namespace pt{
 
 #define cfgAddKey(CFG_INSTANCE_NAME, ENUM_NAME) \
             CFG_INSTANCE_NAME.addKey(ENUM_NAME, #ENUM_NAME);

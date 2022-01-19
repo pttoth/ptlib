@@ -11,7 +11,7 @@
 
 #include "pt/std_extension.hpp"
 
-using namespace PT;
+using namespace pt;
 
 const char* Config::_sep_keyval = "=";
 const char* Config::_sep_valcom = ";";
@@ -132,7 +132,7 @@ char Config::
         getC(int eKey) const{
     std::string data = _getData(eKey);  //getData() may throw "unknown key", we don't wanna catch that
     if( data.length() != 1 ){
-        data = trimWhitespaces(data);   //may be longer than 1 char because of whitespaces
+        data = TrimWhitespaces(data);   //may be longer than 1 char because of whitespaces
         if( data.length() != 1 ){       //try again with trim
             throw std::invalid_argument( _buildErrorStringInvalidValue(eKey) );
         }
@@ -147,16 +147,16 @@ std::string Config::
 
 bool Config::
         getB(int eKey) const{
-    std::string data = trimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
-    if(       "true"  == stringToLower(data) ){ return true;
-    }else if( "false" == stringToLower(data) ){ return false;
+    std::string data = TrimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
+    if(       "true"  == StringToLower(data) ){ return true;
+    }else if( "false" == StringToLower(data) ){ return false;
     }
     throw std::invalid_argument( _buildErrorStringInvalidValue(eKey) );
 }
 
 float Config::
         getF(int eKey) const{
-    std::string data = trimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
+    std::string data = TrimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
     try{
         return std::stof(data);
     }catch(...){
@@ -170,7 +170,7 @@ float Config::
 
 double Config::
         getD(int eKey) const{
-    std::string data = trimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
+    std::string data = TrimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
     try{
         return std::stod(data);
     }catch(...){
@@ -184,7 +184,7 @@ double Config::
 
 int Config::
         getI(int eKey) const{
-    std::string data = trimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
+    std::string data = TrimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
     try{
         return std::stoi(data);
     }catch(...){
@@ -357,8 +357,8 @@ void Config::
     while( std::getline(ss, line) ){
         cfg = _trimComments(line);
         if( !_isEmptyLine(cfg) ){
-            if( splitString(cfg_split, cfg, _sep_keyval) ){
-                cfg_split[0] = trimWhitespaces(cfg_split[0]);
+            if( SplitString(cfg_split, cfg, _sep_keyval) ){
+                cfg_split[0] = TrimWhitespaces(cfg_split[0]);
                 int idx = _getKeyIndex( cfg_split[0] );
                 if(-1 < idx){
                     _entries[idx].val_str = cfg_split[1];
