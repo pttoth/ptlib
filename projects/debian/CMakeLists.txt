@@ -26,6 +26,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MY_OUTPUT_DIR})
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/main.cpp
     ${MY_PROJ_ROOT}/src/config.cpp
+    ${MY_PROJ_ROOT}/include/pt/array.h
     ${MY_PROJ_ROOT}/include/pt/config.h
     ${MY_PROJ_ROOT}/include/pt/std_extension.hpp
     ${MY_PROJ_ROOT}/include/pt/event.hpp
