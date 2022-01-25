@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(ptlib_debian LANGUAGES C CXX)
+project(ptlib_win64 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
