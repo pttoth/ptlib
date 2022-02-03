@@ -153,3 +153,24 @@ MatchRegex(const std::string& str, const std::string& regex_str)
 
 } //end of namespace
 
+
+//-------------------------------------------------------------------------
+#include <string>
+#include <assert.h>
+
+#include <locale>
+#include <codecvt>
+
+#include <cstring>
+
+
+
+
+void CStrToWCStr(wchar_t* output, const char* const text, size_t size);
+std::string WStringToUTF8(const std::wstring& wstring_to_convert);
+std::wstring StringToWString(const std::string& string_to_convert);
+
+void CreateDirectory(const std::string& path);
+void EnsureExistingDirectory(const std::string& path);
+
+
