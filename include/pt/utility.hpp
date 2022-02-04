@@ -135,21 +135,42 @@ MatchRegex(const char* const str, const char* const regex_str)
 inline bool
 MatchRegex(const char* str, const std::string& regex_str)
 {
-    MatchRegex(str, regex_str.c_str());
+    return MatchRegex(str, regex_str.c_str());
 }
 
 inline bool
 MatchRegex(const std::string& str, const char* regex_str)
 {
-    MatchRegex(str.c_str(), regex_str);
+    return MatchRegex(str.c_str(), regex_str);
 }
 
 inline bool
 MatchRegex(const std::string& str, const std::string& regex_str)
 {
-    MatchRegex(str.c_str(), regex_str.c_str());
+    return MatchRegex(str.c_str(), regex_str.c_str());
 }
 
 
 } //end of namespace
+
+
+//-------------------------------------------------------------------------
+#include <string>
+#include <assert.h>
+
+#include <locale>
+#include <codecvt>
+
+#include <cstring>
+
+
+
+
+void CStrToWCStr(wchar_t* output, const char* const text, size_t size);
+std::string WStringToUTF8(const std::wstring& wstring_to_convert);
+std::wstring StringToWString(const std::string& string_to_convert);
+
+void CreateDirectory(const std::string& path);
+void EnsureExistingDirectory(const std::string& path);
+
 
