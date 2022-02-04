@@ -187,6 +187,9 @@ Initialize(const std::string &root_directory,
 {
     bool success = false;
 
+    //TODO: uniformize path (switch '\'-s with '/', etc.)
+
+    //TODO: if uniform root doesn't end in '/', then add it between 'root' and 'filename'
     std::string fullpath = root_directory + filename;
 
     #ifdef __linux__
