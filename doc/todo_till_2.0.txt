@@ -5,11 +5,6 @@ add logger class
 
 finish config refactor
 
-rename 'std_extensions'
-
-add array class
-	can use std::vector internally for now, but have the interface ready
-
 
 
 

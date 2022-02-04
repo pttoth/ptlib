@@ -4,7 +4,6 @@
  * AUTHOR:  Peter Toth
  * E-MAIL:  peter.t.toth92@gmail.com
  * PURPOSE: Multiprocess logger, that writes simultaneously to std::cout and a log file.
- * NOTE:    The multiprocess part is missing for now...
  * -------------------------------------------------------------------------
  */
 

@@ -1,9 +1,8 @@
 /** -----------------------------------------------------------------------------
-  * FILE:   event.hpp
-  * AUTHOR: ptoth
-  * EMAIL:  peter.t.toth92@gmail.com
-  * PURPOSE:
-  *     calls registered functions sequentially with operator()
+  * FILE:    event.hpp
+  * AUTHOR:  ptoth
+  * EMAIL:   peter.t.toth92@gmail.com
+  * PURPOSE: Can register and then call functions sequentially with operator()
   * -----------------------------------------------------------------------------
   */
 

@@ -1,3 +1,11 @@
+/** -----------------------------------------------------------------------------
+  * FILE:    array.h
+  * AUTHOR:  pttoth
+  * EMAIL:   peter.t.toth92@gmail.com
+  * PURPOSE: Dynamic array class
+  * -----------------------------------------------------------------------------
+  */
+
 #pragma once
 
 #include <vector>

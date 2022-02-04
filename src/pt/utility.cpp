@@ -3,7 +3,116 @@
 #include <locale>
 #include <codecvt>
 
+#include <assert.h>
+#include <algorithm>
+#include <cstring>
 #include <sstream>
+#include <regex>
+
+
+bool pt::
+IsEmptyOrWhitespaceLine(const std::string &str)
+{
+    for(char c : str){
+        if( !isspace(c) ){ return false; }
+    }
+    return true;
+}
+
+std::string pt::
+TrimWhitespaces(const std::string& str)
+{
+    if( 0 < str.length() ){
+        size_t low = 0;
+        size_t high = str.length()-1;
+        bool done = false;
+        while(!done){
+            if( (low < str.length()) && isspace(str[low]) ){
+                ++low;
+            }else{
+                done = true;
+            }
+        }
+        done = false;
+        while(!done){
+            if( (low <= high) && isspace(str[high]) ){
+                --high;
+            }else{
+                done = true;
+            }
+        }
+        if(low <= high){
+            return str.substr(low, high-low+1);
+        }
+    }
+    return std::string();
+}
+
+bool pt::
+SplitString(std::string* retval,
+            const std::string& str,
+            const char *sequence)
+{
+    size_t idx      = str.find(sequence);
+    size_t seq_len  = strlen(sequence);
+    if(std::string::npos != idx){
+        retval[0] = str.substr(0, idx);
+        retval[1] = str.substr(idx+seq_len, str.length()-idx-1);
+        return true;
+    }
+    return false;
+}
+
+bool pt::
+SplitString(std::string* retval,
+            const std::string& str,
+            const std::string& sequence)
+{
+    return SplitString(retval, str, sequence.c_str());
+}
+
+std::string pt::
+StringToLower(const std::string& str)
+{
+    std::string result;
+    result.reserve(str.length());
+    std::transform(str.begin(), str.end(), result.begin(), ::tolower);
+    return std::move(result);
+}
+
+std::string pt::
+StringToUpper(const std::string& str)
+{
+    std::string result;
+    result.reserve(str.length());
+    std::transform(str.begin(), str.end(), result.begin(), ::toupper);
+    return std::move(result);
+}
+
+bool pt::
+MatchRegex(const char* const str, const char* const regex_str)
+{
+    std::regex reg(regex_str);
+    return std::regex_match(str, reg);
+}
+
+bool pt::
+MatchRegex(const char* str, const std::string& regex_str)
+{
+    return MatchRegex(str, regex_str.c_str());
+}
+
+bool pt::
+MatchRegex(const std::string& str, const char* regex_str)
+{
+    return MatchRegex(str.c_str(), regex_str);
+}
+
+bool pt::
+MatchRegex(const std::string& str, const std::string& regex_str)
+{
+    return MatchRegex(str.c_str(), regex_str.c_str());
+}
 
 #ifdef __linux__
 #include <sys/types.h>
@@ -43,7 +152,7 @@ CreateDirectoryWin(const std::string& path)
 #endif
 
 
-void
+void pt::
 CreateDirectory(const std::string& path)
 {
     #ifdef __linux__
@@ -54,7 +163,7 @@ CreateDirectory(const std::string& path)
 }
 
 
-void
+void pt::
 EnsureExistingDirectory(const std::string& path)
 {
     std::string dir;
@@ -77,7 +186,7 @@ EnsureExistingDirectory(const std::string& path)
 }
 
 
-void
+void pt::
 CStrToWCStr(wchar_t* output, const char* const text, size_t size)
 {
     mbstowcs(output, text, size);
@@ -86,7 +195,7 @@ CStrToWCStr(wchar_t* output, const char* const text, size_t size)
 }
 
 
-std::string
+std::string pt::
 WStringToUTF8(const std::wstring& wstring_to_convert)
 {
     //setup converter
@@ -98,7 +207,7 @@ WStringToUTF8(const std::wstring& wstring_to_convert)
 }
 
 
-std::wstring
+std::wstring pt::
 StringToWString(const std::string& string_to_convert)
 {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
