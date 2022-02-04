@@ -1,5 +1,7 @@
 #include "pt/logging.h"
 
+#include "pt/utility.hpp"
+
 #ifdef __linux__
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -76,6 +78,7 @@ AutoGenerateLogFileName()
     return filename;
 }
 
+using namespace pt;
 using namespace pt::log;
 
 

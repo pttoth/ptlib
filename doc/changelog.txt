@@ -4,7 +4,7 @@ v2.0.0 - in progress
 renamed the library from 'libpttoth' to 'ptlib'
 moved everything to the 'pt' namespace (lowercase)
 removed the math library
-	TODO: fill where can it be accessed now
+    TODO: fill where can it be accessed now
 
 
 
@@ -14,25 +14,25 @@ removed the math library
 ----------------------------------------------------------------------------------------------
 v1.1.1
 ----------------------------------------------------------------------------------------------
-	Event
-	  renamed 'event' to 'EventBase'
+    Event
+      renamed 'event' to 'EventBase'
       added 'Event' wrapper class
-	    it hides the 'operator()' of EventBase ensuring safe public access
-	  removed Move Constructor and Assignment Operator
-	math
+        it hides the 'operator()' of EventBase ensuring safe public access
+      removed Move Constructor and Assignment Operator
+    math
       added 'MATH_ENABLE_SWIZZLE' macro
       renamed 'REMOVE_PT_NAMESPACE' macro to 'MATH_REMOVE_PT_NAMESPACE'
 ----------------------------------------------------------------------------------------------
 v1.1.0
 ----------------------------------------------------------------------------------------------
-	added 'GNU GPL v3.0' license to the project
-	added math library (Szécsi László's work with minor modifications)
-	several internal changes to Config and its tests
+    added 'GNU GPL v3.0' license to the project
+    added math library (Szécsi László's work with minor modifications)
+    several internal changes to Config and its tests
 ----------------------------------------------------------------------------------------------
 v1.0.2
 ----------------------------------------------------------------------------------------------
-	std_extension
-	  minor optimization to 'stringToLower' and 'stringToUpper'
+    std_extension
+      minor optimization to 'stringToLower' and 'stringToUpper'
 ----------------------------------------------------------------------------------------------
 v1.0.1
 ----------------------------------------------------------------------------------------------
