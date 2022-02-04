@@ -135,19 +135,19 @@ MatchRegex(const char* const str, const char* const regex_str)
 inline bool
 MatchRegex(const char* str, const std::string& regex_str)
 {
-    MatchRegex(str, regex_str.c_str());
+    return MatchRegex(str, regex_str.c_str());
 }
 
 inline bool
 MatchRegex(const std::string& str, const char* regex_str)
 {
-    MatchRegex(str.c_str(), regex_str);
+    return MatchRegex(str.c_str(), regex_str);
 }
 
 inline bool
 MatchRegex(const std::string& str, const std::string& regex_str)
 {
-    MatchRegex(str.c_str(), regex_str.c_str());
+    return MatchRegex(str.c_str(), regex_str.c_str());
 }
 
 

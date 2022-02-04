@@ -33,10 +33,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
+    ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
+    ${MY_PROJ_ROOT}/src/pt/logging.cpp
     ${MY_PROJ_ROOT}/include/pt/array.h
     ${MY_PROJ_ROOT}/include/pt/config.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
     ${MY_PROJ_ROOT}/include/pt/event.hpp
+    ${MY_PROJ_ROOT}/include/pt/logging.h
+    ${MY_PROJ_ROOT}/include/pt/log/logstream.hpp
 )
 
 target_include_directories(ptlib PRIVATE
