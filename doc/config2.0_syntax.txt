@@ -32,41 +32,42 @@ decimal separator can only be '.'
 
 
 naming the config files:
-	config names:
-		names cannot be empty
-		valid characters: A-Z, a-z, 0-9, -, _, ., <space>
-		whitespaces are trimmed at the start and end of the name!
-		
-	the opening brace has to be at the exact start of the line
-	the closing brace has to be the last character of the line
-		name lines cannot have comments
+    config names:
+        names cannot be empty
+        valid characters: A-Z, a-z, 0-9, -, _, ., <space>
+        whitespaces are trimmed at the start and end of the name!
+
+    the opening brace has to be at the exact start of the line
+    the closing brace has to be the last character of the line
+        name lines cannot have comments
 
 
 ---
 Config classes don't contain the names
-	they could be renamed after being added to the writer, can cause conflict
-	
-	they are added during Config class registration
-		CRW::addConfig(Config* c, str name) //exception when (ptr || name) conflicts
-		CRW::rmConfig(Config* c)			//exception when doesn't exist
-		CRW::rmConfig(str name)				//exception when doesn't exist
-	
-	
+    they could be renamed after being added to the writer, can cause conflict
+
+    they are added during Config class registration
+        CRW::addConfig(Config* c, str name) //exception when (ptr || name) conflicts
+        CRW::rmConfig(Config* c)            //exception when doesn't exist
+        CRW::rmConfig(str name)             //exception when doesn't exist
+
+
 Config classes need to be pre-assembled before loading file
-	loading iterates through the connected config files
-		loads the last matching entry for the appropriate config class' variable
-		ignores every other config entry
-			may log a warning for them
-	
-	
-	
-	---think this through, this may be needed---
-	after finishing all Configs, they need to be validated
-	validation:
-		checks, whether the Config has read a value for EVERY registered key
-		if not, the loadFile throws an exception
-	
-	
+    loading iterates through the connected config files
+        loads the last matching entry for the appropriate config class' variable
+        ignores every other config entry
+            may log a warning for them
+
+
+
+
+    ---think this through, this may be needed---
+    after finishing all Configs, they need to be validated
+    validation:
+        checks, whether the Config has read a value for EVERY registered key
+        if not, the loadFile throws an exception
+
+
 -----------
 example cases for regex testing
 -----------

@@ -2,27 +2,27 @@ generic:
     - various camelcase problems
 
 event:
-	- event can be triggered from outside the owning class (operator() is public)
-	- doesn't handle multiple registrations of the same function
-	- event.add() should be named event.addListener()/addCallback()
+    - event can be triggered from outside the owning class (operator() is public)
+    - doesn't handle multiple registrations of the same function
+    - event.add() should be named event.addListener()/addCallback()
         same for remove()
 
 Config:
     - error prints should use "CONFIG: " in front of every message
         maybe even print config file path
         it should use logger::debug as message output
-	- outputs wrong error message when trying to write read-only config file
-	- need to check other behaviors regarding read / write access to files
-	- invalid query exceptions don't contain info about the key and value pair
+    - outputs wrong error message when trying to write read-only config file
+    - need to check other behaviors regarding read / write access to files
+    - invalid query exceptions don't contain info about the key and value pair
         fix: added _buildErrorStringInvalidValue(int eKey) prototype, need testing
 logging:
-	- cannot handle unicode paths yet
-		need c++17 and 'std::filesystem' for that
-		  but 'std::filesystem' is buggy with MinGW 8.1.0
-		  and there is no newer official prebuilt version
-		c++14 + 'experimental/filesystem' is also inadequate
-	- not multiprocess yet
-	- can't create folders on windows yet
+    - cannot handle unicode paths yet
+        need c++17 and 'std::filesystem' for that
+          but 'std::filesystem' is buggy with MinGW 8.1.0
+          and there is no newer official prebuilt version
+        c++14 + 'experimental/filesystem' is also inadequate
+    - not multiprocess yet
+    - can't create folders on windows yet
 utility:
-	SplitString
-		check whether it fails if there is no occurence of separator sequence
+    SplitString
+        check whether it fails if there is no occurence of separator sequence
