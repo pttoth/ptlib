@@ -9,6 +9,8 @@ generic:
 event:
     - event can be triggered from outside the owning class (operator() is public)
     - doesn't handle multiple registrations of the same function
+		may not be an issue
+    - event doesn't have a 'clear()' function
     - event.add() should be named event.addListener()/addCallback()
         same for remove()
 

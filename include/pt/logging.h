@@ -25,6 +25,9 @@ const std::string& GetRootDirectory();
 const std::string& GetFileName();
 
 
+//'rootdir' has to exist already
+//directories in 'filepath' are created if missing
+//'default_timeout' is the time to wait for the logging subprocess to start responding (not yet relevant)
 bool Initialize(const std::string& rootdir,
                 const std::string& filepath,
                 uint32_t timeout = default_timeout);
