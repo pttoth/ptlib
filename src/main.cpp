@@ -1,19 +1,49 @@
-#include <iostream>
 
-#include "pt/logging.h"
+#include "TestLogger.hpp"
+#include "TestConfig.hpp"
+#include "TestEvent.hpp"
+
+#include <iostream>
 
 using namespace std;
 
 int main()
 {
-    pt::log::Initialize("../../log/", pt::log::AutoGenerateLogFileName());
+    {
+        TestLogger tl;
+        bool success = tl.run();
 
-    pt::log::debug << "testing debug: ASCII\n";
-    pt::log::out   << "testing out:   ASCII\n";
-    pt::log::warn  << "testing warn:  ASCII\n";
-    pt::log::err   << "testing err:   ASCII\n";
+        if(success){
+            std::cout << "Logger test: SUCCESS\n";
+        }else{
+            std::cout << "Logger test: FAILED\n";
+        }
+    }
 
-    pt::log::out << "testing hungarian special characters: árvíztűrő tükörfúrógép\n";
+
+    {
+        TestConfig tc;
+        bool success = tc.run();
+
+        if(success){
+            std::cout << "Config test: SUCCESS\n";
+        }else{
+            std::cout << "Config test: FAILED\n";
+        }
+    }
+
+
+
+    {
+        TestEvent te;
+        bool success = te.run();
+
+        if(success){
+            std::cout << "Event test: SUCCESS\n";
+        }else{
+            std::cout << "Event test: FAILED\n";
+        }
+    }
 
 
 
