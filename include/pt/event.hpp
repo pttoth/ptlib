@@ -2,7 +2,8 @@
   * FILE:    event.hpp
   * AUTHOR:  ptoth
   * EMAIL:   peter.t.toth92@gmail.com
-  * PURPOSE: Can register and then call functions sequentially with operator()
+  * PURPOSE: Class-independent event object.
+  *          Can register and call multiple functions sequentally.
   * -----------------------------------------------------------------------------
   */
 
@@ -211,7 +212,31 @@ public:
             (instance->*func)(args...);
         };
 
-        add_element( EventBase::data(static_cast<void*>(instance), static_cast<void*>(func), lambda) ); //FUNC_PARAMS
+        add_element( EventBase::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+    }
+
+    /**
+     * @brief Registers the (!)constant(!) class member function received in the parameters.
+     * @param instance: pointer to the target object
+     * @param func: point to the member function to call on the target object
+     * @throws std::invalid_argument
+     */
+    template<typename T>
+    inline void add(const T* const instance, void (T::*func)(Signature...) const)      //FUNC_PARAMS
+    {
+        if(nullptr == instance){
+            throw std::invalid_argument("attempted to register nullptr as listener");
+        }else if(nullptr == func){
+            throw std::invalid_argument("attempted to register nullptr as function");
+        }
+
+        auto lambda = [=](Signature... args) {
+            (instance->*func)(args...);
+        };
+
+        auto instance_id = const_cast<T*>(instance);
+
+        add_element( EventBase::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
     }
 
     /**
@@ -224,7 +249,7 @@ public:
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
         }
-        add_element( EventBase::data(nullptr, static_cast<void*>(func), func) );
+        add_element( EventBase::data(nullptr, reinterpret_cast<void*>(func), func) );
     }
 
     /**
@@ -241,7 +266,7 @@ public:
         }else if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
-        remove_element( EventBase::data(static_cast<void*>(instance), static_cast<void*>(func), nullptr) );
+        remove_element( EventBase::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
     }
 
     /**
@@ -254,7 +279,7 @@ public:
         if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
-        remove_element( EventBase::data(nullptr, static_cast<void*>(func), nullptr) );
+        remove_element( EventBase::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
     }
 
     /**
@@ -270,7 +295,7 @@ public:
             throw std::invalid_argument("attempted to unregister nullptr as listener");
         }
 
-        EventBase::data d( static_cast<void*>(object), nullptr, nullptr);
+        EventBase::data d( reinterpret_cast<void*>(object), nullptr, nullptr);
 
         //loop until cannot find any more entries with 'target'
         int index = 0;
@@ -375,6 +400,12 @@ public:
     Event& operator=(Event&& source)            = delete;
 
     bool operator==(const Event& other) const   = delete;
+
+    template<typename T>
+    inline void add(const T* const instance, void (T::*func)(Signature...) const )
+    {
+        ev_base.add(instance, func);
+    }
 
     template<typename T>
     inline void add(T* instance, void (T::*func)(Signature...) )
