@@ -18,7 +18,7 @@ namespace pt{
 #define ALLOW_MULTIPLE_INSTANCES 0x1
 
 template<typename... Signature>
-class EventBase
+class EventTrigger
 {
     struct data
     {
@@ -75,12 +75,12 @@ class EventBase
     size_t              mSize;
     size_t              mCap;
     size_t              mIndex;     //CHECK: queue may be fragmented, so that index != size  (fix occurences!!!!)
-    EventBase::data*    mFunctions;
+    EventTrigger::data* mFunctions;
 
     /** @brief: returns the index of the element passed,
      *            or -1 if not contained
      */
-    inline int index_of(const EventBase::data& d) const
+    inline int index_of(const EventTrigger::data& d) const
     {
         for(int i=0; i<mIndex; ++i){
             if(mFunctions[i] == d){
@@ -90,7 +90,7 @@ class EventBase
         return -1;
     }
 
-    inline void defragment_from( EventBase::data* from, int const from_cap)
+    inline void defragment_from( EventTrigger::data* from, int const from_cap)
     {
         int i = 0;
         int j = 0;
@@ -105,7 +105,7 @@ class EventBase
     }
 
     //common mechanics of adding elements
-    inline void add_element(EventBase::data d)
+    inline void add_element(EventTrigger::data d)
     {
         if(nullptr == mFunctions){
             reserve(1);
@@ -127,7 +127,7 @@ class EventBase
     }
 
     //common mechanics of removing elements
-    inline void remove_element(EventBase::data d)
+    inline void remove_element(EventTrigger::data d)
     {
         int index = index_of(d);
         if( -1 != index ){
@@ -138,50 +138,50 @@ class EventBase
     }
 
 public:
-    EventBase(): mFlags(0), mSize(0),
+    EventTrigger(): mFlags(0), mSize(0),
                  mCap(0), mIndex(0),
                  mFunctions(nullptr)
     {}
 
-    EventBase(const EventBase& other): mFlags(other.mFlags),
-                                        mSize(other.mSize),
-                                        mCap(other.mCap),
-                                        mIndex(other.mIndex)
+    EventTrigger(const EventTrigger& other): mFlags(other.mFlags),
+                                             mSize(other.mSize),
+                                             mCap(other.mCap),
+                                             mIndex(other.mIndex)
     {
-        mFunctions = new EventBase::data[mCap];
+        mFunctions = new EventTrigger::data[mCap];
         for(int i=0; i<mCap; ++i){
             mFunctions[i] = other.mFunctions[i];
         }
     }
-    EventBase(EventBase&& source): mFlags(source.mFlags),
-                            mSize(source.mSize),
-                            mCap(source.mCap),
-                            mIndex(source.mIndex)
+    EventTrigger(EventTrigger&& source): mFlags(source.mFlags),
+                                         mSize(source.mSize),
+                                         mCap(source.mCap),
+                                         mIndex(source.mIndex)
     {
         delete[] mFunctions;
         mFunctions = source.mFunctions;
         source.mFunctions = nullptr;
     }
 
-    virtual ~EventBase()
+    virtual ~EventTrigger()
     {
         delete[] mFunctions;
     }
 
-    EventBase& operator=(const EventBase& other)
+    EventTrigger& operator=(const EventTrigger& other)
     {
         delete[] mFunctions;
         mFlags = other.mFlags;
         mSize = other.mSize;
         mCap = other.mCap;
         mIndex = other.mIndex;
-        mFunctions = new EventBase::data[mCap];
+        mFunctions = new EventTrigger::data[mCap];
         for(int i=0; i<mCap; ++i){
             mFunctions[i] = other.mFunctions[i];
         }
     }
 
-    EventBase& operator=(EventBase&& source)
+    EventTrigger& operator=(EventTrigger&& source)
     {
         delete[] mFunctions;
         mFlags = source.mFlags;
@@ -191,7 +191,7 @@ public:
         mFunctions = source.mFunctions;
         source.mFunctions = nullptr;
     }
-    bool operator==(const EventBase& other)const = delete;
+    bool operator==(const EventTrigger& other)const = delete;
 
     /**
      * @brief Registers the class member function received in the parameters.
@@ -212,7 +212,7 @@ public:
             (instance->*func)(args...);
         };
 
-        add_element( EventBase::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
     }
 
     /**
@@ -236,7 +236,7 @@ public:
 
         auto instance_id = const_cast<T*>(instance);
 
-        add_element( EventBase::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
     }
 
     /**
@@ -249,7 +249,7 @@ public:
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
         }
-        add_element( EventBase::data(nullptr, reinterpret_cast<void*>(func), func) );
+        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func) );
     }
 
     /**
@@ -266,7 +266,7 @@ public:
         }else if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
-        remove_element( EventBase::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
+        remove_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
     }
 
     /**
@@ -279,7 +279,7 @@ public:
         if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
-        remove_element( EventBase::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
+        remove_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
     }
 
     /**
@@ -295,7 +295,7 @@ public:
             throw std::invalid_argument("attempted to unregister nullptr as listener");
         }
 
-        EventBase::data d( reinterpret_cast<void*>(object), nullptr, nullptr);
+        EventTrigger::data d( reinterpret_cast<void*>(object), nullptr, nullptr);
 
         //loop until cannot find any more entries with 'target'
         int index = 0;
@@ -315,8 +315,8 @@ public:
     inline void reserve(const size_t new_size)
     {
         if(mCap < new_size){
-            EventBase::data* old = mFunctions;
-            mFunctions = new EventBase::data[new_size];
+            EventTrigger::data* old = mFunctions;
+            mFunctions = new EventTrigger::data[new_size];
             if(old){
                 defragment_from(old, mIndex);
             }
@@ -353,8 +353,8 @@ public:
             mFunctions = nullptr;
         }else{
             if(mSize < mIndex){
-                EventBase::data* old = mFunctions;
-                mFunctions= new EventBase::data[mSize];
+                EventTrigger::data* old = mFunctions;
+                mFunctions= new EventTrigger::data[mSize];
                 defragment_from(old, mIndex);
                 mCap = mSize;
                 delete[] old;
@@ -388,12 +388,12 @@ public:
 template<typename... Signature>
 class Event
 {
-    EventBase<Signature...>& ev_base;
+    EventTrigger<Signature...>& ev_base;
 public:
-    Event(EventBase<Signature...>& eventbase):
+    Event(EventTrigger<Signature...>& eventbase):
         ev_base(eventbase){
     }
-    Event(const Event& other)                   = delete;       //Note: is there a way to be able to copy correctly?
+    Event(const Event& other)                   = delete;  //Note: Event-EventBase pairing has to be manually restored by owner object during copy!
     Event(Event&& source)                       = delete;
     virtual ~Event(){}
     Event& operator=(const Event& other)        = delete;
