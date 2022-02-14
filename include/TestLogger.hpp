@@ -11,6 +11,8 @@ public:
     TestLogger(){}
     virtual ~TestLogger(){}
     virtual bool run() override;
+    void printAsciiTable();
+
 };
 
 
@@ -44,12 +46,8 @@ run()
         pt::log::warn  << "testing warn:  ASCII\n";
         pt::log::err   << "testing err:   ASCII\n";
 
-        pt::log::debug << "printing ASCII table:\n";
-        size_t count = 0;
-        for(uint8_t i=0; count<256; ++count, ++i){
-            char ichar = i;
-            pt::log::debug << "ASCII #" << i << ": " << ichar << "\n";
-        }
+        printAsciiTable();
+
         pt::log::out << "\n";
 
         pt::log::out << "testing hungarian special characters: árvíztűrő tükörfúrógép\n";
@@ -67,3 +65,36 @@ run()
 }
 
 
+void TestLogger::
+printAsciiTable()
+{
+    pt::log::debug << "printing ASCII table:\n";
+    size_t count = 0;
+    for(uint8_t j=0; j<32; ++j){
+        for(uint8_t i=0; i<8; ++count, ++i){
+            uint8_t num = j+i*32;
+            char ichar = num;
+            if((7 <= num) && (num <= 8)){
+                pt::log::debug << "#" << num << "  : " << " ";
+            }else if(num == 9){
+                pt::log::debug << "#" << num << "  :" << "\\t";
+            }else if(num == 10){
+                pt::log::debug << "#" << num << " :" << "\\n";
+            }else if(num == 13){
+                pt::log::debug << "#" << num << " :" << "\\r";
+            }else if(num < 10){
+                pt::log::debug << "#" << num << "  : " << ichar;
+            }else if(num < 100){
+                pt::log::debug << "#" << num << " : " << ichar;
+            }else{
+                pt::log::debug << "#" << num << ": " << ichar;
+            }
+
+            if(count%8 == 7){
+                pt::log::debug << "\n";
+            }else{
+                pt::log::debug << "   ";
+            }
+        }
+    }
+}
