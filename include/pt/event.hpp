@@ -289,13 +289,15 @@ public:
      * @param object: Listener, whose every registered funcion should be removed.
      * @throws std::invalid_argument
      */
-    inline void remove_object(void* const object)
+    inline void remove_object(const void* const object)
     {
         if( nullptr == object ){
             throw std::invalid_argument("attempted to unregister nullptr as listener");
         }
 
-        EventTrigger::data d( reinterpret_cast<void*>(object), nullptr, nullptr);
+        void* object_id = const_cast<void*>(object);
+
+        EventTrigger::data d( reinterpret_cast<void*>(object_id), nullptr, nullptr);
 
         //loop until cannot find any more entries with 'target'
         int index = 0;
@@ -429,7 +431,12 @@ public:
         ev_base.remove(func);
     }
 
-    inline void remove_object(void* const object)
+    inline void remove_object(const void* const object)
+    {
+        ev_base.remove_object(object);
+    }
+
+    inline void remove_object(void* object)
     {
         ev_base.remove_object(object);
     }
