@@ -107,7 +107,7 @@ class logstream{
                         | std::fstream::app);
 
             if(!fs.is_open()){
-                std::cout << "fs wchar is NOT open!\n";
+                std::cout << "fs char is NOT open!\n";
             }
 
             fs << data;
@@ -157,6 +157,7 @@ public:
     DEFINE_LOGSTREAM_OUT_OPERATOR(const void*)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const std::streambuf*)
 
+    DEFINE_LOGSTREAM_OUT_OPERATOR(const char)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const char*)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const std::string&)
 
