@@ -195,8 +195,8 @@ public:
 
     /**
      * @brief Registers the class member function received in the parameters.
-     * @param instance: pointer to the target object
-     * @param func: point to the member function to call on the target object
+     * @param instance: Pointer to the target object.
+     * @param func: Pointer to the member function to call on the target object.
      * @throws std::invalid_argument
      */
     template<typename T>
@@ -216,9 +216,9 @@ public:
     }
 
     /**
-     * @brief Registers the (!)constant(!) class member function received in the parameters.
-     * @param instance: pointer to the target object
-     * @param func: point to the member function to call on the target object
+     * @brief Registers the constant class member function received in the parameters.
+     * @param instance: Pointer to the target object.
+     * @param func: Pointer to the member function to call on the target object.
      * @throws std::invalid_argument
      */
     template<typename T>
@@ -240,8 +240,8 @@ public:
     }
 
     /**
-     * @brief Registers the global function received in the parameters.
-     * @param func: function to call on the target object
+     * @brief Registers the standard function received in the parameters.
+     * @param func: Function to call on the target object.
      * @throws std::invalid_argument
      */
     inline void add( void (*func)(Signature...) )          //FUNC_PARAMS
@@ -253,9 +253,9 @@ public:
     }
 
     /**
-     * @brief Removes the member function defined in the parameters
-     * @param instance: reference to the target object
-     * @param func: member function to call on the target object
+     * @brief Removes the class member function defined in the parameters.
+     * @param instance: Reference to the target object.
+     * @param func: Class member function to call on the target object.
      * @throws std::invalid_argument
      */
     template<typename T>
@@ -270,8 +270,8 @@ public:
     }
 
     /**
-     * @brief Removes the global function defined in the parameters
-     * @param func: function to remove from the array
+     * @brief Removes the standard function defined in the parameters.
+     * @param func: Function to remove from the array.
      * @throws std::invalid_argument
      */
     inline void remove(void (*func)(Signature...) )                //FUNC_PARAMS
@@ -283,10 +283,10 @@ public:
     }
 
     /**
-     * @brief Removes all function registrations regarding the object received as parameter
+     * @brief Removes all function registrations regarding the object received as parameter.
      *   Note: this will remove any parent's member functions as well,
-     *   which the caller may not know about
-     * @param object: listener, whose every registered funcion should be removed
+     *   which the caller may not know about.
+     * @param object: Listener, whose every registered funcion should be removed.
      * @throws std::invalid_argument
      */
     inline void remove_object(void* const object)
@@ -309,8 +309,8 @@ public:
     }
 
     /**
-     * @brief ensures, that 'size' amount of entries are allocated in memory for the queue
-     * @param new_size: the amount of entries we want to be allocated
+     * @brief Ensures, that 'size' amount of entries are allocated in memory for the queue.
+     * @param new_size: The amount of entries we want to be allocated.
      */
     inline void reserve(const size_t new_size)
     {
@@ -326,7 +326,7 @@ public:
     }
 
     /**
-     * @brief Rearranges storage by clumping together still active entries in memory
+     * @brief Rearranges storage by clumping together still active entries in memory.
      */
     inline void optimize()
     {
@@ -342,7 +342,7 @@ public:
     }
 
     /**
-     * @brief Dumps unnecessary allocated memory
+     * @brief Dumps unnecessary allocated memory.
      */
     inline void shrink_to_fit()
     {
