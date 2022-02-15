@@ -7,12 +7,9 @@ generic:
     - various camelcase problems
 
 event:
-    - event can be triggered from outside the owning class (operator() is public)
     - doesn't handle multiple registrations of the same function
 		may not be an issue
     - event doesn't have a 'clear()' function
-    - event.add() should be named event.addListener()/addCallback()
-        same for remove()
 
 Config:
     - error prints should use "CONFIG: " in front of every message
@@ -28,8 +25,8 @@ logging:
           but 'std::filesystem' is buggy with MinGW 8.1.0
           and there is no newer official prebuilt version
         c++14 + 'experimental/filesystem' is also inadequate
-    - not multiprocess yet
-    - can't create folders on windows yet
+    - isn't multiprocess yet
+    - can't create folders on Windows yet
 utility:
     SplitString
         check whether it fails if there is no occurence of separator sequence
