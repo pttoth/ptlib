@@ -20,6 +20,9 @@ namespace pt{
 template<typename... Signature>
 class EventTrigger
 {
+    template<typename...>
+    friend class Event; //Event exposes EventTrigger's handling functions that are private
+
     struct data
     {
         void*                             target;           //used for identification
@@ -137,6 +140,138 @@ class EventTrigger
         //TODO: add support for removing multiple occurences
     }
 
+    //--------------------------------------------------
+    //  private functions, that are exposed in Event
+    //--------------------------------------------------
+
+    template<typename T>
+    inline void addCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    {
+        if(nullptr == instance){
+            throw std::invalid_argument("attempted to register nullptr as listener");
+        }else if(nullptr == func){
+            throw std::invalid_argument("attempted to register nullptr as function");
+        }
+
+        auto lambda = [=](Signature... args) {
+            (instance->*func)(args...);
+        };
+
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+    }
+
+    template<typename T>
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const)      //FUNC_PARAMS
+    {
+        if(nullptr == instance){
+            throw std::invalid_argument("attempted to register nullptr as listener");
+        }else if(nullptr == func){
+            throw std::invalid_argument("attempted to register nullptr as function");
+        }
+
+        auto lambda = [=](Signature... args) {
+            (instance->*func)(args...);
+        };
+
+        auto instance_id = const_cast<T*>(instance);
+
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+    }
+
+    inline void addCallback( void (*func)(Signature...) )          //FUNC_PARAMS
+    {
+        if( nullptr == func ){
+            throw std::invalid_argument("attempted to register nullptr as function");
+        }
+        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func) );
+    }
+
+    template<typename T>
+    inline void removeCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    {
+        if( nullptr == instance ){
+            throw std::invalid_argument("attempted to unregister nullptr as listener");
+        }else if( nullptr == func ){
+            throw std::invalid_argument("attempted to unregister nullptr as function");
+        }
+        remove_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
+    }
+
+    inline void removeCallback(void (*func)(Signature...) )                //FUNC_PARAMS
+    {
+        if( nullptr == func ){
+            throw std::invalid_argument("attempted to unregister nullptr as function");
+        }
+        remove_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
+    }
+
+    inline void removeObject(const void* const object)
+    {
+        if( nullptr == object ){
+            throw std::invalid_argument("attempted to unregister nullptr as listener");
+        }
+
+        void* object_id = const_cast<void*>(object);
+
+        EventTrigger::data d( reinterpret_cast<void*>(object_id), nullptr, nullptr);
+
+        //loop until cannot find any more entries with 'target'
+        int index = 0;
+        while( -1 < index ){
+            index = index_of(d);
+            if( -1 != index ){
+                mFunctions[index].invalidate();
+                --mSize;
+            }
+        }
+    }
+
+    inline void reserve(const size_t new_size)
+    {
+        if(mCap < new_size){
+            EventTrigger::data* old = mFunctions;
+            mFunctions = new EventTrigger::data[new_size];
+            if(old){
+                defragment_from(old, mIndex);
+            }
+            mCap = new_size;
+            delete[] old;
+        }
+    }
+
+    inline void optimize()
+    {
+        //TODO: don't free up memory if empty, this should only be defragmentation
+        if(0 == mSize){
+            delete[] mFunctions;
+            mCap = 0;
+            mIndex = 0;
+            mFunctions = nullptr;
+        }else if(mSize < mIndex ){
+            defragment_from(mFunctions, mIndex);
+        }
+    }
+
+    inline void shrink_to_fit()
+    {
+        if(0 == mSize){
+            delete[] mFunctions;
+            mCap = 0;
+            mIndex = 0;
+            mFunctions = nullptr;
+        }else{
+            if(mSize < mIndex){
+                EventTrigger::data* old = mFunctions;
+                mFunctions= new EventTrigger::data[mSize];
+                defragment_from(old, mIndex);
+                mCap = mSize;
+                delete[] old;
+            }
+        }
+    }
+
+    //--------------------------------------------------
+
 public:
     EventTrigger(): mFlags(0), mSize(0),
                  mCap(0), mIndex(0),
@@ -192,177 +327,6 @@ public:
         source.mFunctions = nullptr;
     }
     bool operator==(const EventTrigger& other)const = delete;
-
-    /**
-     * @brief Registers the class member function received in the parameters.
-     * @param instance: Pointer to the target object.
-     * @param func: Pointer to the member function to call on the target object.
-     * @throws std::invalid_argument
-     */
-    template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
-    {
-        if(nullptr == instance){
-            throw std::invalid_argument("attempted to register nullptr as listener");
-        }else if(nullptr == func){
-            throw std::invalid_argument("attempted to register nullptr as function");
-        }
-
-        auto lambda = [=](Signature... args) {
-            (instance->*func)(args...);
-        };
-
-        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
-    }
-
-    /**
-     * @brief Registers the constant class member function received in the parameters.
-     * @param instance: Pointer to the target object.
-     * @param func: Pointer to the member function to call on the target object.
-     * @throws std::invalid_argument
-     */
-    template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const)      //FUNC_PARAMS
-    {
-        if(nullptr == instance){
-            throw std::invalid_argument("attempted to register nullptr as listener");
-        }else if(nullptr == func){
-            throw std::invalid_argument("attempted to register nullptr as function");
-        }
-
-        auto lambda = [=](Signature... args) {
-            (instance->*func)(args...);
-        };
-
-        auto instance_id = const_cast<T*>(instance);
-
-        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
-    }
-
-    /**
-     * @brief Registers the standard function received in the parameters.
-     * @param func: Function to call on the target object.
-     * @throws std::invalid_argument
-     */
-    inline void addCallback( void (*func)(Signature...) )          //FUNC_PARAMS
-    {
-        if( nullptr == func ){
-            throw std::invalid_argument("attempted to register nullptr as function");
-        }
-        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func) );
-    }
-
-    /**
-     * @brief Removes the class member function defined in the parameters.
-     * @param instance: Reference to the target object.
-     * @param func: Class member function to call on the target object.
-     * @throws std::invalid_argument
-     */
-    template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
-    {
-        if( nullptr == instance ){
-            throw std::invalid_argument("attempted to unregister nullptr as listener");
-        }else if( nullptr == func ){
-            throw std::invalid_argument("attempted to unregister nullptr as function");
-        }
-        remove_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
-    }
-
-    /**
-     * @brief Removes the standard function defined in the parameters.
-     * @param func: Function to remove from the array.
-     * @throws std::invalid_argument
-     */
-    inline void removeCallback(void (*func)(Signature...) )                //FUNC_PARAMS
-    {
-        if( nullptr == func ){
-            throw std::invalid_argument("attempted to unregister nullptr as function");
-        }
-        remove_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
-    }
-
-    /**
-     * @brief Removes all function registrations regarding the object received as parameter.
-     *   Note: this will remove any parent's member functions as well,
-     *   which the caller may not know about.
-     * @param object: Listener, whose every registered funcion is to be removed.
-     * @throws std::invalid_argument
-     */
-    inline void removeObject(const void* const object)
-    {
-        if( nullptr == object ){
-            throw std::invalid_argument("attempted to unregister nullptr as listener");
-        }
-
-        void* object_id = const_cast<void*>(object);
-
-        EventTrigger::data d( reinterpret_cast<void*>(object_id), nullptr, nullptr);
-
-        //loop until cannot find any more entries with 'target'
-        int index = 0;
-        while( -1 < index ){
-            index = index_of(d);
-            if( -1 != index ){
-                mFunctions[index].invalidate();
-                --mSize;
-            }
-        }
-    }
-
-    /**
-     * @brief Ensures, that 'size' amount of entries are allocated in memory for the queue.
-     * @param new_size: The amount of entries we want to be allocated.
-     */
-    inline void reserve(const size_t new_size)
-    {
-        if(mCap < new_size){
-            EventTrigger::data* old = mFunctions;
-            mFunctions = new EventTrigger::data[new_size];
-            if(old){
-                defragment_from(old, mIndex);
-            }
-            mCap = new_size;
-            delete[] old;
-        }
-    }
-
-    /**
-     * @brief Rearranges storage by clumping together still active entries in memory.
-     */
-    inline void optimize()
-    {
-        //TODO: don't free up memory if empty, this should only be defragmentation
-        if(0 == mSize){
-            delete[] mFunctions;
-            mCap = 0;
-            mIndex = 0;
-            mFunctions = nullptr;
-        }else if(mSize < mIndex ){
-            defragment_from(mFunctions, mIndex);
-        }
-    }
-
-    /**
-     * @brief Dumps unnecessary allocated memory.
-     */
-    inline void shrink_to_fit()
-    {
-        if(0 == mSize){
-            delete[] mFunctions;
-            mCap = 0;
-            mIndex = 0;
-            mFunctions = nullptr;
-        }else{
-            if(mSize < mIndex){
-                EventTrigger::data* old = mFunctions;
-                mFunctions= new EventTrigger::data[mSize];
-                defragment_from(old, mIndex);
-                mCap = mSize;
-                delete[] old;
-            }
-        }
-    }
 
     /**
      * @brief Fires the event, sequentally executing all
@@ -508,7 +472,5 @@ public:
         ev_base.shrink_to_fit();
     }
 }; //end of 'Event'
-
-
 
 } //end of namespace PT

@@ -6,10 +6,15 @@ run()
     bool success = false;
 
     try{
+        //a regular class and a const class containing an exposed Event and a private EventTrigger
         EventTestClass tc;
         const EventTestClass ctc;
 
-        //other actors use Event this way
+        //registering functions happen with Event
+        //  trying to register in EventTrigger should fail
+        //evtrigger.addCallback(testfunc); //has to fail (function is private)
+
+        //outside handlers use Event this way
         ev.addCallback(testfunc);
         ev.addCallback(foo);
         ev.addCallback(bar);
@@ -39,15 +44,13 @@ run()
         //  ev.add(fail1); //too few parameters
         //  ev.add(fail2); //too many parameters
         //  ev.add(fail3); //different parameters
-        //  ev.add(fail4); //different, but autocastable parameters (loss)
-        //  ev.add(fail5); //different, but autocastable parameters (lossless)
-
-
-
+        //  ev.add(fail4); //different, but autocastable parameters (lossful casting)
+        //  ev.add(fail5); //different, but autocastable parameters (lossless casting)
 
 
         //owner calls the private object
-        evtrigger(8, 26);
+        evtrigger(8, 26);   //ok
+        //ev(8, 26);        //fails
 
 
         //removing functions
