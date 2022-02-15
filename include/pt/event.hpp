@@ -17,6 +17,10 @@ namespace pt{
 
 #define ALLOW_MULTIPLE_INSTANCES 0x1
 
+/** @class EventTrigger:
+ *  @brief Class-independent event object. Has to be wrapped by an Event instance.
+ *         The two can register and call multiple functions sequentally in the order of registration.
+ */
 template<typename... Signature>
 class EventTrigger
 {
@@ -348,8 +352,8 @@ public:
 
 
 /** @class Event:
- *  @brief Wrapper class that hides the 'operator()' of the actual event object
- *          Its purpose is to prevent external code to trigger the event with the exposed operator().
+ *  @brief Wrapper for EventTrigger that hides its 'operator()' and exposes its private handling functions.
+ *          Its purpose is to prevent external code to call the EventTrigger with an exposed 'operator()'.
  */
 template<typename... Signature>
 class Event
