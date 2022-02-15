@@ -10,15 +10,15 @@ run()
         const EventTestClass ctc;
 
         //other actors use Event this way
-        ev.add(testfunc);
-        ev.add(foo);
-        ev.add(bar);
-        ev.add(testfunc); //cannot add the same function with the same object twice
+        ev.addCallback(testfunc);
+        ev.addCallback(foo);
+        ev.addCallback(bar);
+        ev.addCallback(testfunc); //cannot add the same function with the same object twice
 
         //registering object's member functions
-        ev.add(&tc, EventTestClass::ConstPublicFunction);  //non-const member, const function (ok)
-        ev.add(&tc, EventTestClass::PublicFunction);       //non-const member, non-const function (ok)
-        ev.add(&ctc, EventTestClass::ConstPublicFunction); //const member, const function (ok)
+        ev.addCallback(&tc, EventTestClass::ConstPublicFunction);  //non-const member, const function (ok)
+        ev.addCallback(&tc, EventTestClass::PublicFunction);       //non-const member, non-const function (ok)
+        ev.addCallback(&ctc, EventTestClass::ConstPublicFunction); //const member, const function (ok)
 
         //ev.add(&ctc, EventTestClass::PublicFunction);    //const member, non-const function (fails)
         //ev.add(&tc, EventTestClass::PrivateFunction);    //member func is private - owner has to add it (fails)
@@ -51,11 +51,11 @@ run()
 
 
         //removing functions
-        ev.remove_object(&tc);
-        ev.remove_object(&ctc);
-        ev.remove(bar);
-        ev.remove(foo);
-        ev.remove(testfunc);
+        ev.removeObject(&tc);
+        ev.removeObject(&ctc);
+        ev.removeCallback(bar);
+        ev.removeCallback(foo);
+        ev.removeCallback(testfunc);
 
         //check registrations and removals
         success = this->testAddAndRemovals();
@@ -165,12 +165,12 @@ ConstPublicFunction(int a, int b) const
 void EventTestClass::
 addPrivateFunctionToEvent(pt::Event<int, int> &ev)
 {
-    ev.add(this, EventTestClass::PrivateFunction);
+    ev.addCallback(this, EventTestClass::PrivateFunction);
 }
 
 void EventTestClass::
 addConstPrivateFunctionToEvent(pt::Event<int, int> &ev) const
 {
-    ev.add(this, EventTestClass::ConstPrivateFunction);
+    ev.addCallback(this, EventTestClass::ConstPrivateFunction);
 }
 

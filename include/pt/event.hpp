@@ -200,7 +200,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void add(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    inline void addCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -222,7 +222,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void add(const T* const instance, void (T::*func)(Signature...) const)      //FUNC_PARAMS
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const)      //FUNC_PARAMS
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -244,7 +244,7 @@ public:
      * @param func: Function to call on the target object.
      * @throws std::invalid_argument
      */
-    inline void add( void (*func)(Signature...) )          //FUNC_PARAMS
+    inline void addCallback( void (*func)(Signature...) )          //FUNC_PARAMS
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
@@ -259,7 +259,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void remove(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    inline void removeCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
     {
         if( nullptr == instance ){
             throw std::invalid_argument("attempted to unregister nullptr as listener");
@@ -274,7 +274,7 @@ public:
      * @param func: Function to remove from the array.
      * @throws std::invalid_argument
      */
-    inline void remove(void (*func)(Signature...) )                //FUNC_PARAMS
+    inline void removeCallback(void (*func)(Signature...) )                //FUNC_PARAMS
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
@@ -286,10 +286,10 @@ public:
      * @brief Removes all function registrations regarding the object received as parameter.
      *   Note: this will remove any parent's member functions as well,
      *   which the caller may not know about.
-     * @param object: Listener, whose every registered funcion should be removed.
+     * @param object: Listener, whose every registered funcion is to be removed.
      * @throws std::invalid_argument
      */
-    inline void remove_object(const void* const object)
+    inline void removeObject(const void* const object)
     {
         if( nullptr == object ){
             throw std::invalid_argument("attempted to unregister nullptr as listener");
@@ -404,41 +404,41 @@ public:
     bool operator==(const Event& other) const   = delete;
 
     template<typename T>
-    inline void add(const T* const instance, void (T::*func)(Signature...) const )
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const )
     {
-        ev_base.add(instance, func);
+        ev_base.addCallback(instance, func);
     }
 
     template<typename T>
-    inline void add(T* instance, void (T::*func)(Signature...) )
+    inline void addCallback(T* instance, void (T::*func)(Signature...) )
     {
-        ev_base.add(instance, func);
+        ev_base.addCallback(instance, func);
     }
 
-    inline void add( void (*func)(Signature...) )
+    inline void addCallback( void (*func)(Signature...) )
     {
-        ev_base.add(func);
+        ev_base.addCallback(func);
     }
 
     template<typename T>
-    inline void remove(T* instance, void (T::*func)(Signature...) )
+    inline void removeCallback(T* instance, void (T::*func)(Signature...) )
     {
-        ev_base.remove(instance, func);
+        ev_base.removeCallback(instance, func);
     }
 
-    inline void remove(void (*func)(Signature...) )
+    inline void removeCallback(void (*func)(Signature...) )
     {
-        ev_base.remove(func);
+        ev_base.removeCallback(func);
     }
 
-    inline void remove_object(const void* const object)
+    inline void removeObject(const void* const object)
     {
-        ev_base.remove_object(object);
+        ev_base.removeObject(object);
     }
 
-    inline void remove_object(void* object)
+    inline void removeObject(void* object)
     {
-        ev_base.remove_object(object);
+        ev_base.removeObject(object);
     }
 
     inline void reserve(const size_t new_size)
