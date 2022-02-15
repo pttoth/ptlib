@@ -403,54 +403,106 @@ public:
 
     bool operator==(const Event& other) const   = delete;
 
+    /**
+     * @brief Registers the class member function received in the parameters.
+     * @param instance: Pointer to the target object.
+     * @param func: Pointer to the member function to call on the target object.
+     * @throws std::invalid_argument
+     */
     template<typename T>
     inline void addCallback(const T* const instance, void (T::*func)(Signature...) const )
     {
         ev_base.addCallback(instance, func);
     }
 
+    /**
+     * @brief Registers the constant class member function received in the parameters.
+     * @param instance: Pointer to the target object.
+     * @param func: Pointer to the member function to call on the target object.
+     * @throws std::invalid_argument
+     */
     template<typename T>
     inline void addCallback(T* instance, void (T::*func)(Signature...) )
     {
         ev_base.addCallback(instance, func);
     }
 
+    /**
+     * @brief Registers the standard function received in the parameters.
+     * @param func: Function to call on the target object.
+     * @throws std::invalid_argument
+     */
     inline void addCallback( void (*func)(Signature...) )
     {
         ev_base.addCallback(func);
     }
 
+    /**
+     * @brief Removes the class member function defined in the parameters.
+     * @param instance: Reference to the target object.
+     * @param func: Class member function to call on the target object.
+     * @throws std::invalid_argument
+     */
     template<typename T>
     inline void removeCallback(T* instance, void (T::*func)(Signature...) )
     {
         ev_base.removeCallback(instance, func);
     }
 
+    /**
+     * @brief Removes the standard function defined in the parameters.
+     * @param func: Function to remove from the array.
+     * @throws std::invalid_argument
+     */
     inline void removeCallback(void (*func)(Signature...) )
     {
         ev_base.removeCallback(func);
     }
 
+    /**
+     * @brief Removes all function registrations regarding the object received as parameter.
+     *   Note: this will remove any parent's member functions as well,
+     *   which the caller may not know about.
+     * @param object: Listener, whose every registered funcion is to be removed.
+     * @throws std::invalid_argument
+     */
     inline void removeObject(const void* const object)
     {
         ev_base.removeObject(object);
     }
 
+    /**
+     * @brief Removes all function registrations regarding the object received as parameter.
+     *   Note: this will remove any parent's member functions as well,
+     *   which the caller may not know about.
+     * @param object: Listener, whose every registered funcion is to be removed.
+     * @throws std::invalid_argument
+     */
     inline void removeObject(void* object)
     {
         ev_base.removeObject(object);
     }
 
+    /**
+     * @brief Ensures, that 'size' amount of entries are allocated in memory for the queue.
+     * @param new_size: The amount of entries we want to be allocated.
+     */
     inline void reserve(const size_t new_size)
     {
         ev_base.reserve(new_size);
     }
 
+    /**
+     * @brief Rearranges storage by clumping together still active entries in memory.
+     */
     inline void optimize()
     {
         ev_base.optimize();
     }
 
+    /**
+     * @brief Dumps unnecessary allocated memory.
+     */
     inline void shrink_to_fit()
     {
         ev_base.shrink_to_fit();
