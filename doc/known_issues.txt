@@ -12,6 +12,7 @@ event:
     - event doesn't have a 'clear()' function
 
 Config:
+	- refactor private function names containing '_' as starting character
     - error prints should use "CONFIG: " in front of every message
         maybe even print config file path
         it should use logger::debug as message output

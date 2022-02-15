@@ -1,11 +1,46 @@
 ----------------------------------------------------------------------------------------------
 v2.0.0 - in progress
 ----------------------------------------------------------------------------------------------
+-------------------------
+current version: 2.0.0b3
+-------------------------
+
 renamed the library from 'libpttoth' to 'ptlib'
 moved everything to the 'pt' namespace (lowercase)
 removed the math library
-    TODO: fill where can it be accessed now
+    can be found at 'https://github.com/pttoth/math3d' as a standalone library
 
+added Logger
+  not multiprocess yet
+
+Event
+  refactored to Event and EventTrigger
+  refactored add()/remove() to addCallback()/removeCallback()/removeObject()
+  they can ONLY be used together, EventTrigger has to be wrapped by Event
+  added support for const functions and class instances
+  fixed various bugs with usage
+  improved documentation
+
+Tests
+  added uniform Test parent class
+  added Event and Logging tests
+  renamed test_config to TestConfig
+
+refactored 'std_extension' to 'Utility'
+  updated camelcase convention
+
+  TODO: add new Utility features
+
+
+---
+changes before 2.0.0 final
+---
+Config restructuring
+  - multiple Configs writing into the same file
+  - updated function styling convention
+  - adding support for enum classes
+
+Finalized Logger interface
 
 
 
