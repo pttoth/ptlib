@@ -21,9 +21,9 @@ run()
         ev.addCallback(testfunc); //cannot add the same function with the same object twice
 
         //registering object's member functions
-        ev.addCallback(&tc, EventTestClass::ConstPublicFunction);  //non-const member, const function (ok)
-        ev.addCallback(&tc, EventTestClass::PublicFunction);       //non-const member, non-const function (ok)
-        ev.addCallback(&ctc, EventTestClass::ConstPublicFunction); //const member, const function (ok)
+        ev.addCallback(&tc, &EventTestClass::ConstPublicFunction);  //non-const member, const function (ok)
+        ev.addCallback(&tc, &EventTestClass::PublicFunction);       //non-const member, non-const function (ok)
+        ev.addCallback(&ctc, &EventTestClass::ConstPublicFunction); //const member, const function (ok)
 
         //ev.add(&ctc, EventTestClass::PublicFunction);    //const member, non-const function (fails)
         //ev.add(&tc, EventTestClass::PrivateFunction);    //member func is private - owner has to add it (fails)
@@ -168,12 +168,12 @@ ConstPublicFunction(int a, int b) const
 void EventTestClass::
 addPrivateFunctionToEvent(pt::Event<int, int> &ev)
 {
-    ev.addCallback(this, EventTestClass::PrivateFunction);
+    ev.addCallback(this, &EventTestClass::PrivateFunction);
 }
 
 void EventTestClass::
 addConstPrivateFunctionToEvent(pt::Event<int, int> &ev) const
 {
-    ev.addCallback(this, EventTestClass::ConstPrivateFunction);
+    ev.addCallback(this, &EventTestClass::ConstPrivateFunction);
 }
 
