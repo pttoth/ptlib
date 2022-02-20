@@ -1,26 +1,30 @@
 #pragma once
 
+#include "Test.hpp"
 #include "pt/config.h"
-#include "pt/std_extension.hpp"
+#include "pt/utility.hpp"
 
+#include <stdexcept>
 #include <iostream>
+#include <string>
 
-namespace pt{
-
-class test_config{
+class TestConfig: public Test
+{
 
 public:
-    test_config(){}
-    bool run();
+    TestConfig():Test(){}
+    virtual ~TestConfig(){}
+    virtual bool run() override;
+
     void testTrims();
     bool testTrimWhitespace(char const *str, char const *expected) const;
-
-
 };
 
-bool test_config::
-        run(){
-    Config cfg;
+
+bool TestConfig::
+run()
+{
+    pt::Config cfg;
     enum e{
         fMaxDamage,
         fHealthPoints,
@@ -84,7 +88,7 @@ bool test_config::
     std::cout << "------------------------\n";
     const char  c_char                  = 'c';
     const char *c_charwithwhitespaces   = "  a  ";
-    const char *c_chartabspaces   = " \t ";
+    const char *c_chartabspaces         = " \t ";
     const char *c_charstring            = "strval";
 
 
@@ -123,8 +127,10 @@ bool test_config::
     return true;
 }
 
-void test_config::
-        testTrims(){
+
+void TestConfig::
+testTrims()
+{
     std::cout << "-----------------------------------\n";
     std::cout << "---------testing Config------------\n";
     std::cout << "-----------------------------------\n";
@@ -147,11 +153,13 @@ void test_config::
     std::cout << "-----------------------------------\n";
 }
 
-bool test_config::
-        testTrimWhitespace(const char *str, const char *expected) const{
+
+bool TestConfig::
+testTrimWhitespace(const char *str, const char *expected) const
+{
     std::string orig(str);
     std::string ex(expected);
-    std::string res = trimWhitespaces(orig);
+    std::string res = pt::TrimWhitespaces(orig);
     std::cout << "orig content: '" << orig << "'\n";
     std::cout << "orig len: " << orig.length() << "\n";
     std::cout << "expected content: '" << ex << "'\n";
@@ -165,4 +173,3 @@ bool test_config::
     return res == ex;
 }
 
-}

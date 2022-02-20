@@ -2,7 +2,8 @@
   * FILE:    event.hpp
   * AUTHOR:  ptoth
   * EMAIL:   peter.t.toth92@gmail.com
-  * PURPOSE: Can register and then call functions sequentially with operator()
+  * PURPOSE: Class-independent event object.
+  *          Can register and call multiple functions sequentally.
   * -----------------------------------------------------------------------------
   */
 
@@ -16,9 +17,16 @@ namespace pt{
 
 #define ALLOW_MULTIPLE_INSTANCES 0x1
 
+/** @class EventTrigger:
+ *  @brief Class-independent event object. Has to be wrapped by an Event instance.
+ *         The two can register and call multiple functions sequentally in the order of registration.
+ */
 template<typename... Signature>
-class EventBase
+class EventTrigger
 {
+    template<typename...>
+    friend class Event; //Event exposes EventTrigger's handling functions that are private
+
     struct data
     {
         void*                             target;           //used for identification
@@ -74,12 +82,12 @@ class EventBase
     size_t              mSize;
     size_t              mCap;
     size_t              mIndex;     //CHECK: queue may be fragmented, so that index != size  (fix occurences!!!!)
-    EventBase::data*    mFunctions;
+    EventTrigger::data* mFunctions;
 
     /** @brief: returns the index of the element passed,
      *            or -1 if not contained
      */
-    inline int index_of(const EventBase::data& d) const
+    inline int index_of(const EventTrigger::data& d) const
     {
         for(int i=0; i<mIndex; ++i){
             if(mFunctions[i] == d){
@@ -89,7 +97,7 @@ class EventBase
         return -1;
     }
 
-    inline void defragment_from( EventBase::data* from, int const from_cap)
+    inline void defragment_from( EventTrigger::data* from, int const from_cap)
     {
         int i = 0;
         int j = 0;
@@ -104,7 +112,7 @@ class EventBase
     }
 
     //common mechanics of adding elements
-    inline void add_element(EventBase::data d)
+    inline void add_element(EventTrigger::data d)
     {
         if(nullptr == mFunctions){
             reserve(1);
@@ -126,7 +134,7 @@ class EventBase
     }
 
     //common mechanics of removing elements
-    inline void remove_element(EventBase::data d)
+    inline void remove_element(EventTrigger::data d)
     {
         int index = index_of(d);
         if( -1 != index ){
@@ -136,70 +144,12 @@ class EventBase
         //TODO: add support for removing multiple occurences
     }
 
-public:
-    EventBase(): mFlags(0), mSize(0),
-                 mCap(0), mIndex(0),
-                 mFunctions(nullptr)
-    {}
+    //--------------------------------------------------
+    //  private functions, that are exposed in Event
+    //--------------------------------------------------
 
-    EventBase(const EventBase& other): mFlags(other.mFlags),
-                                        mSize(other.mSize),
-                                        mCap(other.mCap),
-                                        mIndex(other.mIndex)
-    {
-        mFunctions = new EventBase::data[mCap];
-        for(int i=0; i<mCap; ++i){
-            mFunctions[i] = other.mFunctions[i];
-        }
-    }
-    EventBase(EventBase&& source): mFlags(source.mFlags),
-                            mSize(source.mSize),
-                            mCap(source.mCap),
-                            mIndex(source.mIndex)
-    {
-        delete[] mFunctions;
-        mFunctions = source.mFunctions;
-        source.mFunctions = nullptr;
-    }
-
-    virtual ~EventBase()
-    {
-        delete[] mFunctions;
-    }
-
-    EventBase& operator=(const EventBase& other)
-    {
-        delete[] mFunctions;
-        mFlags = other.mFlags;
-        mSize = other.mSize;
-        mCap = other.mCap;
-        mIndex = other.mIndex;
-        mFunctions = new EventBase::data[mCap];
-        for(int i=0; i<mCap; ++i){
-            mFunctions[i] = other.mFunctions[i];
-        }
-    }
-
-    EventBase& operator=(EventBase&& source)
-    {
-        delete[] mFunctions;
-        mFlags = source.mFlags;
-        mSize = source.mSize;
-        mCap = source.mCap;
-        mIndex = source.mIndex;
-        mFunctions = source.mFunctions;
-        source.mFunctions = nullptr;
-    }
-    bool operator==(const EventBase& other)const = delete;
-
-    /**
-     * @brief Registers the class member function received in the parameters.
-     * @param instance: pointer to the target object
-     * @param func: point to the member function to call on the target object
-     * @throws std::invalid_argument
-     */
     template<typename T>
-    inline void add(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    inline void addCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -211,66 +161,63 @@ public:
             (instance->*func)(args...);
         };
 
-        add_element( EventBase::data(static_cast<void*>(instance), static_cast<void*>(func), lambda) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
     }
 
-    /**
-     * @brief Registers the global function received in the parameters.
-     * @param func: function to call on the target object
-     * @throws std::invalid_argument
-     */
-    inline void add( void (*func)(Signature...) )          //FUNC_PARAMS
+    template<typename T>
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const)      //FUNC_PARAMS
+    {
+        if(nullptr == instance){
+            throw std::invalid_argument("attempted to register nullptr as listener");
+        }else if(nullptr == func){
+            throw std::invalid_argument("attempted to register nullptr as function");
+        }
+
+        auto lambda = [=](Signature... args) {
+            (instance->*func)(args...);
+        };
+
+        auto instance_id = const_cast<T*>(instance);
+
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+    }
+
+    inline void addCallback( void (*func)(Signature...) )          //FUNC_PARAMS
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
         }
-        add_element( EventBase::data(nullptr, static_cast<void*>(func), func) );
+        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func) );
     }
 
-    /**
-     * @brief Removes the member function defined in the parameters
-     * @param instance: reference to the target object
-     * @param func: member function to call on the target object
-     * @throws std::invalid_argument
-     */
     template<typename T>
-    inline void remove(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    inline void removeCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
     {
         if( nullptr == instance ){
             throw std::invalid_argument("attempted to unregister nullptr as listener");
         }else if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
-        remove_element( EventBase::data(static_cast<void*>(instance), static_cast<void*>(func), nullptr) );
+        remove_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
     }
 
-    /**
-     * @brief Removes the global function defined in the parameters
-     * @param func: function to remove from the array
-     * @throws std::invalid_argument
-     */
-    inline void remove(void (*func)(Signature...) )                //FUNC_PARAMS
+    inline void removeCallback(void (*func)(Signature...) )                //FUNC_PARAMS
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
-        remove_element( EventBase::data(nullptr, static_cast<void*>(func), nullptr) );
+        remove_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
     }
 
-    /**
-     * @brief Removes all function registrations regarding the object received as parameter
-     *   Note: this will remove any parent's member functions as well,
-     *   which the caller may not know about
-     * @param object: listener, whose every registered funcion should be removed
-     * @throws std::invalid_argument
-     */
-    inline void remove_object(void* const object)
+    inline void removeObject(const void* const object)
     {
         if( nullptr == object ){
             throw std::invalid_argument("attempted to unregister nullptr as listener");
         }
 
-        EventBase::data d( static_cast<void*>(object), nullptr, nullptr);
+        void* object_id = const_cast<void*>(object);
+
+        EventTrigger::data d( reinterpret_cast<void*>(object_id), nullptr, nullptr);
 
         //loop until cannot find any more entries with 'target'
         int index = 0;
@@ -283,15 +230,11 @@ public:
         }
     }
 
-    /**
-     * @brief ensures, that 'size' amount of entries are allocated in memory for the queue
-     * @param new_size: the amount of entries we want to be allocated
-     */
     inline void reserve(const size_t new_size)
     {
         if(mCap < new_size){
-            EventBase::data* old = mFunctions;
-            mFunctions = new EventBase::data[new_size];
+            EventTrigger::data* old = mFunctions;
+            mFunctions = new EventTrigger::data[new_size];
             if(old){
                 defragment_from(old, mIndex);
             }
@@ -300,9 +243,6 @@ public:
         }
     }
 
-    /**
-     * @brief Rearranges storage by clumping together still active entries in memory
-     */
     inline void optimize()
     {
         //TODO: don't free up memory if empty, this should only be defragmentation
@@ -316,9 +256,6 @@ public:
         }
     }
 
-    /**
-     * @brief Dumps unnecessary allocated memory
-     */
     inline void shrink_to_fit()
     {
         if(0 == mSize){
@@ -328,14 +265,72 @@ public:
             mFunctions = nullptr;
         }else{
             if(mSize < mIndex){
-                EventBase::data* old = mFunctions;
-                mFunctions= new EventBase::data[mSize];
+                EventTrigger::data* old = mFunctions;
+                mFunctions= new EventTrigger::data[mSize];
                 defragment_from(old, mIndex);
                 mCap = mSize;
                 delete[] old;
             }
         }
     }
+
+    //--------------------------------------------------
+
+public:
+    EventTrigger(): mFlags(0), mSize(0),
+                 mCap(0), mIndex(0),
+                 mFunctions(nullptr)
+    {}
+
+    EventTrigger(const EventTrigger& other): mFlags(other.mFlags),
+                                             mSize(other.mSize),
+                                             mCap(other.mCap),
+                                             mIndex(other.mIndex)
+    {
+        mFunctions = new EventTrigger::data[mCap];
+        for(int i=0; i<mCap; ++i){
+            mFunctions[i] = other.mFunctions[i];
+        }
+    }
+    EventTrigger(EventTrigger&& source): mFlags(source.mFlags),
+                                         mSize(source.mSize),
+                                         mCap(source.mCap),
+                                         mIndex(source.mIndex)
+    {
+        delete[] mFunctions;
+        mFunctions = source.mFunctions;
+        source.mFunctions = nullptr;
+    }
+
+    virtual ~EventTrigger()
+    {
+        delete[] mFunctions;
+    }
+
+    EventTrigger& operator=(const EventTrigger& other)
+    {
+        delete[] mFunctions;
+        mFlags = other.mFlags;
+        mSize = other.mSize;
+        mCap = other.mCap;
+        mIndex = other.mIndex;
+        mFunctions = new EventTrigger::data[mCap];
+        for(int i=0; i<mCap; ++i){
+            mFunctions[i] = other.mFunctions[i];
+        }
+    }
+
+    EventTrigger& operator=(EventTrigger&& source)
+    {
+        delete[] mFunctions;
+        mFlags = source.mFlags;
+        mSize = source.mSize;
+        mCap = source.mCap;
+        mIndex = source.mIndex;
+        mFunctions = source.mFunctions;
+        source.mFunctions = nullptr;
+    }
+    bool operator==(const EventTrigger& other)const = delete;
 
     /**
      * @brief Fires the event, sequentally executing all
@@ -357,18 +352,18 @@ public:
 
 
 /** @class Event:
- *  @brief Wrapper class that hides the 'operator()' of the actual event object
- *          Its purpose is to prevent external code to trigger the event with the exposed operator().
+ *  @brief Wrapper for EventTrigger that hides its 'operator()' and exposes its private handling functions.
+ *          Its purpose is to prevent external code to call the EventTrigger with an exposed 'operator()'.
  */
 template<typename... Signature>
 class Event
 {
-    EventBase<Signature...>& ev_base;
+    EventTrigger<Signature...>& ev_base;
 public:
-    Event(EventBase<Signature...>& eventbase):
+    Event(EventTrigger<Signature...>& eventbase):
         ev_base(eventbase){
     }
-    Event(const Event& other)                   = delete;       //Note: is there a way to be able to copy correctly?
+    Event(const Event& other)                   = delete;  //Note: Event-EventBase pairing has to be manually restored by owner object during copy!
     Event(Event&& source)                       = delete;
     virtual ~Event(){}
     Event& operator=(const Event& other)        = delete;
@@ -376,49 +371,110 @@ public:
 
     bool operator==(const Event& other) const   = delete;
 
+    /**
+     * @brief Registers the class member function received in the parameters.
+     * @param instance: Pointer to the target object.
+     * @param func: Pointer to the member function to call on the target object.
+     * @throws std::invalid_argument
+     */
     template<typename T>
-    inline void add(T* instance, void (T::*func)(Signature...) )
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const )
     {
-        ev_base.add(instance, func);
+        ev_base.addCallback(instance, func);
     }
 
-    inline void add( void (*func)(Signature...) )
-    {
-        ev_base.add(func);
-    }
-
+    /**
+     * @brief Registers the constant class member function received in the parameters.
+     * @param instance: Pointer to the target object.
+     * @param func: Pointer to the member function to call on the target object.
+     * @throws std::invalid_argument
+     */
     template<typename T>
-    inline void remove(T* instance, void (T::*func)(Signature...) )
+    inline void addCallback(T* instance, void (T::*func)(Signature...) )
     {
-        ev_base.remove(instance, func);
+        ev_base.addCallback(instance, func);
     }
 
-    inline void remove(void (*func)(Signature...) )
+    /**
+     * @brief Registers the standard function received in the parameters.
+     * @param func: Function to call on the target object.
+     * @throws std::invalid_argument
+     */
+    inline void addCallback( void (*func)(Signature...) )
     {
-        ev_base.remove(func);
+        ev_base.addCallback(func);
     }
 
-    inline void remove_object(void* const object)
+    /**
+     * @brief Removes the class member function defined in the parameters.
+     * @param instance: Reference to the target object.
+     * @param func: Class member function to call on the target object.
+     * @throws std::invalid_argument
+     */
+    template<typename T>
+    inline void removeCallback(T* instance, void (T::*func)(Signature...) )
     {
-        ev_base.remove_object(object);
+        ev_base.removeCallback(instance, func);
     }
 
+    /**
+     * @brief Removes the standard function defined in the parameters.
+     * @param func: Function to remove from the array.
+     * @throws std::invalid_argument
+     */
+    inline void removeCallback(void (*func)(Signature...) )
+    {
+        ev_base.removeCallback(func);
+    }
+
+    /**
+     * @brief Removes all function registrations regarding the object received as parameter.
+     *   Note: this will remove any parent's member functions as well,
+     *   which the caller may not know about.
+     * @param object: Listener, whose every registered funcion is to be removed.
+     * @throws std::invalid_argument
+     */
+    inline void removeObject(const void* const object)
+    {
+        ev_base.removeObject(object);
+    }
+
+    /**
+     * @brief Removes all function registrations regarding the object received as parameter.
+     *   Note: this will remove any parent's member functions as well,
+     *   which the caller may not know about.
+     * @param object: Listener, whose every registered funcion is to be removed.
+     * @throws std::invalid_argument
+     */
+    inline void removeObject(void* object)
+    {
+        ev_base.removeObject(object);
+    }
+
+    /**
+     * @brief Ensures, that 'size' amount of entries are allocated in memory for the queue.
+     * @param new_size: The amount of entries we want to be allocated.
+     */
     inline void reserve(const size_t new_size)
     {
         ev_base.reserve(new_size);
     }
 
+    /**
+     * @brief Rearranges storage by clumping together still active entries in memory.
+     */
     inline void optimize()
     {
         ev_base.optimize();
     }
 
+    /**
+     * @brief Dumps unnecessary allocated memory.
+     */
     inline void shrink_to_fit()
     {
         ev_base.shrink_to_fit();
     }
 }; //end of 'Event'
-
-
 
 } //end of namespace PT

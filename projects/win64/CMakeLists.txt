@@ -28,6 +28,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 
+set(MY_COMPILE_FLAGS "-Wall -Wextra")
+set(CMAKE_C_FLAGS ${MY_COMPILE_FLAGS})
+set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 
 #build an archive (.a), for static linking
 add_library(ptlib
@@ -51,7 +54,12 @@ target_include_directories(ptlib PRIVATE
 #build Test app
 add_executable(ptlib_test
     ${MY_PROJ_ROOT}/src/main.cpp
-    ${MY_PROJ_ROOT}/test/test_config.hpp
+    ${MY_PROJ_ROOT}/src/TestEvent.cpp
+    ${MY_PROJ_ROOT}/src/TestLogger.cpp
+    ${MY_PROJ_ROOT}/include/Test.hpp
+    ${MY_PROJ_ROOT}/include/TestConfig.hpp
+    ${MY_PROJ_ROOT}/include/TestEvent.hpp
+    ${MY_PROJ_ROOT}/include/TestLogger.hpp
 )
 
 target_include_directories(ptlib_test PRIVATE
