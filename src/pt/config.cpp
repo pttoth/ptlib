@@ -13,47 +13,47 @@
 
 using namespace pt;
 
-const char* Config::_sep_keyval = "=";
-const char* Config::_sep_valcom = ";";
+const char* Config::mSepKeyValue = "=";
+const char* Config::mSepValueComment = ";";
 
 Config::
         Config(Config &&source){
-    _entries    = std::move(source._entries);
-    _path       = std::move(source._path);
+    mEntries    = std::move(source.mEntries);
+    mPath       = std::move(source.mPath);
 }
 
 Config &Config::
         operator=(Config &&source){
-    _entries    = std::move(source._entries);
-    _path       = std::move(source._path);
+    mEntries    = std::move(source.mEntries);
+    mPath       = std::move(source.mPath);
     return *this;
 }
 
 void Config::
         addKey(int eKey, const char *name){
-    int idx = _getKeyIndex(eKey);
+    int idx = getKeyIndex_(eKey);
     if(-1 < idx){
         throw std::invalid_argument("key already contained");
     }else{
         entry e;
         e.key_id = eKey;
         e.key_str = name;
-        _entries.push_back(e);
+        mEntries.push_back(e);
         //printf("value added: %d, %s\n", eKey, name);
     }
 }
 
 void Config::
         read(){
-    if( 0 == _path.length() ){
+    if( 0 == mPath.length() ){
         throw std::logic_error("no path defined");
     }
-    readF(_path);
+    readF(mPath);
 }
 
 void Config::
         readF(const char *path){
-    if( _isValidPath(path) ){
+    if( isValidPath_(path) ){
         std::ifstream ifs;
         ifs.open(path);
         if( !ifs.is_open() ){
@@ -61,7 +61,7 @@ void Config::
             errormsg += path;
             throw std::invalid_argument( errormsg );
         }
-        _parseData(ifs);
+        parseData_(ifs);
         ifs.close();
     }else{
         std::string errormsg = "invalid path defined";
@@ -78,27 +78,27 @@ void Config::
 void Config::
         readS(const std::string &str){
     std::stringstream ss(str);
-    _parseData(ss);
+    parseData_(ss);
 }
 
 void Config::
         write(){
-    if( 0 == _path.length() ){
+    if( 0 == mPath.length() ){
         throw std::logic_error("no path defined");
     }
-    writeF(_path);
+    writeF(mPath);
 }
 
 void Config::
         writeF(char const *path){
-    if( _isValidPath(path) ){
+    if( isValidPath_(path) ){
         std::ofstream ofs(path);
         if( !ofs.good() ){
             std::cerr << "error opening file " << path << " for reading\n";
         }
-        for(size_t i=0; i<_entries.size(); ++i){
-            entry& ent = _entries[i];
-            ofs << ent.key_str << _sep_keyval << ent.val_str << "\n";
+        for(size_t i=0; i<mEntries.size(); ++i){
+            entry& ent = mEntries[i];
+            ofs << ent.key_str << mSepKeyValue << ent.val_str << "\n";
         }
         ofs.close();
     }else{
@@ -120,21 +120,21 @@ void Config::
 
 void Config::
         setPath(const std::string &path){
-    _path = path;
+    mPath = path;
 }
 
 std::string Config::
         getPath() const{
-    return _path;
+    return mPath;
 }
 
 char Config::
         getC(int eKey) const{
-    std::string data = _getData(eKey);  //getData() may throw "unknown key", we don't wanna catch that
+    std::string data = getData_(eKey);  //getData() may throw "unknown key", we don't wanna catch that
     if( data.length() != 1 ){
         data = TrimWhitespaces(data);   //may be longer than 1 char because of whitespaces
         if( data.length() != 1 ){       //try again with trim
-            throw std::invalid_argument( _buildErrorStringInvalidValue(eKey) );
+            throw std::invalid_argument( buildErrorStringInvalidValue_(eKey) );
         }
     }
     return data[0];
@@ -142,21 +142,21 @@ char Config::
 
 std::string Config::
         getS(int eKey) const{
-    return _getData(eKey);
+    return getData_(eKey);
 }
 
 bool Config::
         getB(int eKey) const{
-    std::string data = TrimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
+    std::string data = TrimWhitespaces( getData_(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
     if(       "true"  == StringToLower(data) ){ return true;
     }else if( "false" == StringToLower(data) ){ return false;
     }
-    throw std::invalid_argument( _buildErrorStringInvalidValue(eKey) );
+    throw std::invalid_argument( buildErrorStringInvalidValue_(eKey) );
 }
 
 float Config::
         getF(int eKey) const{
-    std::string data = TrimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
+    std::string data = TrimWhitespaces( getData_(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
     try{
         return std::stof(data);
     }catch(...){
@@ -164,13 +164,13 @@ float Config::
         //  std::invalid_argument
         //  std::out_of_range
         //but a simple error will suffice instead
-        throw std::invalid_argument( _buildErrorStringInvalidValue(eKey) );
+        throw std::invalid_argument( buildErrorStringInvalidValue_(eKey) );
     }
 }
 
 double Config::
         getD(int eKey) const{
-    std::string data = TrimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
+    std::string data = TrimWhitespaces( getData_(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
     try{
         return std::stod(data);
     }catch(...){
@@ -178,13 +178,13 @@ double Config::
         //  std::invalid_argument
         //  std::out_of_range
         //but a simple error will suffice instead
-        throw std::invalid_argument( _buildErrorStringInvalidValue(eKey) );
+        throw std::invalid_argument( buildErrorStringInvalidValue_(eKey) );
     }
 }
 
 int Config::
         getI(int eKey) const{
-    std::string data = TrimWhitespaces( _getData(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
+    std::string data = TrimWhitespaces( getData_(eKey) ); //getData() may throw "unknown key", we don't wanna catch that
     try{
         return std::stoi(data);
     }catch(...){
@@ -192,25 +192,25 @@ int Config::
         //  std::invalid_argument
         //  std::out_of_range
         //but a simple error will suffice instead
-        throw std::invalid_argument( _buildErrorStringInvalidValue(eKey) );
+        throw std::invalid_argument( buildErrorStringInvalidValue_(eKey) );
     }
 }
 
 void Config::
         setC(int eKey, char c){
-    std::string& data = _getDataReference(eKey);
+    std::string& data = getDataReference_(eKey);
     data = c;
 }
 
 void Config::
         setS(int eKey, const std::string &str){
-    std::string& data = _getDataReference(eKey);
+    std::string& data = getDataReference_(eKey);
     data = str;
 }
 
 void Config::
         setB(int eKey, bool b){
-    std::string& data = _getDataReference(eKey);
+    std::string& data = getDataReference_(eKey);
     if(b){ data = "true";
     }else{ data = "false";
     }
@@ -218,7 +218,7 @@ void Config::
 
 void Config::
         setF(int eKey, float f){
-    std::string& data = _getDataReference(eKey);
+    std::string& data = getDataReference_(eKey);
     char buf[64];
     sprintf(buf, "%f", f);
     data = buf;
@@ -226,7 +226,7 @@ void Config::
 
 void Config::
         setD(int eKey, double d){
-    std::string& data = _getDataReference(eKey);
+    std::string& data = getDataReference_(eKey);
     char buf[64];
     sprintf(buf, "%lf", d);
     data = buf;
@@ -234,33 +234,33 @@ void Config::
 
 void Config::
         setI(int eKey, int i){
-    std::string& data = _getDataReference(eKey);
+    std::string& data = getDataReference_(eKey);
     char buf[64];
     sprintf(buf, "%d", i);
     data = buf;
 }
 
 std::string Config::
-        _getData(int eKey) const{
-    int idx = _getKeyIndex(eKey);
+        getData_(int eKey) const{
+    int idx = getKeyIndex_(eKey);
     if(-1 < idx){
-        return _entries[idx].val_str;
+        return mEntries[idx].val_str;
     }
     throw std::invalid_argument("unknown key");
 }
 
 std::string &Config::
-        _getDataReference(int eKey){
-    int idx = _getKeyIndex(eKey);
+        getDataReference_(int eKey){
+    int idx = getKeyIndex_(eKey);
     if(-1 < idx){
-        entry& ent = _entries[idx];
+        entry& ent = mEntries[idx];
         return ent.val_str;
     }
     throw std::invalid_argument("unknown key");
 }
 
 bool Config::
-        _isEmptyLine(const std::string &str) const{
+        isEmptyLine_(const std::string &str) const{
     for(char c : str){
         if( !isspace(c) ){ return false; }
     }
@@ -268,18 +268,18 @@ bool Config::
 }
 
 std::string Config::
-        _buildErrorStringInvalidValue(int eKey) const{
+        buildErrorStringInvalidValue_(int eKey) const{
     std::string         strError;
     std::stringstream   ss;
     ss << "invalid config value for key(" << eKey << ") : (";
-    ss << _getData(eKey) << ")";
+    ss << getData_(eKey) << ")";
 
     strError = ss.str();
     return strError;
 }
 
 bool Config::
-        _isValidCharForFileName(char c) const{
+        isValidCharForFileName_(char c) const{
     const char* valids = "_-./";
     size_t len = strlen(valids);
     if( isalnum(c) ){ return true; } //A-Z, a-z, 0-9
@@ -290,7 +290,7 @@ bool Config::
 }
 
 bool Config::
-        _isValidPath(const std::string &path) const{
+        isValidPath_(const std::string &path) const{
     //the function restricts paths to these characters
     //safe
     //A-Z, a-z, 0-9
@@ -316,7 +316,7 @@ bool Config::
 
     //mustn't contain illegal characters
     for(char c : path){
-        if( !_isValidCharForFileName(c) ){
+        if( !isValidCharForFileName_(c) ){
             return false;
         }
     }
@@ -324,8 +324,8 @@ bool Config::
 }
 
 std::string Config::
-        _trimComments(const std::string &str) const{
-    size_t idx_denom = str.find(_sep_valcom);
+        trimComments_(const std::string &str) const{
+    size_t idx_denom = str.find(mSepValueComment);
     if(std::string::npos != idx_denom){
         return str.substr(0, idx_denom);
     }
@@ -333,35 +333,35 @@ std::string Config::
 }
 
 int Config::
-        _getKeyIndex(int eKey) const{
-    for(size_t i=0; i<_entries.size(); ++i){
-        if( eKey == _entries[i].key_id ) return i;
+        getKeyIndex_(int eKey) const{
+    for(size_t i=0; i<mEntries.size(); ++i){
+        if( eKey == mEntries[i].key_id ) return i;
     }
     return -1;
 }
 
 int Config::
-        _getKeyIndex(const std::string &str) const{
-    for(size_t i=0; i<_entries.size(); ++i){
-        if( str == _entries[i].key_str ) return i;
+        getKeyIndex_(const std::string &str) const{
+    for(size_t i=0; i<mEntries.size(); ++i){
+        if( str == mEntries[i].key_str ) return i;
     }
     return -1;
 }
 
 void Config::
-        _processData(const std::string &data){
+        processData_(const std::string &data){
     std::stringstream ss(data);
     std::string line;
     std::string cfg;
     std::string cfg_split[2]; //[0]: key, [1]: val
     while( std::getline(ss, line) ){
-        cfg = _trimComments(line);
-        if( !_isEmptyLine(cfg) ){
-            if( SplitString(cfg_split, cfg, _sep_keyval) ){
+        cfg = trimComments_(line);
+        if( !isEmptyLine_(cfg) ){
+            if( SplitString(cfg_split, cfg, mSepKeyValue) ){
                 cfg_split[0] = TrimWhitespaces(cfg_split[0]);
-                int idx = _getKeyIndex( cfg_split[0] );
+                int idx = getKeyIndex_( cfg_split[0] );
                 if(-1 < idx){
-                    _entries[idx].val_str = cfg_split[1];
+                    mEntries[idx].val_str = cfg_split[1];
                 }else{
                     std::cerr << "WARNING: unrecognized config key: " << cfg_split[0] << "\n";
                 }
@@ -373,7 +373,7 @@ void Config::
 }
 
 void Config::
-        _parseData(std::istream &stream){
+        parseData_(std::istream &stream){
     std::stringstream ss;
     std::string data;
     size_t expected_size = 0;
@@ -393,6 +393,6 @@ void Config::
     data = ss.str();
     data = data.substr(0, expected_size);
 
-    _processData(data);
+    processData_(data);
 }
 
