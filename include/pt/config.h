@@ -18,7 +18,8 @@ namespace pt{
 #define cfgAddKey(CFG_INSTANCE_NAME, ENUM_NAME) \
             CFG_INSTANCE_NAME.addKey(ENUM_NAME, #ENUM_NAME);
 
-class Config{
+class Config
+{
 public:
     Config()                    = default;
     Config(const Config& other) = default;
@@ -63,29 +64,29 @@ private:
         std::string  val_str;       //string value associated with key
     };
 
-    static const char*  _sep_keyval; //key-value spearator string
-    static const char*  _sep_valcom; //value-comment spearator string
+    static const char*  mSepKeyValue;       //key-value spearator string
+    static const char*  mSepValueComment;   //value-comment spearator string
 
-    std::vector<entry>  _entries;   //the stored data
-    std::string         _path;      //file to read from and write to
+    std::vector<entry>  mEntries;   //the stored data
+    std::string         mPath;      //file to read from and write to
 
-    std::string     _getData(int eKey) const;
-    std::string&    _getDataReference(int eKey);
+    std::string     getData_(int eKey) const;
+    std::string&    getDataReference_(int eKey);
 
-    std::string     _trimComments(const std::string& str) const;
-    bool            _isValidCharForFileName(char c) const;
-    bool            _isValidPath(const std::string& path) const;
-    bool            _isEmptyLine(const std::string& str) const;
-    std::string     _buildErrorStringInvalidValue(int eKey) const;
-    int             _getKeyIndex(int eKey) const;
-    int             _getKeyIndex(const std::string& str) const;
+    std::string     trimComments_(const std::string& str) const;
+    bool            isValidCharForFileName_(char c) const;
+    bool            isValidPath_(const std::string& path) const;
+    bool            isEmptyLine_(const std::string& str) const;
+    std::string     buildErrorStringInvalidValue_(int eKey) const;
+    int             getKeyIndex_(int eKey) const;
+    int             getKeyIndex_(const std::string& str) const;
 
 
     //after the config was read from any input, we have it in a string
     //this is the common processing function, which parses the expected
     //  data from the string
-    void _processData(const std::string& data);
-    void _parseData(std::istream& stream);
+    void processData_(const std::string& data);
+    void parseData_(std::istream& stream);
 };
 
 }
