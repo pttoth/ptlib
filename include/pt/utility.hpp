@@ -17,7 +17,7 @@ namespace pt{
 
 template<typename T>
 inline int
-IndexOfInVector(std::vector<T>& vec, T& element)
+IndexOfInVector(const std::vector<T>& vec, const T& element)
 {
     for(int i=0; i<vec.size(); ++i){
         if(vec[i] == element){
@@ -29,7 +29,7 @@ IndexOfInVector(std::vector<T>& vec, T& element)
 
 template<typename T>
 inline bool
-ContainedInVector(std::vector<T>& vec, T& element)
+ContainedInVector(const std::vector<T>& vec, const T& element)
 {
     return ( -1 < indexOfInVector(vec, element) );
 }
