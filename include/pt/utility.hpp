@@ -31,7 +31,7 @@ template<typename T>
 inline bool
 ContainedInVector(const std::vector<T>& vec, const T& element)
 {
-    return ( -1 < indexOfInVector(vec, element) );
+    return ( -1 < IndexOfInVector(vec, element) );
 }
 
 template<typename T>
