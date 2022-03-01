@@ -31,3 +31,7 @@ logging:
 utility:
     SplitString
         check whether it fails if there is no occurence of separator sequence
+
+tests:
+    - add test calls for every template function
+        they are skipped during compilation if unused and may contain errors
