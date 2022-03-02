@@ -50,6 +50,9 @@ target_include_directories(ptlib PRIVATE
     ${MY_PROJ_ROOT}/include
 )
 
+set_target_properties(ptlib PROPERTIES COMPILE_FLAGS
+    "${MY_COMPILE_FLAGS} -fPIC"
+)
 
 #build Test app
 add_executable(ptlib_test
