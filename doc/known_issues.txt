@@ -5,6 +5,7 @@ build:
 
 generic:
     - various camelcase problems
+	- add documentation for non-obvious functions
 
 event:
     - doesn't handle multiple registrations of the same function
@@ -31,6 +32,7 @@ logging:
 utility:
     SplitString
         check whether it fails if there is no occurence of separator sequence
+		add documentation for usage
 
 tests:
     - add test calls for every template function
