@@ -29,20 +29,26 @@ bool pt::
 IsStringNumeric(const std::string &str)
 {
     //not empty
-    if(0 == str.length()){
+    if( 0 == str.length() ){
         return false;
     }
 
-    //starts with digit or '-'
     std::string::const_iterator it = str.begin();
-    if((*it != '-') && !IsCharDigit(*it)){
+
+    //may start with '-'
+    if( '-' == *it ){
+        ++it;
+    }
+
+    //contains at least 1 number
+    if( !IsCharDigit(*it) ){
         return false;
     }
     ++it;
 
-    //rest contains only numbers
-    while(true){
-        if(!IsCharDigit(*it) || it == str.end()){
+    //rest may contain only numbers
+    while( it != str.end() ){
+        if( !IsCharDigit(*it) ){
             return false;
         }
         ++it;
