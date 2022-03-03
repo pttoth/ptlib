@@ -51,6 +51,11 @@ RemoveElementInVector(std::vector<T>& vec, size_t pos)
 
 bool IsCharDigit(char c);
 bool IsEmptyOrWhitespaceLine(const std::string& str);
+
+/**
+ * @brief IsStringNumeric:  Determines, whether the string is a number in text format.
+ *                           Supports negative numbers. Doesn't support whitespaces.
+ */
 bool IsStringNumeric(const std::string& str);
 
 std::string TrimWhitespaces(const std::string& str);
