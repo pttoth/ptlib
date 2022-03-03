@@ -13,7 +13,11 @@
 #include <vector>
 #include <string>
 
+//return the enum name in parameter as string
+#define EnumToString(ENUM_NAME) #ENUM_NAME
+
 namespace pt{
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 template<typename T>
