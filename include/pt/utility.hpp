@@ -49,7 +49,9 @@ RemoveElementInVector(std::vector<T>& vec, size_t pos)
     vec.erase(iter);
 }
 
-bool IsEmptyOrWhitespaceLine(const std::string &str);
+bool IsCharDigit(char c);
+bool IsEmptyOrWhitespaceLine(const std::string& str);
+bool IsStringNumeric(const std::string& str);
 
 std::string TrimWhitespaces(const std::string& str);
 
