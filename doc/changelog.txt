@@ -2,7 +2,27 @@
 v2.0.0 - in progress
 ----------------------------------------------------------------------------------------------
 -------------------------
-current version: 2.0.0b3
+current version: 2.0.0b6
+-------------------------
+	Project
+	  added '-fPIC' compiler flag for library
+	  added dependency settings to enforce build order
+	  updated known issues
+	Config
+	  refactored 'cfgAddKey' to 'CfgAddKey'
+	Utility
+	  added EnumToString() macro
+	  added IsCharDigit()
+	  added IsStringNumeric()
+	  suppressed some unnecessary warnings
+-------------------------
+	2.0.0b5
+-------------------------
+-------------------------
+	2.0.0b4
+-------------------------
+-------------------------
+	2.0.0b3
 -------------------------
 
 renamed the library from 'libpttoth' to 'ptlib'

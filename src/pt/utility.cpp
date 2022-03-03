@@ -11,10 +11,47 @@
 
 
 bool pt::
+IsCharDigit(char c)
+{
+    return !((c < '0') || ('9' < c));
+}
+
+bool pt::
 IsEmptyOrWhitespaceLine(const std::string &str)
 {
     for(char c : str){
         if( !isspace(c) ){ return false; }
+    }
+    return true;
+}
+
+bool pt::
+IsStringNumeric(const std::string &str)
+{
+    //not empty
+    if( 0 == str.length() ){
+        return false;
+    }
+
+    std::string::const_iterator it = str.begin();
+
+    //may start with '-'
+    if( '-' == *it ){
+        ++it;
+    }
+
+    //contains at least 1 number
+    if( !IsCharDigit(*it) ){
+        return false;
+    }
+    ++it;
+
+    //rest may contain only numbers
+    while( it != str.end() ){
+        if( !IsCharDigit(*it) ){
+            return false;
+        }
+        ++it;
     }
     return true;
 }
@@ -223,6 +260,3 @@ StringToWString(const std::string& string_to_convert)
     return converter.from_bytes( string_to_convert );
     */
 }
-
-
-

@@ -15,7 +15,7 @@
 
 namespace pt{
 
-#define cfgAddKey(CFG_INSTANCE_NAME, ENUM_NAME) \
+#define CfgAddKey(CFG_INSTANCE_NAME, ENUM_NAME) \
             CFG_INSTANCE_NAME.addKey(ENUM_NAME, #ENUM_NAME);
 
 class Config

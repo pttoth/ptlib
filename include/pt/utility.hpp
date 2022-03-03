@@ -13,8 +13,13 @@
 #include <vector>
 #include <string>
 
+//return the enum name in parameter as string
+#define EnumToString(ENUM_NAME) #ENUM_NAME
+
 namespace pt{
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
 template<typename T>
 inline int
 IndexOfInVector(const std::vector<T>& vec, const T& element)
@@ -26,6 +31,8 @@ IndexOfInVector(const std::vector<T>& vec, const T& element)
     }
     return -1;
 }
+
+#pragma GCC diagnostic pop
 
 template<typename T>
 inline bool
@@ -42,7 +49,14 @@ RemoveElementInVector(std::vector<T>& vec, size_t pos)
     vec.erase(iter);
 }
 
-bool IsEmptyOrWhitespaceLine(const std::string &str);
+bool IsCharDigit(char c);
+bool IsEmptyOrWhitespaceLine(const std::string& str);
+
+/**
+ * @brief IsStringNumeric:  Determines, whether the string is a number in text format.
+ *                           Supports negative numbers. Doesn't support whitespaces.
+ */
+bool IsStringNumeric(const std::string& str);
 
 std::string TrimWhitespaces(const std::string& str);
 

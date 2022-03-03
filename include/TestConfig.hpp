@@ -39,14 +39,14 @@ run()
         cCharTabSpaces,
         cCharString,
     };
-    cfgAddKey(cfg, fMaxDamage);
-    cfgAddKey(cfg, fHealthPoints);
-    cfgAddKey(cfg, bInvulnerable);
+    CfgAddKey(cfg, fMaxDamage);
+    CfgAddKey(cfg, fHealthPoints);
+    CfgAddKey(cfg, bInvulnerable);
 
-    cfgAddKey(cfg, cChar);
-    cfgAddKey(cfg, cCharWithWhiteSpaces);
-    cfgAddKey(cfg, cCharTabSpaces);
-    cfgAddKey(cfg, cCharString);
+    CfgAddKey(cfg, cChar);
+    CfgAddKey(cfg, cCharWithWhiteSpaces);
+    CfgAddKey(cfg, cCharTabSpaces);
+    CfgAddKey(cfg, cCharString);
 
 
     const char* pathin = "./conf.cfg";
@@ -59,19 +59,19 @@ run()
     }
 
     cfg.setF(fMaxDamage, 100.0f);
-    cfgAddKey(cfg, bNewData1);
-    cfgAddKey(cfg, bNewData2);
+    CfgAddKey(cfg, bNewData1);
+    CfgAddKey(cfg, bNewData2);
     cfg.setB(bNewData1, true);
     cfg.setB(bNewData2, false);
 
-    cfgAddKey(cfg, iWriteFReadI);
+    CfgAddKey(cfg, iWriteFReadI);
     float f = 1.0001f;
     cfg.setF(iWriteFReadI, f);
     std::cout << "write value: (float) " << f << "\n";
     std::cout << "read value: (int) " << cfg.getI(iWriteFReadI) << "\n";
 
 
-    cfgAddKey(cfg, fWriteIReadF);
+    CfgAddKey(cfg, fWriteIReadF);
     float i = 155;
     cfg.setF(fWriteIReadF, i);
     std::cout << "write value: (int) " << i << "\n";
