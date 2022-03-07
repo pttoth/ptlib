@@ -5,6 +5,10 @@ run()
 {
     bool success = false;
 
+    std::cout << "--------------------------------------------------\n";
+    std::cout << "  Testing Event                                   \n";
+    std::cout << "--------------------------------------------------\n";
+
     try{
         //a regular class and a const class containing an exposed Event and a private EventTrigger
         EventTestClass tc;
@@ -63,20 +67,24 @@ run()
         //check registrations and removals
         success = this->testAddAndRemovals();
         if(!success){
+            std::cout << "------------------------\n";
             return false;
         }
         //check ev and trigger sizes
         //...
 
-
+        std::cout << "------------------------\n";
         return true;
     }catch(const std::invalid_argument& e){
+        std::cout << "------------------------\n";
         std::cout << "Event test: Badly parameterized test case: " << e.what() << "\n";
         return false;
     }catch(const std::exception& e){
+        std::cout << "------------------------\n";
         std::cout << "Event test: Unexpected exception occured: " << e.what() << "\n";
         return false;
     }catch(...){
+        std::cout << "------------------------\n";
         std::cout << "Event test: Unknown exception occured!\n";
         return false;
     }

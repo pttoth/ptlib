@@ -14,9 +14,9 @@ int main()
         bool success = tl.run();
 
         if(success){
-            std::cout << "Logger test: SUCCESS\n";
+            std::cout << "Logger test: SUCCESS\n\n\n\n";
         }else{
-            std::cout << "Logger test: FAILED\n";
+            std::cout << "Logger test: FAILED\n\n\n\n";
         }
     }
 
@@ -26,9 +26,9 @@ int main()
         bool success = tc.run();
 
         if(success){
-            std::cout << "Config test: SUCCESS\n";
+            std::cout << "Config test: SUCCESS\n\n\n\n";
         }else{
-            std::cout << "Config test: FAILED\n";
+            std::cout << "Config test: FAILED\n\n\n\n";
         }
     }
 
@@ -39,9 +39,9 @@ int main()
         bool success = te.run();
 
         if(success){
-            std::cout << "Event test: SUCCESS\n";
+            std::cout << "Event test: SUCCESS\n\n\n\n";
         }else{
-            std::cout << "Event test: FAILED\n";
+            std::cout << "Event test: FAILED\n\n\n\n";
         }
     }
 
