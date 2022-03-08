@@ -24,6 +24,10 @@ public:
 bool TestConfig::
 run()
 {
+    std::cout << "--------------------------------------------------\n";
+    std::cout << "  Testing Config                                  \n";
+    std::cout << "--------------------------------------------------\n";
+
     pt::Config cfg;
     enum e{
         fMaxDamage,
@@ -49,33 +53,47 @@ run()
     CfgAddKey(cfg, cCharString);
 
 
+    CfgAddKey(cfg, bNewData1);
+    CfgAddKey(cfg, bNewData2);
+
+    CfgAddKey(cfg, iWriteFReadI);
+
+    CfgAddKey(cfg, fWriteIReadF);
+
+
+
     const char* pathin = "./conf.cfg";
     const char* pathout = "./conf_out.cfg";
 
     try{
+        std::cout << "trying to read config file (" << pathin <<")\n";
         cfg.readF(pathin);
+        //TODO: add write and then re-read (ensure existing config file and test read)
+        //...
+        std::cout << "config file (" << pathin << ") read successfully\n";
     }catch(std::invalid_argument& e){
         std::cout << "exception caught when trying to read file!\n  reason: " << e.what() << "\n";
     }
 
     cfg.setF(fMaxDamage, 100.0f);
-    CfgAddKey(cfg, bNewData1);
-    CfgAddKey(cfg, bNewData2);
     cfg.setB(bNewData1, true);
     cfg.setB(bNewData2, false);
 
-    CfgAddKey(cfg, iWriteFReadI);
+    std::cout << "---\n";
+
     float f = 1.0001f;
     cfg.setF(iWriteFReadI, f);
-    std::cout << "write value: (float) " << f << "\n";
-    std::cout << "read value: (int) " << cfg.getI(iWriteFReadI) << "\n";
+    std::cout << "write value (float): " << f << "\n";
+    std::cout << "read value (float): " << cfg.getF(iWriteFReadI) << "\n";
+    std::cout << "read value (int): " << cfg.getI(iWriteFReadI) << "\n";
 
+    std::cout << "---\n";
 
-    CfgAddKey(cfg, fWriteIReadF);
     float i = 155;
     cfg.setF(fWriteIReadF, i);
-    std::cout << "write value: (int) " << i << "\n";
-    std::cout << "read value:  (float)" << cfg.getF(fWriteIReadF) << "\n";
+    std::cout << "write value (int): " << i << "\n";
+    std::cout << "read value (int): " << cfg.getI(fWriteIReadF) << "\n";
+    std::cout << "read value (float): " << cfg.getF(fWriteIReadF) << "\n";
 
     //cfg.setF(fInvalidKey, 0.01f);
 

@@ -5,7 +5,7 @@ bool TestLogger::
 run()
 {
     std::cout << "--------------------------------------------------\n";
-    std::cout << "  Testing logger                                  \n";
+    std::cout << "  Testing Logger                                  \n";
     std::cout << "--------------------------------------------------\n";
 
     try{
@@ -66,12 +66,15 @@ printAsciiTable()
             char ichar = num;
             if((7 <= num) && (num <= 8)){
                 pt::log::debug << "#" << num << "  : " << " ";
+            //TAB
             }else if(num == 9){
                 pt::log::debug << "#" << num << "  :" << "\\t";
+            //LF
             }else if(num == 10){
-                pt::log::debug << "#" << num << " :" << "\\n";
+                pt::log::debug << "#" << num << " :" << "LF";
+            //CR
             }else if(num == 13){
-                pt::log::debug << "#" << num << " :" << "\\r";
+                pt::log::debug << "#" << num << " :" << "CR";
             }else if(num < 10){
                 pt::log::debug << "#" << num << "  : " << ichar;
             }else if(num < 100){
@@ -87,4 +90,9 @@ printAsciiTable()
             }
         }
     }
+    pt::log::debug << "testing tab( \"\\t.\\t.\" ):\t.\t.\n";
+    pt::log::debug << "testing LF( \"\\n.\" ):\n.\n";
+    pt::log::debug << "testing CR( \"aaa\\r.\" ;first character should be '.'):\naaa \r.\n";
+
+
 }
