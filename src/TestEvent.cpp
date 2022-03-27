@@ -24,6 +24,8 @@ run()
         ev.addCallback(bar);
         ev.addCallback(testfunc); //cannot add the same function with the same object twice
 
+        evVoid.addCallback(&testfuncVoid);
+
         //registering object's member functions
         ev.addCallback(&tc, &EventTestClass::ConstPublicFunction);  //non-const member, const function (ok)
         ev.addCallback(&tc, &EventTestClass::PublicFunction);       //non-const member, non-const function (ok)
@@ -31,6 +33,17 @@ run()
 
         //ev.add(&ctc, EventTestClass::PublicFunction);    //const member, non-const function (fails)
         //ev.add(&tc, EventTestClass::PrivateFunction);    //member func is private - owner has to add it (fails)
+
+        ev.addCallback(EventTestClass::StaticMemberFunction);
+        ev.addCallback(&EventTestClass::StaticMemberFunction);
+        ev2.addCallback(&EventTestClass::StaticMemberFunction2);
+        evVoid.addCallback(&EventTestClass::StaticVoidFunction);
+        //evVoid.addCallback(&tc, &EventTestClass::StaticVoidFunction);     //nice if fails, but silent pass still produces valid result
+        evVoid.addCallback(&tc, &EventTestClass::VoidFunction);
+        evVoid.addCallback(&tc, &EventTestClass::ConstVoidFunction);
+        //evVoid.addCallback(&ctc, &EventTestClass::VoidFunction);        //has to fail
+        evVoid.addCallback(&ctc, &EventTestClass::ConstVoidFunction);
+
 
         //private functions are callable, if the private owner adds them
         tc.addPrivateFunctionToEvent(ev);            //private owner adds private func
@@ -55,6 +68,9 @@ run()
         //owner calls the private object
         evtrigger(8, 26);   //ok
         //ev(8, 26);        //fails
+
+        evtrigger2(12, "abcdef");
+        evVoidTrigger();
 
 
         //removing functions
@@ -104,6 +120,13 @@ testfunc(int a, int b)
     std::cout << "testfunc called: a=" << a << ", b=" << b << "\n";
 }
 
+
+void testfuncVoid()
+{
+    std::cout << "testfuncVoid called\n";
+}
+
+
 void
 foo(int a, int b)
 {
@@ -150,7 +173,25 @@ fail5(short a, short b)
 
 
 
-void EventTestClass::PrivateFunction(int a, int b)
+void EventTestClass::
+StaticMemberFunction(int a, int b)
+{
+    std::cout << "StaticMemberFunction called: a=" << a << ", b=" << b << "\n";
+}
+
+void EventTestClass::
+StaticMemberFunction2(int a, std::string b)
+{
+    std::cout << "StaticMemberFunction2 called: a=" << a << ", b=\"" << b << "\"\n";
+}
+
+void EventTestClass::StaticVoidFunction()
+{
+    std::cout << "StaticVoidFunction called\n";
+}
+
+void EventTestClass::
+PrivateFunction(int a, int b)
 {
     std::cout << "PrivateFunction called: a=" << a << ", b=" << b << "\n";
 }
@@ -159,6 +200,18 @@ void EventTestClass::
 ConstPrivateFunction(int a, int b) const
 {
     std::cout << "ConstPrivateFunction called: a=" << a << ", b=" << b << "\n";
+}
+
+void EventTestClass::
+VoidFunction()
+{
+    std::cout << "VoidFunction called\n";
+}
+
+void EventTestClass::
+ConstVoidFunction() const
+{
+    std::cout << "ConstVoidFunction called\n";
 }
 
 void EventTestClass::
@@ -184,4 +237,5 @@ addConstPrivateFunctionToEvent(pt::Event<int, int> &ev) const
 {
     ev.addCallback(this, &EventTestClass::ConstPrivateFunction);
 }
+
 
