@@ -58,6 +58,7 @@ run()
 void TestLogger::
 printAsciiTable()
 {
+    return;  //TEMP: TODO: this completely messes up the deconding in linux-based text editors, even when forced to use UTF-8
     pt::log::debug << "printing ASCII table:\n";
     size_t count = 0;
     for(uint8_t j=0; j<32; ++j){
