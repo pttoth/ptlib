@@ -2,10 +2,6 @@
 
 A library for some generic purpose tools.
 
-### Array
-
-Currently just a wrapper around 'std::vector'. It's only good for setting up dependencies for custom memory management features added later.
-
 ### Config
 
 Writes/reads key-value pairs into/from a file where the key is converted from enum values to strings and vice versa.
