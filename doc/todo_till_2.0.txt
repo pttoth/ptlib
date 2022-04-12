@@ -3,10 +3,18 @@ test the EventBase and Event class usage
 add logger class
     switch all output writing references to logger
 
+make Config recognize /r/n line endings correctly on linux
+	currently it reads them as "content\r"
+
 finish config refactor
 
+logger should add "DEBUG:" string to the start of messages with 'debug' ????
+logger should add "WARNING:" string to the start of messages with 'warn'
+logger should add "ERROR:" string to the start of messages with 'err'
 
-
+pt::array
+	make utility Vector handling functions for Array too
+	make it standard-iterable
 
 
 

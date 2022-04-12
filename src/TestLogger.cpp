@@ -5,7 +5,7 @@ bool TestLogger::
 run()
 {
     std::cout << "--------------------------------------------------\n";
-    std::cout << "  Testing logger                                  \n";
+    std::cout << "  Testing Logger                                  \n";
     std::cout << "--------------------------------------------------\n";
 
     try{
@@ -31,6 +31,11 @@ run()
         pt::log::warn  << "testing warn:  ASCII\n";
         pt::log::err   << "testing err:   ASCII\n";
 
+        pt::debug << "testing debug without 'pt' namespace: ASCII\n";
+        pt::out   << "testing out without 'pt' namespace:   ASCII\n";
+        pt::warn  << "testing warn without 'pt' namespace:  ASCII\n";
+        pt::err   << "testing err without 'pt' namespace:   ASCII\n";
+
         printAsciiTable();
 
         pt::log::out << "\n";
@@ -53,6 +58,7 @@ run()
 void TestLogger::
 printAsciiTable()
 {
+    return;  //TEMP: TODO: this completely messes up the deconding in linux-based text editors, even when forced to use UTF-8
     pt::log::debug << "printing ASCII table:\n";
     size_t count = 0;
     for(uint8_t j=0; j<32; ++j){
@@ -61,12 +67,15 @@ printAsciiTable()
             char ichar = num;
             if((7 <= num) && (num <= 8)){
                 pt::log::debug << "#" << num << "  : " << " ";
+            //TAB
             }else if(num == 9){
                 pt::log::debug << "#" << num << "  :" << "\\t";
+            //LF
             }else if(num == 10){
-                pt::log::debug << "#" << num << " :" << "\\n";
+                pt::log::debug << "#" << num << " :" << "LF";
+            //CR
             }else if(num == 13){
-                pt::log::debug << "#" << num << " :" << "\\r";
+                pt::log::debug << "#" << num << " :" << "CR";
             }else if(num < 10){
                 pt::log::debug << "#" << num << "  : " << ichar;
             }else if(num < 100){
@@ -82,4 +91,9 @@ printAsciiTable()
             }
         }
     }
+    pt::log::debug << "testing tab( \"\\t.\\t.\" ):\t.\t.\n";
+    pt::log::debug << "testing LF( \"\\n.\" ):\n.\n";
+    pt::log::debug << "testing CR( \"aaa\\r.\" ;first character should be '.'):\naaa \r.\n";
+
+
 }

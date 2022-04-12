@@ -47,6 +47,14 @@ extern logstream warn;
 extern logstream err;
 
 } //end of namespace 'log'
+
+
+//aliases for a more convenient usage syntax
+inline log::logstream& debug = log::debug;
+inline log::logstream& out = log::out;
+inline log::logstream& warn = log::warn;
+inline log::logstream& err = log::err;
+
 } //end of namespace 'pt'
 
 
