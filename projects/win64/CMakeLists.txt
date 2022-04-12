@@ -38,7 +38,6 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
     ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
     ${MY_PROJ_ROOT}/src/pt/logging.cpp
-    ${MY_PROJ_ROOT}/include/pt/array.h
     ${MY_PROJ_ROOT}/include/pt/config.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
     ${MY_PROJ_ROOT}/include/pt/event.hpp
