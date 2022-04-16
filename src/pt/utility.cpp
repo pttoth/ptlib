@@ -16,6 +16,7 @@ IsCharDigit(char c)
     return !((c < '0') || ('9' < c));
 }
 
+
 bool pt::
 IsEmptyOrWhitespaceLine(const std::string &str)
 {
@@ -24,6 +25,7 @@ IsEmptyOrWhitespaceLine(const std::string &str)
     }
     return true;
 }
+
 
 bool pt::
 IsStringNumeric(const std::string &str)
@@ -56,6 +58,7 @@ IsStringNumeric(const std::string &str)
     return true;
 }
 
+
 std::string pt::
 TrimWhitespaces(const std::string& str)
 {
@@ -85,6 +88,7 @@ TrimWhitespaces(const std::string& str)
     return std::string();
 }
 
+
 bool pt::
 SplitString(std::string* retval,
             const std::string& str,
@@ -100,6 +104,7 @@ SplitString(std::string* retval,
     return false;
 }
 
+
 bool pt::
 SplitString(std::string* retval,
             const std::string& str,
@@ -107,6 +112,7 @@ SplitString(std::string* retval,
 {
     return SplitString(retval, str, sequence.c_str());
 }
+
 
 std::string pt::
 StringToLower(const std::string& str)
@@ -117,6 +123,7 @@ StringToLower(const std::string& str)
     return std::move(result);
 }
 
+
 std::string pt::
 StringToUpper(const std::string& str)
 {
@@ -126,6 +133,7 @@ StringToUpper(const std::string& str)
     return std::move(result);
 }
 
+
 bool pt::
 MatchRegex(const char* const str, const char* const regex_str)
 {
@@ -133,11 +141,13 @@ MatchRegex(const char* const str, const char* const regex_str)
     return std::regex_match(str, reg);
 }
 
+
 bool pt::
 MatchRegex(const char* str, const std::string& regex_str)
 {
     return MatchRegex(str, regex_str.c_str());
 }
+
 
 bool pt::
 MatchRegex(const std::string& str, const char* regex_str)
@@ -145,11 +155,13 @@ MatchRegex(const std::string& str, const char* regex_str)
     return MatchRegex(str.c_str(), regex_str);
 }
 
+
 bool pt::
 MatchRegex(const std::string& str, const std::string& regex_str)
 {
     return MatchRegex(str.c_str(), regex_str.c_str());
 }
+
 
 #ifdef __linux__
 #include <sys/types.h>
