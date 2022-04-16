@@ -112,7 +112,7 @@ std::string pt::
 StringToLower(const std::string& str)
 {
     std::string result;
-    result.reserve(str.length());
+    result.resize(str.length());
     std::transform(str.begin(), str.end(), result.begin(), ::tolower);
     return std::move(result);
 }
@@ -121,7 +121,7 @@ std::string pt::
 StringToUpper(const std::string& str)
 {
     std::string result;
-    result.reserve(str.length());
+    result.resize(str.length());
     std::transform(str.begin(), str.end(), result.begin(), ::toupper);
     return std::move(result);
 }

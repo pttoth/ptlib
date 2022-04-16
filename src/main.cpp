@@ -2,6 +2,7 @@
 #include "TestLogger.hpp"
 #include "TestConfig.hpp"
 #include "TestEvent.hpp"
+#include "TestUtility.hpp"
 
 #include <iostream>
 
@@ -46,6 +47,16 @@ int main()
     }
 
 
+    {
+        TestUtility tu;
+        bool success = tu.run();
+
+        if(success){
+            std::cout << "Utility test: SUCCESS\n\n\n\n";
+        }else{
+            std::cout << "Utility test: FAILED\n\n\n\n";
+        }
+    }
 
     return 0;
 }
