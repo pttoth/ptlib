@@ -58,10 +58,12 @@ add_executable(ptlib_test
     ${MY_PROJ_ROOT}/src/main.cpp
     ${MY_PROJ_ROOT}/src/TestEvent.cpp
     ${MY_PROJ_ROOT}/src/TestLogger.cpp
+    ${MY_PROJ_ROOT}/src/TestUtility.cpp
     ${MY_PROJ_ROOT}/include/Test.hpp
     ${MY_PROJ_ROOT}/include/TestConfig.hpp
     ${MY_PROJ_ROOT}/include/TestEvent.hpp
     ${MY_PROJ_ROOT}/include/TestLogger.hpp
+    ${MY_PROJ_ROOT}/include/TestUtility.hpp
 )
 
 target_include_directories(ptlib_test PRIVATE
