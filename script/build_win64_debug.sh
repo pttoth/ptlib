@@ -8,15 +8,16 @@ popd > /dev/null
 #move to project root directory
 pushd $scriptdir/..
 
-cmake ./projects/win64 -Bbuild -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
+builddir="./build/win64_debug"
+cmake ./projects/win64 -B$builddir -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
 
-cd build
+pushd $builddir
 
 #get available core count
 cores=$(nproc)
 
 make -j $cores
 
-cd ..
+popd #from $builddir
 
-popd
+popd #from $scriptdir

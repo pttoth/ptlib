@@ -8,15 +8,16 @@ popd > /dev/null
 #move to project root directory
 pushd $scriptdir/..
 
-cmake ./projects/debian -Bbuild -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
+builddir="./build/debian_debug"
+cmake ./projects/debian -B$builddir -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
 
-cd build
+pushd $builddir
 
 #get available core count
 cores=$(nproc)
 
 make -j $cores
 
-cd ..
+popd #from $builddir
 
-popd
+popd #from $scriptdir
