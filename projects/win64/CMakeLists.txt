@@ -74,3 +74,5 @@ target_link_libraries(ptlib_test
     -lptlib
 )
 
+add_dependencies(ptlib_test ptlib)
+
