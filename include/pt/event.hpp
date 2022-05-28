@@ -186,12 +186,12 @@ class EventTrigger
         add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda, execrule) ); //FUNC_PARAMS
     }
 
-    inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent  )          //FUNC_PARAMS
+    inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )          //FUNC_PARAMS
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
         }
-        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func), execrule );
+        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func, execrule) );
     }
 
     template<typename T>
@@ -249,13 +249,7 @@ class EventTrigger
 
     inline void optimize()
     {
-        //TODO: don't free up memory if empty, this should only be defragmentation
-        if(0 == mSize){
-            delete[] mFunctions;
-            mCap = 0;
-            mIndex = 0;
-            mFunctions = nullptr;
-        }else if(mSize < mIndex ){
+        if(mSize < mIndex ){
             defragment_from(mFunctions, mIndex);
         }
     }
@@ -386,9 +380,9 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const )
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule = ExecRule::Persistent )
     {
-        ev_base.addCallback(instance, func);
+        ev_base.addCallback(instance, func, execrule);
     }
 
     /**
@@ -398,9 +392,9 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...) )
+    inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
     {
-        ev_base.addCallback(instance, func);
+        ev_base.addCallback(instance, func, execrule);
     }
 
     /**
@@ -408,9 +402,9 @@ public:
      * @param func: Function to call on the target object.
      * @throws std::invalid_argument
      */
-    inline void addCallback( void (*func)(Signature...) )
+    inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
     {
-        ev_base.addCallback(func);
+        ev_base.addCallback(func, execrule);
     }
 
     /**
