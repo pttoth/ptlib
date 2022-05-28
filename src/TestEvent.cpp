@@ -10,6 +10,18 @@ run()
     std::cout << "--------------------------------------------------\n";
 
     try{
+        {
+            //test autoremoval
+            EventTestClass tc;
+            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            evtrigger(9, 11);
+            evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
+            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            evtrigger(10, 36);
+            evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
+            std::cout << "-----\n";
+        }
+
         //a regular class and a const class containing an exposed Event and a private EventTrigger
         EventTestClass tc;
         const EventTestClass ctc;
