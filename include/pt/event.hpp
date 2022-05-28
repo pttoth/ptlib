@@ -17,6 +17,11 @@ namespace pt{
 
 #define ALLOW_MULTIPLE_INSTANCES 0x1
 
+enum class ExecRule{
+    Persistent = 0,
+    TriggerOnce = 1
+};
+
 /** @class EventTrigger:
  *  @brief Class-independent event object. Has to be wrapped by an Event instance.
  *         The two can register and call multiple functions sequentally in the order of registration.
@@ -32,6 +37,7 @@ class EventTrigger
         void*                             target;           //used for identification
         void*                             function_ptr;     //used for identification
         std::function<void(Signature...)> function_obj;     //used during calling       //FUNC_PARAMS
+        ExecRule                          rule;
 
         //ctor
         data():target(nullptr),
@@ -40,11 +46,9 @@ class EventTrigger
         {}
 
         //ctor
-        data(void* t,
-             void* fptr,
-             std::function<void(Signature...)> fobj): target(t),    //FUNC_PARAMS
-                                                      function_ptr(fptr),
-                                                      function_obj(fobj)
+        data( void* t, void* fptr, std::function<void(Signature...)> fobj,
+              ExecRule execrule = ExecRule::Persistent ):
+            target(t), function_ptr(fptr), function_obj(fobj), rule(execrule)
         {}
 
         /**
@@ -149,7 +153,7 @@ class EventTrigger
     //--------------------------------------------------
 
     template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )      //FUNC_PARAMS
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -161,11 +165,11 @@ class EventTrigger
             (instance->*func)(args...);
         };
 
-        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda, execrule) ); //FUNC_PARAMS
     }
 
     template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const)      //FUNC_PARAMS
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule = ExecRule::Persistent )      //FUNC_PARAMS
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -179,15 +183,15 @@ class EventTrigger
 
         auto instance_id = const_cast<T*>(instance);
 
-        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda, execrule) ); //FUNC_PARAMS
     }
 
-    inline void addCallback( void (*func)(Signature...) )          //FUNC_PARAMS
+    inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent  )          //FUNC_PARAMS
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
         }
-        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func) );
+        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func), execrule );
     }
 
     template<typename T>
@@ -342,6 +346,10 @@ public:
             for( size_t i=0; i<mIndex; ++i ){
                 if( mFunctions[i].is_callable() ){
                     mFunctions[i].function_obj(args...);    //FUNC_PARAMS
+                    if( ExecRule::TriggerOnce == mFunctions[i].rule ){
+                        mFunctions[i].invalidate();
+                        --mSize;
+                    }
                 }
             }
         }
