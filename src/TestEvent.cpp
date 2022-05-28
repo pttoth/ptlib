@@ -25,7 +25,14 @@ run()
             ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
             evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
             std::cout << "-----\n";
+
+            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            ev.addCallback(foo, pt::ExecRule::TriggerOnce);
+            ev.addCallback(bar, pt::ExecRule::TriggerOnce);
+            ev.clear();
         }
+
+        {}
 
         //a regular class and a const class containing an exposed Event and a private EventTrigger
         EventTestClass tc;

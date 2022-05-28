@@ -45,11 +45,13 @@ class EventTrigger
             function_obj()
         {}
 
+
         //ctor
         data( void* t, void* fptr, std::function<void(Signature...)> fobj,
               ExecRule execrule = ExecRule::Persistent ):
             target(t), function_ptr(fptr), function_obj(fobj), rule(execrule)
         {}
+
 
         /**
          * @brief operator ==:
@@ -69,10 +71,12 @@ class EventTrigger
             return false;
         }
 
+
         inline bool is_callable() const
         {
             return (function_ptr!=nullptr);
         }
+
 
         inline void invalidate()
         {
@@ -88,6 +92,7 @@ class EventTrigger
     size_t              mIndex;     //CHECK: queue may be fragmented, so that index != size  (fix occurences!!!!)
     EventTrigger::data* mFunctions;
 
+
     /** @brief: returns the index of the element passed,
      *            or -1 if not contained
      */
@@ -100,6 +105,7 @@ class EventTrigger
         }
         return -1;
     }
+
 
     inline void defragment_from( EventTrigger::data* from, int const from_cap)
     {
@@ -114,6 +120,7 @@ class EventTrigger
         }
         mIndex = j;
     }
+
 
     //common mechanics of adding elements
     inline void add_element(EventTrigger::data d)
@@ -137,6 +144,7 @@ class EventTrigger
         //TODO: add support multiple registrations
     }
 
+
     //common mechanics of removing elements
     inline void remove_element(EventTrigger::data d)
     {
@@ -148,9 +156,11 @@ class EventTrigger
         //TODO: add support for removing multiple occurences
     }
 
+
     //--------------------------------------------------
     //  private functions, that are exposed in Event
     //--------------------------------------------------
+
 
     template<typename T>
     inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )      //FUNC_PARAMS
@@ -167,6 +177,7 @@ class EventTrigger
 
         add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda, execrule) ); //FUNC_PARAMS
     }
+
 
     template<typename T>
     inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule = ExecRule::Persistent )      //FUNC_PARAMS
@@ -186,6 +197,7 @@ class EventTrigger
         add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda, execrule) ); //FUNC_PARAMS
     }
 
+
     inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )          //FUNC_PARAMS
     {
         if( nullptr == func ){
@@ -193,6 +205,7 @@ class EventTrigger
         }
         add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func, execrule) );
     }
+
 
     template<typename T>
     inline void removeCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
@@ -205,6 +218,7 @@ class EventTrigger
         remove_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
     }
 
+
     inline void removeCallback(void (*func)(Signature...) )                //FUNC_PARAMS
     {
         if( nullptr == func ){
@@ -212,6 +226,7 @@ class EventTrigger
         }
         remove_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
     }
+
 
     inline void removeObject(const void* const object)
     {
@@ -234,6 +249,17 @@ class EventTrigger
         }
     }
 
+
+    inline void clear()
+    {
+        for(size_t i=0; i<mIndex; ++i){
+            mFunctions[i].invalidate();
+        }
+        mIndex = 0;
+        mSize = 0;
+    }
+
+
     inline void reserve(const size_t new_size)
     {
         if(mCap < new_size){
@@ -247,12 +273,14 @@ class EventTrigger
         }
     }
 
+
     inline void optimize()
     {
         if(mSize < mIndex ){
             defragment_from(mFunctions, mIndex);
         }
     }
+
 
     inline void shrink_to_fit()
     {
@@ -272,6 +300,7 @@ class EventTrigger
         }
     }
 
+
     //--------------------------------------------------
 
 public:
@@ -279,6 +308,7 @@ public:
                  mCap(0), mIndex(0),
                  mFunctions(nullptr)
     {}
+
 
     EventTrigger(const EventTrigger& other): mFlags(other.mFlags),
                                              mSize(other.mSize),
@@ -290,6 +320,8 @@ public:
             mFunctions[i] = other.mFunctions[i];
         }
     }
+
+
     EventTrigger(EventTrigger&& source): mFlags(source.mFlags),
                                          mSize(source.mSize),
                                          mCap(source.mCap),
@@ -300,10 +332,12 @@ public:
         source.mFunctions = nullptr;
     }
 
+
     virtual ~EventTrigger()
     {
         delete[] mFunctions;
     }
+
 
     EventTrigger& operator=(const EventTrigger& other)
     {
@@ -318,6 +352,7 @@ public:
         }
     }
 
+
     EventTrigger& operator=(EventTrigger&& source)
     {
         delete[] mFunctions;
@@ -328,7 +363,10 @@ public:
         mFunctions = source.mFunctions;
         source.mFunctions = nullptr;
     }
+
+
     bool operator==(const EventTrigger& other)const = delete;
+
 
     /**
      * @brief Fires the event, sequentially executing all
@@ -373,6 +411,7 @@ public:
 
     bool operator==(const Event& other) const   = delete;
 
+
     /**
      * @brief Registers the constant class member function received in the parameters.
      * @param instance: Pointer to the target object.
@@ -385,6 +424,7 @@ public:
     {
         ev_trigger.addCallback(instance, func, execrule);
     }
+
 
     /**
      * @brief Registers the class member function received in the parameters.
@@ -399,6 +439,7 @@ public:
         ev_trigger.addCallback(instance, func, execrule);
     }
 
+
     /**
      * @brief Registers the basic function received in the parameters.
      * @param func: Function to call on the target object.
@@ -409,6 +450,7 @@ public:
     {
         ev_trigger.addCallback(func, execrule);
     }
+
 
     /**
      * @brief Removes the class member function defined in the parameters.
@@ -422,6 +464,7 @@ public:
         ev_trigger.removeCallback(instance, func);
     }
 
+
     /**
      * @brief Removes the standard function defined in the parameters.
      * @param func: Function to remove from the array.
@@ -431,6 +474,7 @@ public:
     {
         ev_trigger.removeCallback(func);
     }
+
 
     /**
      * @brief Removes all function registrations regarding the object received as parameter.
@@ -444,6 +488,7 @@ public:
         ev_trigger.removeObject(object);
     }
 
+
     /**
      * @brief Removes all function registrations regarding the object received as parameter.
      *   Note: this will remove any parent's member functions as well,
@@ -456,6 +501,15 @@ public:
         ev_trigger.removeObject(object);
     }
 
+
+    /**
+     * @brief Removes all registered elements. Allocated memory stays.
+     */
+    inline void clear(){
+        ev_trigger.clear();
+    }
+
+
     /**
      * @brief Ensures, that 'size' amount of entries are allocated in memory for the queue.
      * @param new_size: The amount of entries we want to be allocated.
@@ -465,6 +519,7 @@ public:
         ev_trigger.reserve(new_size);
     }
 
+
     /**
      * @brief Rearranges storage by clumping together still active entries in memory.
      */
@@ -472,6 +527,7 @@ public:
     {
         ev_trigger.optimize();
     }
+
 
     /**
      * @brief Dumps unnecessary allocated memory.
