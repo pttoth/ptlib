@@ -35,14 +35,15 @@ set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 #build an archive (.a), for static linking
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
-    ${MY_PROJ_ROOT}/src/pt/utility.cpp
     ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
     ${MY_PROJ_ROOT}/src/pt/logging.cpp
+    ${MY_PROJ_ROOT}/src/pt/utility.cpp
+    ${MY_PROJ_ROOT}/include/pt/callqueue.hpp
     ${MY_PROJ_ROOT}/include/pt/config.h
-    ${MY_PROJ_ROOT}/include/pt/utility.hpp
     ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/logging.h
     ${MY_PROJ_ROOT}/include/pt/log/logstream.hpp
+    ${MY_PROJ_ROOT}/include/pt/utility.hpp
 )
 
 target_include_directories(ptlib PRIVATE

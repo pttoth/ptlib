@@ -31,7 +31,8 @@ class CallQueue
 public:
     struct Identifier
     {
-    public:
+        void* target = nullptr;
+        void* function_ptr = nullptr;
         virtual bool operator==(const Tid& rhs) = 0;
 
         virtual void invalidate() = 0;
