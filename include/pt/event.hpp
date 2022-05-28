@@ -163,6 +163,22 @@ class EventTrigger
 
 
     template<typename T>
+    inline void addCallback(std::function<void(Signature...)>& function, ExecRule execrule = ExecRule::Persistent )      //FUNC_PARAMS
+    {
+        bool IsCallable = (bool) function;
+        if( IsCallable ){
+            throw std::invalid_argument("attempted to register std::function that has no target");
+        }
+
+        auto lambda = [=](Signature... args) {
+            function(args...);
+        };
+
+        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), lambda, execrule) ); //FUNC_PARAMS
+    }
+
+
+    template<typename T>
     inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )      //FUNC_PARAMS
     {
         if(nullptr == instance){

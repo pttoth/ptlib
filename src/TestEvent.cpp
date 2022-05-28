@@ -32,7 +32,15 @@ run()
             ev.clear();
         }
 
-        {}
+        //test lambdas
+        {
+            ev.addCallback( []()->void
+            {
+                //test lambda code
+
+            }, pt::ExecRule::TriggerOnce);
+
+        }
 
         //a regular class and a const class containing an exposed Event and a private EventTrigger
         EventTestClass tc;
