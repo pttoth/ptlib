@@ -18,6 +18,11 @@ run()
             evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
             ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
             evtrigger(10, 36);
+            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            evtrigger(26767, 675);
+            ev.shrink_to_fit();
+            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
             evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
             std::cout << "-----\n";
         }

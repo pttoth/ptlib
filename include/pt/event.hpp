@@ -3,7 +3,7 @@
   * AUTHOR:  ptoth
   * EMAIL:   peter.t.toth92@gmail.com
   * PURPOSE: Class-independent event object.
-  *          Can register and call multiple functions sequentally.
+  *          Can register and call multiple functions sequentially.
   * -----------------------------------------------------------------------------
   */
 
@@ -24,7 +24,7 @@ enum class ExecRule{
 
 /** @class EventTrigger:
  *  @brief Class-independent event object. Has to be wrapped by an Event instance.
- *         The two can register and call multiple functions sequentally in the order of registration.
+ *         The two can register and call multiple functions sequentially in the order of registration.
  */
 template<typename... Signature>
 class EventTrigger
@@ -331,7 +331,7 @@ public:
     bool operator==(const EventTrigger& other)const = delete;
 
     /**
-     * @brief Fires the event, sequentally executing all
+     * @brief Fires the event, sequentially executing all
      *          registered functions in the order of registration.
      */
     inline void operator()(Signature...args)        //FUNC_PARAMS
@@ -349,7 +349,7 @@ public:
         }
     }
 
-}; //end of 'EventBase'
+}; //end of 'EventTrigger'
 
 
 
@@ -360,12 +360,12 @@ public:
 template<typename... Signature>
 class Event
 {
-    EventTrigger<Signature...>& ev_base;
+    EventTrigger<Signature...>& ev_trigger;
 public:
-    Event(EventTrigger<Signature...>& eventbase):
-        ev_base(eventbase){
+    Event(EventTrigger<Signature...>& eventtrigger):
+        ev_trigger(eventtrigger){
     }
-    Event(const Event& other)                   = delete;  //Note: Event-EventBase pairing has to be manually restored by owner object during copy!
+    Event(const Event& other)                   = delete;  //Note: Event-EventTrigger pairing has to be manually restored by owner object during copy!
     Event(Event&& source)                       = delete;
     virtual ~Event(){}
     Event& operator=(const Event& other)        = delete;
@@ -374,37 +374,40 @@ public:
     bool operator==(const Event& other) const   = delete;
 
     /**
-     * @brief Registers the class member function received in the parameters.
+     * @brief Registers the constant class member function received in the parameters.
      * @param instance: Pointer to the target object.
      * @param func: Pointer to the member function to call on the target object.
+     * @param execrule: Controls whether the function should only be executed once.
      * @throws std::invalid_argument
      */
     template<typename T>
     inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule = ExecRule::Persistent )
     {
-        ev_base.addCallback(instance, func, execrule);
+        ev_trigger.addCallback(instance, func, execrule);
     }
 
     /**
-     * @brief Registers the constant class member function received in the parameters.
+     * @brief Registers the class member function received in the parameters.
      * @param instance: Pointer to the target object.
      * @param func: Pointer to the member function to call on the target object.
+     * @param execrule: Controls whether the function should only be executed once.
      * @throws std::invalid_argument
      */
     template<typename T>
     inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
     {
-        ev_base.addCallback(instance, func, execrule);
+        ev_trigger.addCallback(instance, func, execrule);
     }
 
     /**
-     * @brief Registers the standard function received in the parameters.
+     * @brief Registers the basic function received in the parameters.
      * @param func: Function to call on the target object.
+     * @param execrule: Controls whether the function should only be executed once.
      * @throws std::invalid_argument
      */
     inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
     {
-        ev_base.addCallback(func, execrule);
+        ev_trigger.addCallback(func, execrule);
     }
 
     /**
@@ -416,7 +419,7 @@ public:
     template<typename T>
     inline void removeCallback(T* instance, void (T::*func)(Signature...) )
     {
-        ev_base.removeCallback(instance, func);
+        ev_trigger.removeCallback(instance, func);
     }
 
     /**
@@ -426,7 +429,7 @@ public:
      */
     inline void removeCallback(void (*func)(Signature...) )
     {
-        ev_base.removeCallback(func);
+        ev_trigger.removeCallback(func);
     }
 
     /**
@@ -438,7 +441,7 @@ public:
      */
     inline void removeObject(const void* const object)
     {
-        ev_base.removeObject(object);
+        ev_trigger.removeObject(object);
     }
 
     /**
@@ -450,7 +453,7 @@ public:
      */
     inline void removeObject(void* object)
     {
-        ev_base.removeObject(object);
+        ev_trigger.removeObject(object);
     }
 
     /**
@@ -459,7 +462,7 @@ public:
      */
     inline void reserve(const size_t new_size)
     {
-        ev_base.reserve(new_size);
+        ev_trigger.reserve(new_size);
     }
 
     /**
@@ -467,7 +470,7 @@ public:
      */
     inline void optimize()
     {
-        ev_base.optimize();
+        ev_trigger.optimize();
     }
 
     /**
@@ -475,8 +478,8 @@ public:
      */
     inline void shrink_to_fit()
     {
-        ev_base.shrink_to_fit();
+        ev_trigger.shrink_to_fit();
     }
 }; //end of 'Event'
 
-} //end of namespace PT
+} //end of namespace pt
