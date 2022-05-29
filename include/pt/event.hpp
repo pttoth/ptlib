@@ -198,12 +198,20 @@ class EventTrigger
     }
 
 
+    //with 'T&&' version introduced, is this needed?
     inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )          //FUNC_PARAMS
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
         }
         add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func, execrule) );
+    }
+
+
+    template<typename T>
+    inline void addCallback( T&& func, ExecRule execrule = ExecRule::Persistent )
+    {
+        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(&func), func, execrule) );
     }
 
 
@@ -442,11 +450,24 @@ public:
 
     /**
      * @brief Registers the basic function received in the parameters.
-     * @param func: Function to call on the target object.
+     * @param func: Function to call.
      * @param execrule: Controls whether the function should only be executed once.
      * @throws std::invalid_argument
      */
     inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
+    {
+        ev_trigger.addCallback(func, execrule);
+    }
+
+
+    /**
+     * @brief Registers the function/functor received in the parameters.
+     * @param func: Function to call.
+     * @param execrule: Controls whether the function/functor should only be executed once.
+     * @throws std::invalid_argument
+     */
+    template<typename T>
+    inline void addCallback( T&& func, ExecRule execrule = ExecRule::Persistent )
     {
         ev_trigger.addCallback(func, execrule);
     }

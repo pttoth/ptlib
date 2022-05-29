@@ -32,7 +32,44 @@ run()
             ev.clear();
         }
 
-        {}
+        {
+            //test lambdas
+            evVoid.addCallback( []() -> void
+            {
+                std::cout << "lambda(void) is working\n";
+                std::cout << "---\n";
+            }, pt::ExecRule::TriggerOnce );
+
+            ev.addCallback( [=](int a, int b) -> void
+            {
+                std::cout << "lambda(int, int) is working\n";
+                std::cout << "  a=" << a << " , b=" << b << "\n";
+                std::cout << "---\n";
+            }, pt::ExecRule::TriggerOnce );
+
+            struct TestFunctor{
+                int a;
+                int b;
+
+                void operator()(int pa, int pb){
+                    std::cout << "TestClass::operator() called!\n";
+                }
+            };
+
+            TestFunctor tf;
+            ev.addCallback( tf, pt::ExecRule::TriggerOnce );
+
+            struct TestNonFunctor{
+                int a;
+                int b;
+            };
+
+            TestNonFunctor tnf;
+            //ev.addCallback( tnf, pt::ExecRule::TriggerOnce ); //has to fail, 'tnf' is not a function object
+
+            evVoidTrigger();
+            evtrigger(456, 6789);
+        }
 
         //a regular class and a const class containing an exposed Event and a private EventTrigger
         EventTestClass tc;
