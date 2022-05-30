@@ -17,13 +17,19 @@ namespace pt{
 
 //TODO: removal functions don't yet support 'T&&'
 //TODO: indexof 'int' type to 'int32_t'
-
-#define ALLOW_MULTIPLE_INSTANCES 0x1
+//TODO: rename enum classes to 'EventExecRule' and 'EventRemoveMode' to avoid possible name conflicts later
+//TODO: fix exception message strings
 
 enum class ExecRule{
     Persistent = 0,
     TriggerOnce = 1
 };
+
+enum class RemoveMode{
+    One = 0,
+    All = 1
+};
+
 
 /** @class EventTrigger:
  *  @brief Class-independent event object. Has to be wrapped by an Event instance.
@@ -89,7 +95,6 @@ class EventTrigger
         }
     };
 
-    unsigned            mFlags;     //CHECK: may not be needed
     size_t              mSize;
     size_t              mCap;
     size_t              mIndex;
@@ -132,23 +137,20 @@ class EventTrigger
             reserve(1);
         }
 
-        if( -1 == index_of( d ) ){
-            if( mIndex >= mCap ){ //reached end
-                if( mSize <= mCap/2 ){ //fragmented enough
-                    optimize();
-                }else{
-                    reserve( 2 * mCap );
-                }
+        if( mIndex >= mCap ){ //reached end
+            if( mSize <= mCap/2 ){ //fragmented enough
+                optimize();
+            }else{
+                reserve( 2 * mCap );
             }
-            mFunctions[mIndex] = d;
-            ++mIndex;
-            ++mSize;
         }
-        //TODO: add support multiple registrations
+        mFunctions[mIndex] = d;
+        ++mIndex;
+        ++mSize;
     }
 
 
-    //common mechanics of removing elements
+    //common mechanics of removing 1 element
     inline void remove_element(EventTrigger::data d)
     {
         int index = index_of(d);
@@ -156,7 +158,19 @@ class EventTrigger
             mFunctions[index].invalidate();
             --mSize;
         }
-        //TODO: add support for removing multiple occurences
+    }
+
+
+    //common mechanics of removing all occurences of element
+    inline void remove_element_occurences(EventTrigger::data d)
+    {
+        for( int i=0; i<mIndex; ++i){
+            EventTrigger::data& element = mFunctions[i];
+            if( element == d ){
+                element.invalidate();
+                --mSize;
+            }
+        }
     }
 
 
@@ -219,23 +233,44 @@ class EventTrigger
 
 
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...) )
+    inline void removeCallback(T* instance, void (T::*func)(Signature...), RemoveMode mode )
     {
         if( nullptr == instance ){
             throw std::invalid_argument("attempted to unregister nullptr as listener");
         }else if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
-        remove_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
+
+        if( RemoveMode::All == mode ){
+            remove_element_occurences( EventTrigger::data( reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr ) );
+        }else{
+            remove_element( EventTrigger::data( reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr ) );
+        }
     }
 
 
-    inline void removeCallback(void (*func)(Signature...) )
+    inline void removeCallback(void (*func)(Signature...), RemoveMode mode )
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
-        remove_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
+
+        if( RemoveMode::All == mode ){
+            remove_element_occurences( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
+        }else{
+            remove_element( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
+        }
+    }
+
+
+    template<typename T>
+    inline void removeCallback( T&& func, RemoveMode mode )
+    {
+        if( RemoveMode::All == mode ){
+            remove_element_occurences( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
+        }else{
+            remove_element( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
+        }
     }
 
 
@@ -315,16 +350,14 @@ class EventTrigger
     //--------------------------------------------------
 
 public:
-    EventTrigger(): mFlags(0), mSize(0),
-                 mCap(0), mIndex(0),
-                 mFunctions(nullptr)
+    EventTrigger():
+        mSize(0), mCap(0), mIndex(0),
+        mFunctions(nullptr)
     {}
 
 
-    EventTrigger(const EventTrigger& other): mFlags(other.mFlags),
-                                             mSize(other.mSize),
-                                             mCap(other.mCap),
-                                             mIndex(other.mIndex)
+    EventTrigger(const EventTrigger& other):
+        mSize(other.mSize), mCap(other.mCap), mIndex(other.mIndex)
     {
         mFunctions = new EventTrigger::data[mCap];
         for(int i=0; i<mCap; ++i){
@@ -333,10 +366,8 @@ public:
     }
 
 
-    EventTrigger(EventTrigger&& source): mFlags(source.mFlags),
-                                         mSize(source.mSize),
-                                         mCap(source.mCap),
-                                         mIndex(source.mIndex)
+    EventTrigger(EventTrigger&& source):
+        mSize(source.mSize), mCap(source.mCap), mIndex(source.mIndex)
     {
         delete[] mFunctions;
         mFunctions = source.mFunctions;
@@ -354,7 +385,6 @@ public:
     {
         //TODO: new can throw exception here, data will be freed, but not allocated
         delete[] mFunctions;
-        mFlags = other.mFlags;
         mSize = other.mSize;
         mCap = other.mCap;
         mIndex = other.mIndex;
@@ -368,7 +398,6 @@ public:
     EventTrigger& operator=(EventTrigger&& source)
     {
         delete[] mFunctions;
-        mFlags = source.mFlags;
         mSize = source.mSize;
         mCap = source.mCap;
         mIndex = source.mIndex;
@@ -480,24 +509,38 @@ public:
     /**
      * @brief Removes the class member function defined in the parameters.
      * @param instance: Reference to the target object.
-     * @param func: Class member function to call on the target object.
+     * @param func: Function to remove.
+     * @param mode: Controls whether to remove only one or all registered instances.
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...) )
+    inline void removeCallback(T* instance, void (T::*func)(Signature...), RemoveMode mode = RemoveMode::One )
     {
-        ev_trigger.removeCallback(instance, func);
+        ev_trigger.removeCallback(instance, func, mode);
     }
 
 
     /**
      * @brief Removes the standard function defined in the parameters.
-     * @param func: Function to remove from the array.
+     * @param func: Function to remove.
+     * @param mode: Controls whether to remove only one or all registered instances.
      * @throws std::invalid_argument
      */
-    inline void removeCallback(void (*func)(Signature...) )
+    inline void removeCallback(void (*func)(Signature...), RemoveMode mode = RemoveMode::One )
     {
-        ev_trigger.removeCallback(func);
+        ev_trigger.removeCallback(func, mode);
+    }
+
+
+    /**
+     * @brief Removes the function/functor defined in the parameters.
+     * @param func: Function/functor to remove.
+     * @param mode: Controls whether to remove only one or all registered instances.
+     */
+    template<typename T>
+    inline void removeCallback( T&& func, RemoveMode mode = RemoveMode::One )
+    {
+        ev_trigger.removeCallback(func, mode);
     }
 
 
