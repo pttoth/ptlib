@@ -13,22 +13,22 @@ run()
         {
             //test autoremoval
             EventTestClass tc;
-            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
             evtrigger(9, 11);
             evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
-            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
             evtrigger(10, 36);
-            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
-            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
             evtrigger(26767, 675);
             ev.shrink_to_fit();
-            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
             evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
             std::cout << "-----\n";
 
-            ev.addCallback(testfunc, pt::ExecRule::TriggerOnce);
-            ev.addCallback(foo, pt::ExecRule::TriggerOnce);
-            ev.addCallback(bar, pt::ExecRule::TriggerOnce);
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
+            ev.addCallback(foo, pt::EventExecRule::TriggerOnce);
+            ev.addCallback(bar, pt::EventExecRule::TriggerOnce);
             ev.clear();
         }
 
@@ -38,14 +38,14 @@ run()
             {
                 std::cout << "lambda(void) is working\n";
                 std::cout << "---\n";
-            }, pt::ExecRule::TriggerOnce );
+            }, pt::EventExecRule::TriggerOnce );
 
             ev.addCallback( [=](int a, int b) -> void
             {
                 std::cout << "lambda(int, int) is working\n";
                 std::cout << "  a=" << a << " , b=" << b << "\n";
                 std::cout << "---\n";
-            }, pt::ExecRule::TriggerOnce );
+            }, pt::EventExecRule::TriggerOnce );
 
             struct TestFunctor{
                 void operator()(int pa, int pb){
@@ -56,7 +56,7 @@ run()
             };
 
             TestFunctor tf;
-            ev.addCallback( tf, pt::ExecRule::TriggerOnce );
+            ev.addCallback( tf, pt::EventExecRule::TriggerOnce );
 
             struct TestNonFunctor{
                 int a;

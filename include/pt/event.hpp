@@ -15,15 +15,14 @@
 
 namespace pt{
 
-//TODO: rename enum classes to 'EventExecRule' and 'EventRemoveMode' to avoid possible name conflicts later
 //TODO: fix exception message strings
 
-enum class ExecRule{
+enum class EventExecRule{
     Persistent = 0,
     TriggerOnce = 1
 };
 
-enum class RemoveMode{
+enum class EventRemoveMode{
     One = 0,
     All = 1
 };
@@ -44,7 +43,7 @@ class EventTrigger
         void*                             target        = nullptr;     //used for identification
         void*                             function_ptr  = nullptr;     //used for identification
         std::function<void(Signature...)> function_obj;                //used during calling
-        ExecRule                          rule          = ExecRule::Persistent;
+        EventExecRule                     rule          = EventExecRule::Persistent;
 
         //ctor
         data(): function_obj()
@@ -54,7 +53,7 @@ class EventTrigger
         //ctor
         data( void* t, void* fptr,
               std::function<void(Signature...)> fobj,
-              ExecRule execrule = ExecRule::Persistent ):
+              EventExecRule execrule = EventExecRule::Persistent ):
             target(t), function_ptr(fptr), function_obj(fobj), rule(execrule)
         {}
 
@@ -179,7 +178,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule )
+    inline void addCallback(T* instance, void (T::*func)(Signature...), EventExecRule execrule )
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -196,7 +195,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule )
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, EventExecRule execrule )
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -226,7 +225,7 @@ class EventTrigger
 */
 
     template<typename T>
-    inline void addCallback( T&& func, ExecRule execrule )
+    inline void addCallback( T&& func, EventExecRule execrule )
     {
         void* function_ptr = reinterpret_cast<void*>(&func);
         if( nullptr == function_ptr ){
@@ -241,7 +240,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...), RemoveMode mode )
+    inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveMode mode )
     {
         if( nullptr == instance ){
             throw std::invalid_argument("attempted to unregister nullptr as listener");
@@ -249,7 +248,7 @@ class EventTrigger
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
 
-        if( RemoveMode::All == mode ){
+        if( EventRemoveMode::All == mode ){
             remove_element_occurences( EventTrigger::data( reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr ) );
         }else{
             remove_element( EventTrigger::data( reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr ) );
@@ -275,7 +274,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void removeCallback( T&& func, RemoveMode mode )
+    inline void removeCallback( T&& func, EventRemoveMode mode )
     {
         void* function_ptr = reinterpret_cast<void*>(&func);
         if( nullptr == function_ptr ){
@@ -284,7 +283,7 @@ class EventTrigger
             throw std::invalid_argument("attempted to unregister nullptr as function");
         }
 
-        if( RemoveMode::All == mode ){
+        if( EventRemoveMode::All == mode ){
             remove_element_occurences( EventTrigger::data( nullptr, function_ptr, nullptr ) );
         }else{
             remove_element( EventTrigger::data( nullptr, function_ptr, nullptr ) );
@@ -428,7 +427,7 @@ public:
             for( size_t i=0; i<mIndex; ++i ){
                 if( mFunctions[i].is_callable() ){
                     mFunctions[i].function_obj(args...);
-                    if( ExecRule::TriggerOnce == mFunctions[i].rule ){
+                    if( EventExecRule::TriggerOnce == mFunctions[i].rule ){
                         mFunctions[i].invalidate();
                         --mSize;
                     }
@@ -470,7 +469,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule = ExecRule::Persistent )
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, EventExecRule execrule = EventExecRule::Persistent )
     {
         ev_trigger.addCallback(instance, func, execrule);
     }
@@ -484,7 +483,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
+    inline void addCallback(T* instance, void (T::*func)(Signature...), EventExecRule execrule = EventExecRule::Persistent )
     {
         ev_trigger.addCallback(instance, func, execrule);
     }
@@ -512,7 +511,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void addCallback( T&& func, ExecRule execrule = ExecRule::Persistent )
+    inline void addCallback( T&& func, EventExecRule execrule = EventExecRule::Persistent )
     {
         ev_trigger.addCallback(func, execrule);
     }
@@ -526,7 +525,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...), RemoveMode mode = RemoveMode::One )
+    inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveMode mode = EventRemoveMode::One )
     {
         ev_trigger.removeCallback(instance, func, mode);
     }
@@ -553,7 +552,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void removeCallback( T&& func, RemoveMode mode = RemoveMode::One )
+    inline void removeCallback( T&& func, EventRemoveMode mode = EventRemoveMode::One )
     {
         ev_trigger.removeCallback(func, mode);
     }
