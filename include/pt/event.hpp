@@ -15,8 +15,6 @@
 
 namespace pt{
 
-//TODO: removal functions don't yet support 'T&&'
-//TODO: indexof 'int' type to 'int32_t'
 //TODO: rename enum classes to 'EventExecRule' and 'EventRemoveMode' to avoid possible name conflicts later
 //TODO: fix exception message strings
 
@@ -43,20 +41,19 @@ class EventTrigger
 
     struct data
     {
-        void*                             target;           //used for identification
-        void*                             function_ptr;     //used for identification
-        std::function<void(Signature...)> function_obj;     //used during calling
-        ExecRule                          rule;
+        void*                             target        = nullptr;     //used for identification
+        void*                             function_ptr  = nullptr;     //used for identification
+        std::function<void(Signature...)> function_obj;                //used during calling
+        ExecRule                          rule          = ExecRule::Persistent;
 
         //ctor
-        data():target(nullptr),
-            function_ptr(nullptr),
-            function_obj()
+        data(): function_obj()
         {}
 
 
         //ctor
-        data( void* t, void* fptr, std::function<void(Signature...)> fobj,
+        data( void* t, void* fptr,
+              std::function<void(Signature...)> fobj,
               ExecRule execrule = ExecRule::Persistent ):
             target(t), function_ptr(fptr), function_obj(fobj), rule(execrule)
         {}
@@ -64,16 +61,18 @@ class EventTrigger
 
         /**
          * @brief operator ==:
-         *   used with object sample during searches
-         *      - doesn't check std::function member
+         *   used to compare with a sample object during searches
+         *      - doesn't check 'function_obj' (std::function) member
+         *      - doesn't check 'rule' member
          *      - if 'function_ptr' is nullptr, then returns true for every entry with 'target'
          *      - if 'target' is nullptr, then it's a non-class function
          */
         inline bool operator==(const data& other)const
         {
             if(target == other.target){
-                if( (other.function_ptr == nullptr) //if sample only contains listener id, then function_ptr doesn't matter
-                    ||(function_ptr == other.function_ptr)){
+                if( (nullptr == other.function_ptr) //if sample only contains listener id, then function_ptr doesn't matter
+                    ||(function_ptr == other.function_ptr))
+                {
                     return true;
                 }
             }
@@ -95,18 +94,18 @@ class EventTrigger
         }
     };
 
-    size_t              mSize;
-    size_t              mCap;
-    size_t              mIndex;
-    EventTrigger::data* mFunctions;
+    size_t              mSize = 0;
+    size_t              mCap = 0;
+    size_t              mIndex = 0;
+    EventTrigger::data* mFunctions = nullptr;
 
 
     /** @brief: returns the index of the element passed,
      *            or -1 if not contained
      */
-    inline int index_of(const EventTrigger::data& d) const
+    inline int32_t index_of(const EventTrigger::data& d) const
     {
-        for(int i=0; i<mIndex; ++i){
+        for( int32_t i=0; i<mIndex; ++i ){
             if(mFunctions[i] == d){
                 return i;
             }
@@ -115,11 +114,11 @@ class EventTrigger
     }
 
 
-    inline void defragment_from( EventTrigger::data* from, int const from_cap)
+    inline void defragment_from( EventTrigger::data* from, size_t count)
     {
-        int i = 0;
-        int j = 0;
-        while( (i<from_cap) && (j<mCap) ){
+        size_t i = 0;
+        size_t j = 0;
+        while( (i<count) && (j<mCap) ){
             if( from[i].is_callable() ){
                 mFunctions[j] = from[i];
                 ++j;
@@ -133,15 +132,15 @@ class EventTrigger
     //common mechanics of adding elements
     inline void add_element(EventTrigger::data d)
     {
-        if(nullptr == mFunctions){
+        if( nullptr == mFunctions ){
             reserve(1);
         }
 
-        if( mIndex >= mCap ){ //reached end
+        if( mCap <= mIndex ){ //reached end
             if( mSize <= mCap/2 ){ //fragmented enough
                 optimize();
             }else{
-                reserve( 2 * mCap );
+                reserve( mCap * 2 );
             }
         }
         mFunctions[mIndex] = d;
@@ -153,8 +152,8 @@ class EventTrigger
     //common mechanics of removing 1 element
     inline void remove_element(EventTrigger::data d)
     {
-        int index = index_of(d);
-        if( -1 != index ){
+        int32_t index = index_of(d);
+        if( -1 < index ){
             mFunctions[index].invalidate();
             --mSize;
         }
@@ -164,7 +163,7 @@ class EventTrigger
     //common mechanics of removing all occurences of element
     inline void remove_element_occurences(EventTrigger::data d)
     {
-        for( int i=0; i<mIndex; ++i){
+        for( size_t i=0; i<mIndex; ++i){
             EventTrigger::data& element = mFunctions[i];
             if( element == d ){
                 element.invalidate();
@@ -180,7 +179,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
+    inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule )
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -197,7 +196,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule = ExecRule::Persistent )
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule )
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -216,7 +215,7 @@ class EventTrigger
 
 
     //CHECK: with 'T&&' version introduced, is this needed?
-    inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
+    inline void addCallback( void (*func)(Signature...), ExecRule execrule )
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
@@ -226,7 +225,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void addCallback( T&& func, ExecRule execrule = ExecRule::Persistent )
+    inline void addCallback( T&& func, ExecRule execrule )
     {
         add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(&func), func, execrule) );
     }
@@ -285,13 +284,10 @@ class EventTrigger
         EventTrigger::data d( reinterpret_cast<void*>(object_id), nullptr, nullptr);
 
         //loop until cannot find any more entries with 'target'
-        int index = 0;
-        while( -1 < index ){
-            index = index_of(d);
-            if( -1 != index ){
-                mFunctions[index].invalidate();
-                --mSize;
-            }
+        int32_t index;
+        while( -1 < (index = index_of(d)) ){
+            mFunctions[index].invalidate();
+            --mSize;
         }
     }
 
@@ -312,7 +308,7 @@ class EventTrigger
             EventTrigger::data* old = mFunctions;
             mFunctions = new EventTrigger::data[new_size];
             if(old){
-                defragment_from(old, mIndex);
+                defragment_from(old, mIndex); //sets 'mIndex'
             }
             mCap = new_size;
             delete[] old;
@@ -323,7 +319,7 @@ class EventTrigger
     inline void optimize()
     {
         if(mSize < mIndex ){
-            defragment_from(mFunctions, mIndex);
+            defragment_from(mFunctions, mIndex); //sets 'mIndex'
         }
     }
 
@@ -339,7 +335,7 @@ class EventTrigger
             if(mSize < mIndex){
                 EventTrigger::data* old = mFunctions;
                 mFunctions= new EventTrigger::data[mSize];
-                defragment_from(old, mIndex);
+                defragment_from(old, mIndex); //sets 'mIndex'
                 mCap = mSize;
                 delete[] old;
             }
@@ -350,19 +346,15 @@ class EventTrigger
     //--------------------------------------------------
 
 public:
-    EventTrigger():
-        mSize(0), mCap(0), mIndex(0),
-        mFunctions(nullptr)
+    EventTrigger()
     {}
 
 
     EventTrigger(const EventTrigger& other):
-        mSize(other.mSize), mCap(other.mCap), mIndex(other.mIndex)
+        mSize(other.mSize), mCap(other.mCap)
     {
         mFunctions = new EventTrigger::data[mCap];
-        for(int i=0; i<mCap; ++i){
-            mFunctions[i] = other.mFunctions[i];
-        }
+        defragment_from( other.mFunctions, other.mIndex ); //sets 'mIndex'
     }
 
 
@@ -383,20 +375,18 @@ public:
 
     EventTrigger& operator=(const EventTrigger& other)
     {
-        //TODO: new can throw exception here, data will be freed, but not allocated
-        delete[] mFunctions;
-        mSize = other.mSize;
+        EventTrigger::data* old = mFunctions;
+        mFunctions = new EventTrigger::data[other.mCap];
         mCap = other.mCap;
-        mIndex = other.mIndex;
-        mFunctions = new EventTrigger::data[mCap];
-        for(int i=0; i<mCap; ++i){
-            mFunctions[i] = other.mFunctions[i];
-        }
+        mSize = other.mSize;
+        defragment_from( old, other.mIndex ); //sets 'mIndex'
+        delete[] old;
     }
 
 
     EventTrigger& operator=(EventTrigger&& source)
     {
+        //don't defragment here, move has to be fast
         delete[] mFunctions;
         mSize = source.mSize;
         mCap = source.mCap;
