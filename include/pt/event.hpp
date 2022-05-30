@@ -15,6 +15,9 @@
 
 namespace pt{
 
+//TODO: removal functions don't yet support 'T&&'
+//TODO: indexof 'int' type to 'int32_t'
+
 #define ALLOW_MULTIPLE_INSTANCES 0x1
 
 enum class ExecRule{
@@ -36,7 +39,7 @@ class EventTrigger
     {
         void*                             target;           //used for identification
         void*                             function_ptr;     //used for identification
-        std::function<void(Signature...)> function_obj;     //used during calling       //FUNC_PARAMS
+        std::function<void(Signature...)> function_obj;     //used during calling
         ExecRule                          rule;
 
         //ctor
@@ -89,7 +92,7 @@ class EventTrigger
     unsigned            mFlags;     //CHECK: may not be needed
     size_t              mSize;
     size_t              mCap;
-    size_t              mIndex;     //CHECK: queue may be fragmented, so that index != size  (fix occurences!!!!)
+    size_t              mIndex;
     EventTrigger::data* mFunctions;
 
 
@@ -138,7 +141,7 @@ class EventTrigger
                 }
             }
             mFunctions[mIndex] = d;
-            ++mIndex; //CHECK: optimize and reserve fixed index???
+            ++mIndex;
             ++mSize;
         }
         //TODO: add support multiple registrations
@@ -163,7 +166,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )      //FUNC_PARAMS
+    inline void addCallback(T* instance, void (T::*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -175,12 +178,12 @@ class EventTrigger
             (instance->*func)(args...);
         };
 
-        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda, execrule) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda, execrule) );
     }
 
 
     template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule = ExecRule::Persistent )      //FUNC_PARAMS
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, ExecRule execrule = ExecRule::Persistent )
     {
         if(nullptr == instance){
             throw std::invalid_argument("attempted to register nullptr as listener");
@@ -194,12 +197,12 @@ class EventTrigger
 
         auto instance_id = const_cast<T*>(instance);
 
-        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda, execrule) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda, execrule) );
     }
 
 
-    //with 'T&&' version introduced, is this needed?
-    inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )          //FUNC_PARAMS
+    //CHECK: with 'T&&' version introduced, is this needed?
+    inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to register nullptr as function");
@@ -216,7 +219,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    inline void removeCallback(T* instance, void (T::*func)(Signature...) )
     {
         if( nullptr == instance ){
             throw std::invalid_argument("attempted to unregister nullptr as listener");
@@ -227,7 +230,7 @@ class EventTrigger
     }
 
 
-    inline void removeCallback(void (*func)(Signature...) )                //FUNC_PARAMS
+    inline void removeCallback(void (*func)(Signature...) )
     {
         if( nullptr == func ){
             throw std::invalid_argument("attempted to unregister nullptr as function");
@@ -349,6 +352,7 @@ public:
 
     EventTrigger& operator=(const EventTrigger& other)
     {
+        //TODO: new can throw exception here, data will be freed, but not allocated
         delete[] mFunctions;
         mFlags = other.mFlags;
         mSize = other.mSize;
@@ -380,12 +384,12 @@ public:
      * @brief Fires the event, sequentially executing all
      *          registered functions in the order of registration.
      */
-    inline void operator()(Signature...args)        //FUNC_PARAMS
+    inline void operator()(Signature...args)
     {
         if(mFunctions){
             for( size_t i=0; i<mIndex; ++i ){
                 if( mFunctions[i].is_callable() ){
-                    mFunctions[i].function_obj(args...);    //FUNC_PARAMS
+                    mFunctions[i].function_obj(args...);
                     if( ExecRule::TriggerOnce == mFunctions[i].rule ){
                         mFunctions[i].invalidate();
                         --mSize;
@@ -395,7 +399,7 @@ public:
         }
     }
 
-}; //end of 'EventTrigger'
+}; //end of class 'EventTrigger'
 
 
 
@@ -557,6 +561,6 @@ public:
     {
         ev_trigger.shrink_to_fit();
     }
-}; //end of 'Event'
+}; //end of class 'Event'
 
-} //end of namespace pt
+} //end of namespace 'pt'
