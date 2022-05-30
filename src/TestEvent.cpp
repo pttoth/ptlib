@@ -48,11 +48,10 @@ run()
             }, pt::ExecRule::TriggerOnce );
 
             struct TestFunctor{
-                int a;
-                int b;
-
                 void operator()(int pa, int pb){
                     std::cout << "TestClass::operator() called!\n";
+                    std::cout << "  a=" << pa << " , b=" << pb << "\n";
+                    std::cout << "---\n";
                 }
             };
 
@@ -71,19 +70,31 @@ run()
             evtrigger(456, 6789);
         }
 
+        {
+            //test deliberate misuses
+            ev.clear();
+            ev.addCallback(nullptr);    //will crash on invocation
+
+            //ev.addCallback(0);        //shouldn't compile, if possible
+            //ev.addCallback(1);
+
+            //evtrigger(5, 15);         //should crash with invalid registrations
+            ev.clear();
+        }
+
         //a regular class and a const class containing an exposed Event and a private EventTrigger
         EventTestClass tc;
         const EventTestClass ctc;
 
         //registering functions happen with Event
         //  trying to register in EventTrigger should fail
-        //evtrigger.addCallback(testfunc); //has to fail (function is private)
+        //evtrigger.addCallback(testfunc); //has to fail ('addCallback()' function is private)
 
         //outside handlers use Event this way
         ev.addCallback(testfunc);
         ev.addCallback(foo);
         ev.addCallback(bar);
-        ev.addCallback(testfunc); //cannot add the same function with the same object twice
+        ev.addCallback(testfunc); //can add the same function with the same object twice
 
         evVoid.addCallback(&testfuncVoid);
 

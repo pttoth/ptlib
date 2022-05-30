@@ -215,6 +215,7 @@ class EventTrigger
 
 
     //CHECK: with 'T&&' version introduced, is this needed?
+/*
     inline void addCallback( void (*func)(Signature...), ExecRule execrule )
     {
         if( nullptr == func ){
@@ -222,12 +223,20 @@ class EventTrigger
         }
         add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func, execrule) );
     }
-
+*/
 
     template<typename T>
     inline void addCallback( T&& func, ExecRule execrule )
     {
-        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(&func), func, execrule) );
+        void* function_ptr = reinterpret_cast<void*>(&func);
+        if( nullptr == function_ptr ){
+            //this is probably impossible, as even explicitly calling with 'nullptr' doesn't result in 'function_ptr' being 'nullptr'
+            //  but this MUST NEVER result in 'nullptr' being function ID as it would result in an invalid container state
+            //  (insertion would treat is as a valid element, while the 'nullptr' function ID would identify it as an invalidated entry)
+            throw std::invalid_argument("attempted to register nullptr as function");
+        }
+
+        add_element( EventTrigger::data(nullptr, function_ptr, func, execrule) );
     }
 
 
@@ -248,6 +257,8 @@ class EventTrigger
     }
 
 
+    //with the 'T&&' version introduced, this is probably not needed
+/*
     inline void removeCallback(void (*func)(Signature...), RemoveMode mode )
     {
         if( nullptr == func ){
@@ -260,15 +271,23 @@ class EventTrigger
             remove_element( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
         }
     }
+*/
 
 
     template<typename T>
     inline void removeCallback( T&& func, RemoveMode mode )
     {
+        void* function_ptr = reinterpret_cast<void*>(&func);
+        if( nullptr == function_ptr ){
+            //this is probably impossible, as even explicitly calling with 'nullptr' doesn't result in 'function_ptr' being 'nullptr'
+            //  but this MUST NEVER result in 'nullptr' being function ID as it would result in an invalid container state
+            throw std::invalid_argument("attempted to unregister nullptr as function");
+        }
+
         if( RemoveMode::All == mode ){
-            remove_element_occurences( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
+            remove_element_occurences( EventTrigger::data( nullptr, function_ptr, nullptr ) );
         }else{
-            remove_element( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
+            remove_element( EventTrigger::data( nullptr, function_ptr, nullptr ) );
         }
     }
 
@@ -477,14 +496,17 @@ public:
      * @param execrule: Controls whether the function should only be executed once.
      * @throws std::invalid_argument
      */
+/*
     inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
     {
         ev_trigger.addCallback(func, execrule);
     }
+*/
 
 
     /**
      * @brief Registers the function/functor received in the parameters.
+     *   Note that lambdas registered with 'Persistent' rule can only be removed by wiping the storage with 'clear()'!
      * @param func: Function to call.
      * @param execrule: Controls whether the function/functor should only be executed once.
      * @throws std::invalid_argument
@@ -516,16 +538,19 @@ public:
      * @param mode: Controls whether to remove only one or all registered instances.
      * @throws std::invalid_argument
      */
+/*
     inline void removeCallback(void (*func)(Signature...), RemoveMode mode = RemoveMode::One )
     {
         ev_trigger.removeCallback(func, mode);
     }
+*/
 
 
     /**
      * @brief Removes the function/functor defined in the parameters.
      * @param func: Function/functor to remove.
      * @param mode: Controls whether to remove only one or all registered instances.
+     * @throws std::invalid_argument
      */
     template<typename T>
     inline void removeCallback( T&& func, RemoveMode mode = RemoveMode::One )
