@@ -400,7 +400,7 @@ public:
         mFunctions = new EventTrigger::data[other.mCap];
         mCap = other.mCap;
         mSize = other.mSize;
-        defragment_from( old, other.mIndex ); //sets 'mIndex'
+        defragment_from( other.mFunctions, other.mIndex ); //sets 'mIndex'
         delete[] old;
     }
 
