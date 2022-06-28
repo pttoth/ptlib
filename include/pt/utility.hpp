@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <vector>
 #include <string>
+#include <cstdint>
 
 //return the enum name in parameter as string
 #define EnumToString(ENUM_NAME) #ENUM_NAME
@@ -19,14 +20,15 @@
 namespace pt{
 
 template<typename T>
-inline int
+inline int64_t
 IndexOfInVector(const std::vector<T>& vec, const T& element)
 {
-    for(int i=0; i<vec.size(); ++i){
+    for(int64_t i=0; i<vec.size(); ++i){
         if(vec[i] == element){
             return i;
         }
     }
+
     return -1;
 }
 
