@@ -2,6 +2,7 @@
 #include "TestLogger.hpp"
 #include "TestConfig.hpp"
 #include "TestEvent.hpp"
+#include "TestGuard.hpp"
 #include "TestUtility.hpp"
 
 #include <iostream>
@@ -55,6 +56,17 @@ int main()
             std::cout << "Utility test: SUCCESS\n\n\n\n";
         }else{
             std::cout << "Utility test: FAILED\n\n\n\n";
+        }
+    }
+
+    {
+        TestGuard tg;
+        bool success = tg.run();
+
+        if(success){
+            std::cout << "Threadsafe guard test: SUCCESS\n\n\n\n";
+        }else{
+            std::cout << "Threadsafe guard test: FAILED\n\n\n\n";
         }
     }
 
