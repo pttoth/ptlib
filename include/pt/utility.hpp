@@ -18,8 +18,6 @@
 
 namespace pt{
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
 template<typename T>
 inline int
 IndexOfInVector(const std::vector<T>& vec, const T& element)
@@ -32,7 +30,6 @@ IndexOfInVector(const std::vector<T>& vec, const T& element)
     return -1;
 }
 
-#pragma GCC diagnostic pop
 
 template<typename T>
 inline bool
