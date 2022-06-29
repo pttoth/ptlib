@@ -104,9 +104,9 @@ class EventTrigger
     /** @brief: returns the index of the element passed,
      *            or -1 if not contained
      */
-    inline int32_t index_of(const EventTrigger::data& d) const
+    inline int64_t index_of(const EventTrigger::data& d) const
     {
-        for( int32_t i=0; i<mIndex; ++i ){
+        for( int64_t i=0; i<mIndex; ++i ){
             if(mFunctions[i] == d){
                 return i;
             }
