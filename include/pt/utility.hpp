@@ -80,6 +80,10 @@ std::wstring StringToWString(const std::string& string_to_convert);
 void CreateDirectory(const std::string& path);
 void EnsureExistingDirectory(const std::string& path);
 
+template<typename T>
+const T& Clamp( const T& v, const T& lo, const T& hi ){
+    return std::min( std::max( lo, v ), hi );
+}
 
 } //end of namespace
 
