@@ -35,6 +35,7 @@ set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 #build an archive (.a), for static linking
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
+    ${MY_PROJ_ROOT}/src/pt/name.cpp
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
     ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
     ${MY_PROJ_ROOT}/src/pt/logging.cpp
@@ -43,6 +44,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/logging.h
     ${MY_PROJ_ROOT}/include/pt/log/logstream.hpp
+    ${MY_PROJ_ROOT}/include/pt/name.h
 )
 
 target_include_directories(ptlib PRIVATE
@@ -58,11 +60,13 @@ add_executable(ptlib_test
     ${MY_PROJ_ROOT}/src/main.cpp
     ${MY_PROJ_ROOT}/src/TestEvent.cpp
     ${MY_PROJ_ROOT}/src/TestLogger.cpp
+    ${MY_PROJ_ROOT}/src/TestName.cpp
     ${MY_PROJ_ROOT}/src/TestUtility.cpp
     ${MY_PROJ_ROOT}/include/Test.hpp
     ${MY_PROJ_ROOT}/include/TestConfig.hpp
     ${MY_PROJ_ROOT}/include/TestEvent.hpp
     ${MY_PROJ_ROOT}/include/TestLogger.hpp
+    #${MY_PROJ_ROOT}/include/TestName.hpp
     ${MY_PROJ_ROOT}/include/TestUtility.hpp
 )
 
