@@ -120,7 +120,7 @@ StringToLower(const std::string& str)
     std::string result;
     result.resize(str.length());
     std::transform(str.begin(), str.end(), result.begin(), ::tolower);
-    return std::move(result);
+    return result;
 }
 
 
@@ -130,7 +130,7 @@ StringToUpper(const std::string& str)
     std::string result;
     result.resize(str.length());
     std::transform(str.begin(), str.end(), result.begin(), ::toupper);
-    return std::move(result);
+    return result;
 }
 
 
