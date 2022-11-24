@@ -1,5 +1,6 @@
 #include "TestLogger.hpp"
 
+#include <sstream>
 
 bool TestLogger::
 run()
@@ -40,6 +41,14 @@ run()
 
         pt::log::out << "\n";
 
+        std::string asd = "árvíztűrő tükörfúrógép";
+        std::stringstream ssasd;
+        ssasd << "testing hungarian special characters: ";
+        ssasd << asd;
+        ssasd << "\n";
+
+        pt::log::out << ssasd.str();
+        pt::log::out << "testing hungarian special characters: " << asd << "\n";
         pt::log::out << "testing hungarian special characters: árvíztűrő tükörfúrógép\n";
         std::cout << "--------------------------------------------------\n";
 
