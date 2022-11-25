@@ -65,8 +65,12 @@ std::string TrimWhitespaces(const std::string& str);
 bool SplitString(std::string* retval, const std::string& str, const char *sequence);
 bool SplitString(std::string* retval, const std::string& str, const std::string& sequence);
 
+
+//doesn't work with non-ASCII characters
+//produces valid UTF-8 output, but skips transforming multi-byte characters
 std::string StringToLower(const std::string& str);
 std::string StringToUpper(const std::string& str);
+
 
 bool MatchRegex(const char* const str, const char* const regex_str);
 bool MatchRegex(const char* str, const std::string& regex_str);

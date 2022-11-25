@@ -118,8 +118,21 @@ std::string pt::
 StringToLower(const std::string& str)
 {
     std::string result;
-    result.resize(str.length());
-    std::transform(str.begin(), str.end(), result.begin(), ::tolower);
+    const size_t len = str.length();
+    result.resize( len );
+
+    //a note on UTF-8 support:
+    //  [a-zA-Z] falls between 0-127
+    //  therefore, this implementation never breaks UTF-8 encoding
+    //    but skips transforming special characters
+    //  see: https://en.wikipedia.org/wiki/UTF-8#Encoding
+
+    //branchless, no pipeline flush
+    const char diff = 'a' - 'A'; // 97 - 65
+    for( size_t i=0; i<len; ++i ){
+        const char& c = str[i];
+        result[i] = c + ( ('A'<=c) && (c<='Z') ) * diff;
+    }
     return result;
 }
 
@@ -128,8 +141,21 @@ std::string pt::
 StringToUpper(const std::string& str)
 {
     std::string result;
-    result.resize(str.length());
-    std::transform(str.begin(), str.end(), result.begin(), ::toupper);
+    const size_t len = str.length();
+    result.resize( len );
+
+    //a note on UTF-8 support:
+    //  [a-zA-Z] falls between 0-127
+    //  therefore, this implementation never breaks UTF-8 encoding
+    //    but skips transforming special characters
+    //  see: https://en.wikipedia.org/wiki/UTF-8#Encoding
+
+    //branchless, no pipeline flush
+    const char diff = 'a' - 'A'; // 97 - 65
+    for( size_t i=0; i<len; ++i ){
+        const char& c = str[i];
+        result[i] = c - ( ('a'<=c) && (c<='z') ) * diff;
+    }
     return result;
 }
 
