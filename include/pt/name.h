@@ -3,23 +3,24 @@
  * FILE:    name.h
  * AUTHOR:  Peter Toth
  * E-MAIL:  peter.t.toth92@gmail.com
- * PURPOSE: String class optimized for comparison.
+ * PURPOSE: Immutable string class optimized for frequent comparisons.
  *          - Statically stores different string occurences once.
  *          - Maps an integer ID for each string occurence.
- *          - Comparison is done with a single integer instead of string operations.
+ *          - Comparison is done with the single integer ID instead of string operations.
  *          - Never deletes string occurences.
  *          - Performance tradeoff is that construction is more expensive.
- *          - Instances are best used as static consts.
- *   Basic idea is Unreal Engine's 'name' class, although this is in runtime, not compile time.
+ *   The purpose is similar to UnrealScript's 'name' class.
+ *   The Name instances are best used as static consts.
  * -------------------------------------------------------------------------
  */
 
-
-
-//TODO: header here
+//TODO: unused String deletion
+//      Name instances' shared ptr-s may allow tracking usage and detect unused strings
+//      take a look some time...
 
 
 //TODO: add some character filtering
+//          [a-zA-Z0-9] + [-_.]
 
 #pragma once
 
@@ -46,12 +47,11 @@ class Name
         StringData( StringData&& source ) = default;
 
         StringData( const std::string& str_, uint64_t id_ ):
-            mPStr( std::make_shared< const std::string >( str_ ) ),
-            mID( id_ )
+            mID( id_ ),
+            mPStr( std::make_shared< const std::string >( str_ ) )
         {}
 
-        virtual ~StringData()
-        {}
+        virtual ~StringData() = default;
 
         StringData& operator=( const StringData& other ) = default;
         StringData& operator=( StringData&& source ) = default;
@@ -63,6 +63,7 @@ class Name
     };
 
 
+    //TODO: not needed, hashes are only needed during construction, no need to store them
     struct InstanceData: public StringData
     {
         std::size_t mHash;
