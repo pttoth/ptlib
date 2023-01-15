@@ -43,6 +43,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/logging.h
     ${MY_PROJ_ROOT}/include/pt/log/logstream.hpp
+    ${MY_PROJ_ROOT}/include/pt/threadsafe.hpp
 )
 
 target_include_directories(ptlib PRIVATE
@@ -59,11 +60,13 @@ add_executable(ptlib_test
     ${MY_PROJ_ROOT}/src/TestEvent.cpp
     ${MY_PROJ_ROOT}/src/TestLogger.cpp
     ${MY_PROJ_ROOT}/src/TestUtility.cpp
+    ${MY_PROJ_ROOT}/src/TestThreadsafe.cpp
     ${MY_PROJ_ROOT}/include/Test.hpp
     ${MY_PROJ_ROOT}/include/TestConfig.hpp
     ${MY_PROJ_ROOT}/include/TestEvent.hpp
     ${MY_PROJ_ROOT}/include/TestLogger.hpp
     ${MY_PROJ_ROOT}/include/TestUtility.hpp
+    ${MY_PROJ_ROOT}/include/TestThreadsafe.h
 )
 
 target_include_directories(ptlib_test PRIVATE

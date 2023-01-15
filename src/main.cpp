@@ -2,7 +2,9 @@
 #include "TestLogger.hpp"
 #include "TestConfig.hpp"
 #include "TestEvent.hpp"
+#include "TestName.hpp"
 #include "TestUtility.hpp"
+#include "TestThreadsafe.h"
 
 #include <iostream>
 
@@ -48,6 +50,18 @@ int main()
 
 
     {
+        TestName tn;
+        bool success = tn.run();
+
+        if(success){
+            std::cout << "Name test: SUCCESS\n\n\n\n";
+        }else{
+            std::cout << "Name test: FAILED\n\n\n\n";
+        }
+    }
+
+
+    {
         TestUtility tu;
         bool success = tu.run();
 
@@ -55,6 +69,18 @@ int main()
             std::cout << "Utility test: SUCCESS\n\n\n\n";
         }else{
             std::cout << "Utility test: FAILED\n\n\n\n";
+        }
+    }
+
+
+    {
+        TestThreadsafe tts;
+        bool success = tts.run();
+
+        if(success){
+            std::cout << "Threadsafe test: SUCCESS\n\n\n\n";
+        }else{
+            std::cout << "Threadsafe test: FAILED\n\n\n\n";
         }
     }
 
