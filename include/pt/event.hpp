@@ -12,6 +12,7 @@
 #include <vector>
 #include <functional>
 #include <stdexcept>
+#include <assert.h>
 
 namespace pt{
 
@@ -96,10 +97,15 @@ class EventTrigger
     size_t              mIndex = 0;
     EventTrigger::data* mFunctions = nullptr;
 
+    std::function< void(void*) > cbNotifyPairOnMove; // callback needed for move ctor to notify the paired Event class about this object's new memory position
+    //std::function< void(void*) > cbNotifyPairOnDestroy; // note: this is never needed, because Event requires an existing Trigger on construction,
+                                                        // therefore Event is always destroyed earlier than its Trigger
+
     const std::string   mErrStrNullFunctionOnAdd = "Attempted to add nullptr as function to event.";
     const std::string   mErrStrNullListenerOnAdd = "Attempted to add nullptr as listener to event.";
     const std::string   mErrStrNullFunctionOnRemove = "Attempted to remove nullptr as function from event.";
     const std::string   mErrStrNullListenerOnRemove = "Attempted to remove nullptr as listener from event.";
+
 
     /** @brief: returns the index of the element passed,
      *            or -1 if not contained
@@ -385,6 +391,9 @@ public:
         delete[] mFunctions;
         mFunctions = source.mFunctions;
         source.mFunctions = nullptr;
+        if( nullptr != cbNotifyPairOnMove.target< void(void*) >() ){
+            cbNotifyPairOnMove( this );
+        }
     }
 
 
@@ -450,18 +459,57 @@ public:
 template<typename... Signature>
 class Event
 {
-    EventTrigger<Signature...>& ev_trigger;
+    EventTrigger<Signature...> *ev_trigger = nullptr;
 public:
-    Event(EventTrigger<Signature...>& eventtrigger):
-        ev_trigger(eventtrigger){
-    }
-    Event(const Event& other)                   = delete;  //Note: Event-EventTrigger pairing has to be manually restored by owner object during copy!
-    Event(Event&& source)                       = delete;
-    virtual ~Event(){}
-    Event& operator=(const Event& other)        = delete;
-    Event& operator=(Event&& source)            = delete;
+    Event( EventTrigger<Signature...>& eventtrigger ):
+        ev_trigger( &eventtrigger )
+    {}
+    Event( const Event& other ) = delete;  //Note: Event-EventTrigger pairing has to be manually restored by owner object during copy!
 
-    bool operator==(const Event& other) const   = delete;
+    Event( Event&& source ):
+        ev_trigger( source.ev_trigger )
+    {
+        source.ev_trigger = nullptr;
+        if( nullptr != ev_trigger ){
+            ev_trigger->cbNotifyPairOnMove = [=]( void* new_mem_pos ){
+                assert( nullptr != new_mem_pos );
+                this->ev_trigger = reinterpret_cast< EventTrigger< Signature... >* >( new_mem_pos );
+            };
+        }
+    }
+
+    virtual ~Event()
+    {
+        if( nullptr != ev_trigger ){
+            ev_trigger->cbNotifyPairOnMove = nullptr;
+        }
+    }
+
+    Event& operator=( const Event& other )  = delete;
+
+    Event& operator=( Event&& source )
+    {
+        // unbind Events from their currently connected EventTriggers
+        if( nullptr != source.ev_trigger ){
+            source.ev_trigger->cbNotifyPairOnMove = nullptr;
+        }
+        if( nullptr != ev_trigger ){
+            ev_trigger->cbNotifyPairOnMove = nullptr;
+        }
+        // move Event into Receptacle
+        ev_trigger = source.ev_trigger;
+        // unbind source Event
+        source.ev_trigger = nullptr;
+        // rebind Receptacle to source's Trigger
+        if( nullptr != ev_trigger ){
+            ev_trigger->cbNotifyPairOnMove = [=]( void* new_mem_pos ){
+                assert( nullptr != new_mem_pos );
+                this->ev_trigger = reinterpret_cast< EventTrigger< Signature... >* >( new_mem_pos );
+            };
+        }
+    }
+
+    bool operator==( const Event& other ) const = delete;
 
 
     /**
@@ -474,7 +522,8 @@ public:
     template<typename T>
     inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, EventExecRule execrule = EventExecRule::Persistent )
     {
-        ev_trigger.addCallback(instance, func, execrule);
+        assert( nullptr != ev_trigger );
+        ev_trigger->addCallback( instance, func, execrule );
     }
 
 
@@ -488,7 +537,8 @@ public:
     template<typename T>
     inline void addCallback(T* instance, void (T::*func)(Signature...), EventExecRule execrule = EventExecRule::Persistent )
     {
-        ev_trigger.addCallback(instance, func, execrule);
+        assert( nullptr != ev_trigger );
+        ev_trigger->addCallback( instance, func, execrule );
     }
 
 
@@ -501,7 +551,8 @@ public:
 /*
     inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
     {
-        ev_trigger.addCallback(func, execrule);
+        assert( nullptr != ev_trigger );
+        ev_trigger->addCallback( func, execrule );
     }
 */
 
@@ -516,7 +567,8 @@ public:
     template<typename T>
     inline void addCallback( T&& func, EventExecRule execrule = EventExecRule::Persistent )
     {
-        ev_trigger.addCallback(func, execrule);
+        assert( nullptr != ev_trigger );
+        ev_trigger->addCallback( func, execrule );
     }
 
 
@@ -530,7 +582,8 @@ public:
     template<typename T>
     inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveMode mode = EventRemoveMode::One )
     {
-        ev_trigger.removeCallback(instance, func, mode);
+        assert( nullptr != ev_trigger );
+        ev_trigger->removeCallback( instance, func, mode );
     }
 
 
@@ -543,7 +596,8 @@ public:
 /*
     inline void removeCallback(void (*func)(Signature...), RemoveMode mode = RemoveMode::One )
     {
-        ev_trigger.removeCallback(func, mode);
+        assert( nullptr != ev_trigger );
+        ev_trigger->removeCallback( func, mode );
     }
 */
 
@@ -557,7 +611,8 @@ public:
     template<typename T>
     inline void removeCallback( T&& func, EventRemoveMode mode = EventRemoveMode::One )
     {
-        ev_trigger.removeCallback(func, mode);
+        assert( nullptr != ev_trigger );
+        ev_trigger->removeCallback( func, mode );
     }
 
 
@@ -570,7 +625,8 @@ public:
      */
     inline void removeObject(const void* const object)
     {
-        ev_trigger.removeObject(object);
+        assert( nullptr != ev_trigger );
+        ev_trigger->removeObject( object );
     }
 
 
@@ -583,7 +639,8 @@ public:
      */
     inline void removeObject(void* object)
     {
-        ev_trigger.removeObject(object);
+        assert( nullptr != ev_trigger );
+        ev_trigger->removeObject( object );
     }
 
 
@@ -591,7 +648,8 @@ public:
      * @brief Removes all registered elements. Allocated memory stays.
      */
     inline void clear(){
-        ev_trigger.clear();
+        assert( nullptr != ev_trigger );
+        ev_trigger->clear();
     }
 
 
@@ -601,7 +659,8 @@ public:
      */
     inline void reserve(const size_t new_size)
     {
-        ev_trigger.reserve(new_size);
+        assert( nullptr != ev_trigger );
+        ev_trigger->reserve( new_size );
     }
 
 
@@ -610,7 +669,8 @@ public:
      */
     inline void optimize()
     {
-        ev_trigger.optimize();
+        assert( nullptr != ev_trigger );
+        ev_trigger->optimize();
     }
 
 
@@ -619,7 +679,8 @@ public:
      */
     inline void shrink_to_fit()
     {
-        ev_trigger.shrink_to_fit();
+        assert( nullptr != ev_trigger );
+        ev_trigger->shrink_to_fit();
     }
 }; //end of class 'Event'
 
