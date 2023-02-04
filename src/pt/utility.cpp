@@ -127,7 +127,7 @@ StringToLower(const std::string& str)
     //    but skips transforming special characters
     //  see: https://en.wikipedia.org/wiki/UTF-8#Encoding
 
-    //branchless, no pipeline flush
+    //branchless (except the prediction-friendly cycle condition)
     const char diff = 'a' - 'A'; // 97 - 65
     for( size_t i=0; i<len; ++i ){
         const char& c = str[i];
@@ -150,7 +150,7 @@ StringToUpper(const std::string& str)
     //    but skips transforming special characters
     //  see: https://en.wikipedia.org/wiki/UTF-8#Encoding
 
-    //branchless, no pipeline flush
+    //branchless (except the prediction-friendly cycle condition)
     const char diff = 'a' - 'A'; // 97 - 65
     for( size_t i=0; i<len; ++i ){
         const char& c = str[i];
