@@ -47,7 +47,8 @@ class logstream;
     }
 
 class logstream{
-    bool mEnabled;
+    bool            mEnabled;
+    std::string     mMessagePrefix;
 
     #ifdef __linux__
     template<typename T>
@@ -71,7 +72,12 @@ class logstream{
                 std::cout << "fs is NOT open!\n";
             }
 
-            fs << data;
+            if( 0 < mMessagePrefix.length() ){
+                fs << mMessagePrefix << ": " << data;
+            }else{
+                fs << data;
+            }
+
             fs.close();
         }
     }
@@ -130,6 +136,7 @@ class logstream{
 
 public:
     logstream();
+    logstream( const std::string& prefix );
     virtual ~logstream(){}
     logstream(const logstream& other)=delete;
     logstream(logstream&& source)=delete;
