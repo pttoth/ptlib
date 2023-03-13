@@ -66,7 +66,7 @@ add_executable(ptlib_test
     ${MY_PROJ_ROOT}/include/TestConfig.hpp
     ${MY_PROJ_ROOT}/include/TestEvent.hpp
     ${MY_PROJ_ROOT}/include/TestLogger.hpp
-    #${MY_PROJ_ROOT}/include/TestName.hpp
+    ${MY_PROJ_ROOT}/include/TestName.hpp
     ${MY_PROJ_ROOT}/include/TestUtility.hpp
 )
 

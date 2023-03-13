@@ -2,6 +2,7 @@
 #include "TestLogger.hpp"
 #include "TestConfig.hpp"
 #include "TestEvent.hpp"
+#include "TestName.hpp"
 #include "TestUtility.hpp"
 
 #include <iostream>
@@ -43,6 +44,18 @@ int main()
             std::cout << "Event test: SUCCESS\n\n\n\n";
         }else{
             std::cout << "Event test: FAILED\n\n\n\n";
+        }
+    }
+
+
+    {
+        TestName tn;
+        bool success = tn.run();
+
+        if(success){
+            std::cout << "Name test: SUCCESS\n\n\n\n";
+        }else{
+            std::cout << "Name test: FAILED\n\n\n\n";
         }
     }
 

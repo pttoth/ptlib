@@ -1,7 +1,9 @@
+#include "TestName.hpp"
+
 #include <iostream>
 
-#include "actor.h"
-#include "name.h"
+//#include "actor.h"
+#include "pt/name.h"
 
 using namespace std;
 
@@ -131,7 +133,9 @@ void TestUnorderedMultiMap()
 
 }
 
-void TestName()
+
+bool TestName::
+run()
 {
     {
         const pt::Name defaultname;
@@ -254,15 +258,4 @@ void TestName()
     //TODO: try move constructor
 
 
-}
-
-int main()
-{
-
-    //TestOrderedMultiMap();
-    //TestUnorderedMultiMap();
-
-    TestName();
-
-    return 0;
 }
