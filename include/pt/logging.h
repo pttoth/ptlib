@@ -9,10 +9,12 @@
 
 #pragma once
 
+#include "pt/log/logstream.hpp"
+
 #include <string>
 #include <cstring>
 
-#include "pt/log/logstream.hpp"
+#include <iostream>
 
 namespace pt{
 namespace log{
@@ -37,10 +39,6 @@ void Destroy();
 void LoadSettings();
 
 
-
-
-
-
 extern logstream debug;
 extern logstream out;
 extern logstream warn;
@@ -55,12 +53,21 @@ inline log::logstream& out = log::out;
 inline log::logstream& warn = log::warn;
 inline log::logstream& err = log::err;
 
+
+// Macro version of debug logger
+//  like assertions, this can be redefined to NULL to nullify performance footprint
+//  #define __PT_DISABLE_DEBUG_OUTPUT
+
+#if defined __cplusplus && __GNUC_PREREQ (2,95)
+# define __PT_VOID_CAST static_cast<void>
+#else
+# define __PT_VOID_CAST (void)
+#endif
+
+#ifdef __PT_DISABLE_DEBUG_OUTPUT
+#define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
+#else
+#define PT_LOG_DEBUG(expr) pt::log::debug << expr << std::endl;
+#endif
+
 } //end of namespace 'pt'
-
-
-
-
-
-
-
-

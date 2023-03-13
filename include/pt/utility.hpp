@@ -43,6 +43,19 @@ ContainedInVector(const std::vector<T>& vec, const T& element)
     return ( -1 < IndexOfInVector(vec, element) );
 }
 
+
+template<typename T>
+inline bool
+PushBackIfNotInVector( std::vector<T>& vec, T& element )
+{
+    if( not pt::ContainedInVector( vec, element ) ){
+        vec.push_back( element );
+        return true;
+    }
+    return false;
+}
+
+
 template<typename T>
 inline void
 RemoveElementInVector(std::vector<T>& vec, size_t pos)

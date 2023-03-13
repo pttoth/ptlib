@@ -15,7 +15,7 @@ run()
     std::cout << "  Testing StringToLower/Upper \n";
     std::cout << "------------------------------\n";
     //StringToUpper/Lower
-    std::string base = "abcdef123ABCDEF";
+    std::string base = "abcdef_123_ABCDEF_áéíóöőúüű_ÁÉÍÓÖŐÚÜŰ";
 
     std::string low = pt::StringToLower(base);
     std::string up = pt::StringToUpper(base);
