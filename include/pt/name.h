@@ -60,32 +60,8 @@ class Name
         bool operator==( const StringData& rhs ) const{
             return ( *mPStr == *(rhs.mPStr) );
         }
-    };
 
-
-    //TODO: not needed, hashes are only needed during construction, no need to store them
-    struct InstanceData: public StringData
-    {
-        std::size_t mHash;
-
-        InstanceData():
-            StringData(), mHash( 0 )
-        {}
-
-        InstanceData( const InstanceData& other ) = default;
-        InstanceData( InstanceData&& source ) = default;
-
-        InstanceData( const std::string& str_, uint64_t id_, std::size_t hash_ ):
-            StringData( str_, id_ ), mHash( hash_ )
-        {}
-
-        virtual ~InstanceData()
-        {}
-
-        InstanceData& operator=( const InstanceData& other ) = default;
-        InstanceData& operator=( InstanceData&& source ) = default;
-
-        static InstanceData ConstructInstanceData( const std::string& str );
+        static StringData ConstructStringData( const std::string& str );
     };
 
 public:
@@ -97,7 +73,6 @@ public:
     Name( const Name& other ) = default;
     Name( Name&& source ) = default;
 
-    //TODO: warning says, 'mData' has no copy assignment operator (it's explicit-defaulted, how and why this happens ???)
     Name& operator=( const Name& other ) = default;
     Name& operator=( Name&& source ) = default;
 
@@ -121,14 +96,14 @@ public:
 
     const std::string& ToString() const;
 
-    const bool IsEmpty() const;
+    bool IsEmpty() const;
 
 
 private:
     //-------------------------
     //  stack contents
     //-------------------------
-    const InstanceData mData;   //wrapped in struct to better support const-initialization (TODO: think some, might have been a bad direction)
+    StringData mData;   //wrapped in struct to better support const-initialization (TODO: think some, might have been a bad direction)
 
     //-------------------------
     //  static contents
