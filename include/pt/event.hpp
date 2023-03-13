@@ -96,10 +96,25 @@ class EventTrigger
     size_t              mIndex = 0;
     EventTrigger::data* mFunctions = nullptr;
 
-    const std::string   mErrStrNullFunctionOnAdd = "Attempted to add nullptr as function to event.";
-    const std::string   mErrStrNullListenerOnAdd = "Attempted to add nullptr as listener to event.";
-    const std::string   mErrStrNullFunctionOnRemove = "Attempted to remove nullptr as function from event.";
-    const std::string   mErrStrNullListenerOnRemove = "Attempted to remove nullptr as listener from event.";
+    static const std::string& GetErrStrNullFunctionOnAdd(){
+        static const std::string str( "Attempted to add nullptr as function to event." );
+        return str;
+    }
+
+    static const std::string& GetErrStrNullListenerOnAdd(){
+        static const std::string str( "Attempted to add nullptr as listener to event." );
+        return str;
+    }
+
+    static const std::string& GetErrStrNullFunctionOnRemove(){
+        static const std::string str( "Attempted to remove nullptr as function from event." );
+        return str;
+    }
+
+    static const std::string& GetErrStrNullListenerOnRemove(){
+        static const std::string str( "Attempted to remove nullptr as listener from event." );
+        return str;
+    }
 
     /** @brief: returns the index of the element passed,
      *            or -1 if not contained
@@ -183,9 +198,9 @@ class EventTrigger
     inline void addCallback(T* instance, void (T::*func)(Signature...), EventExecRule execrule )
     {
         if(nullptr == instance){
-            throw std::invalid_argument( mErrStrNullListenerOnAdd );
+            throw std::invalid_argument( GetErrStrNullListenerOnAdd() );
         }else if(nullptr == func){
-            throw std::invalid_argument( mErrStrNullFunctionOnAdd );
+            throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
         }
 
         auto lambda = [=](Signature... args) {
@@ -200,9 +215,9 @@ class EventTrigger
     inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, EventExecRule execrule )
     {
         if(nullptr == instance){
-            throw std::invalid_argument( mErrStrNullListenerOnAdd );
+            throw std::invalid_argument( GetErrStrNullListenerOnAdd() );
         }else if(nullptr == func){
-            throw std::invalid_argument( mErrStrNullFunctionOnAdd );
+            throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
         }
 
         auto lambda = [=](Signature... args) {
@@ -220,7 +235,7 @@ class EventTrigger
     inline void addCallback( void (*func)(Signature...), ExecRule execrule )
     {
         if( nullptr == func ){
-            throw std::invalid_argument( mErrStrNullFunctionOnAdd );
+            throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
         }
         add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func, execrule) );
     }
@@ -235,7 +250,7 @@ class EventTrigger
             //this is probably impossible, as even explicitly calling with 'nullptr' doesn't result in 'function_ptr' being 'nullptr'
             //  but this MUST NEVER result in 'nullptr' being function ID as it would result in an invalid container state
             //  (insertion would treat is as a valid element, while the 'nullptr' function ID would identify it as an invalidated entry)
-            throw std::invalid_argument( mErrStrNullFunctionOnAdd );
+            throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
         }
 
         add_element( EventTrigger::data(nullptr, function_ptr, func, execrule) );
@@ -246,9 +261,9 @@ class EventTrigger
     inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveMode mode )
     {
         if( nullptr == instance ){
-            throw std::invalid_argument( mErrStrNullListenerOnRemove );
+            throw std::invalid_argument( GetErrStrNullListenerOnRemove() );
         }else if( nullptr == func ){
-            throw std::invalid_argument( mErrStrNullFunctionOnRemove );
+            throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
         }
 
         if( EventRemoveMode::All == mode ){
@@ -264,7 +279,7 @@ class EventTrigger
     inline void removeCallback(void (*func)(Signature...), RemoveMode mode )
     {
         if( nullptr == func ){
-            throw std::invalid_argument( mErrStrNullFunctionOnRemove );
+            throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
         }
 
         if( RemoveMode::All == mode ){
@@ -283,7 +298,7 @@ class EventTrigger
         if( nullptr == function_ptr ){
             //this is probably impossible, as even explicitly calling with 'nullptr' doesn't result in 'function_ptr' being 'nullptr'
             //  but this MUST NEVER result in 'nullptr' being function ID as it would result in an invalid container state
-            throw std::invalid_argument( mErrStrNullFunctionOnRemove );
+            throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
         }
 
         if( EventRemoveMode::All == mode ){
@@ -297,7 +312,7 @@ class EventTrigger
     inline void removeObject(const void* const object)
     {
         if( nullptr == object ){
-            throw std::invalid_argument( mErrStrNullListenerOnRemove );
+            throw std::invalid_argument( GetErrStrNullListenerOnRemove() );
         }
 
         void* object_id = const_cast<void*>(object);
