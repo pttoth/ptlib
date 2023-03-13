@@ -16,11 +16,9 @@ public:
 
     bool operator==( const TestThreadsafe& other ) const = delete;
 
-    bool run();
+    bool run() override;
 protected:
 private:
 
 
 };
-
-
