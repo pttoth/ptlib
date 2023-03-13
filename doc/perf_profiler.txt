@@ -1,0 +1,35 @@
+
+make a perf profiler class
+
+takes
+- a result value uint64_t ptr
+
+constructor 
+- saves now() timestamp
+
+destructor
+- writes the lifetime duration into result value 
+
+make a parameter to control output granularity
+- millisec 
+- microsec
+- nanosec
+
+-----
+
+make a function, that takes:
+- a result value uint64_t ptr
+- a lambda
+- a granularity setting
+
+	- creates a profiler object
+	- executes the lambda
+	- deletes the profiler object
+
+-----
+improved version later
+- child of this profiler class
+- connects into a measurement system (GUI, display, etc)
+
+
+
