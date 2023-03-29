@@ -8,10 +8,6 @@ make Config recognize /r/n line endings correctly on linux
 
 finish config refactor
 
-logger should add "DEBUG:" string to the start of messages with 'debug' ????
-logger should add "WARNING:" string to the start of messages with 'warn'
-logger should add "ERROR:" string to the start of messages with 'err'
-
 pt::array
 	make utility Vector handling functions for Array too
 	make it standard-iterable

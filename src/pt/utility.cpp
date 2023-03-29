@@ -124,10 +124,10 @@ StringToLower(const std::string& str)
     //a note on UTF-8 support:
     //  [a-zA-Z] falls between 0-127
     //  therefore, this implementation never breaks UTF-8 encoding
-    //    but skips transforming special characters
+    //    but skips transforming special, non-ASCII characters
     //  see: https://en.wikipedia.org/wiki/UTF-8#Encoding
 
-    //branchless (except the prediction-friendly cycle condition)
+    // branchless (except the cycle condition, which is prediction-friendly)
     const char diff = 'a' - 'A'; // 97 - 65
     for( size_t i=0; i<len; ++i ){
         const char& c = str[i];
@@ -147,10 +147,10 @@ StringToUpper(const std::string& str)
     //a note on UTF-8 support:
     //  [a-zA-Z] falls between 0-127
     //  therefore, this implementation never breaks UTF-8 encoding
-    //    but skips transforming special characters
+    //    but skips transforming special, non-ASCII characters
     //  see: https://en.wikipedia.org/wiki/UTF-8#Encoding
 
-    //branchless (except the prediction-friendly cycle condition)
+    // branchless (except the cycle condition, which is prediction-friendly)
     const char diff = 'a' - 'A'; // 97 - 65
     for( size_t i=0; i<len; ++i ){
         const char& c = str[i];

@@ -79,8 +79,7 @@ bool SplitString(std::string* retval, const std::string& str, const char *sequen
 bool SplitString(std::string* retval, const std::string& str, const std::string& sequence);
 
 
-//doesn't work with non-ASCII characters
-//produces valid UTF-8 output, but skips transforming multi-byte characters
+// doesn't work with non-ASCII chars, skips transforming multi-byte characters
 std::string StringToLower(const std::string& str);
 std::string StringToUpper(const std::string& str);
 

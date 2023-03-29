@@ -1,6 +1,6 @@
 /** -----------------------------------------------------------------------------
   * FILE:    alias.h
-  * AUTHOR:  pttoth
+  * AUTHOR:  ptoth
   * EMAIL:   peter.t.toth92@gmail.com
   * PURPOSE: Alias definitions
   * -----------------------------------------------------------------------------
@@ -13,6 +13,6 @@
 namespace pt{
     using MutexLock = std::unique_lock< std::mutex >;
     using MutexLockGuard = std::lock_guard< std::mutex >;
-    //C++17
+    // TODO: add C++17 detector macro here
     //using MutexScopedLock = std::scoped_lock< std::mutex >;
 }
