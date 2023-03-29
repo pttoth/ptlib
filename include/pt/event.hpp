@@ -20,7 +20,7 @@ enum class EventExecRule{
     TriggerOnce = 1
 };
 
-enum class EventRemoveMode{
+enum class EventRemoveRule{
     One = 0,
     All = 1
 };
@@ -232,7 +232,7 @@ class EventTrigger
 
     //CHECK: with 'T&&' version introduced, is this needed?
 /*
-    inline void addCallback( void (*func)(Signature...), ExecRule execrule )
+    inline void addCallback( void (*func)(Signature...), EventExecRule execrule )
     {
         if( nullptr == func ){
             throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
@@ -258,7 +258,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveMode mode )
+    inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveRule rule )
     {
         if( nullptr == instance ){
             throw std::invalid_argument( GetErrStrNullListenerOnRemove() );
@@ -266,7 +266,7 @@ class EventTrigger
             throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
         }
 
-        if( EventRemoveMode::All == mode ){
+        if( EventRemoveRule::All == rule ){
             remove_element_occurences( EventTrigger::data( reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr ) );
         }else{
             remove_element( EventTrigger::data( reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr ) );
@@ -276,13 +276,13 @@ class EventTrigger
 
     //with the 'T&&' version introduced, this is probably not needed
 /*
-    inline void removeCallback(void (*func)(Signature...), RemoveMode mode )
+    inline void removeCallback(void (*func)(Signature...), EventRemoveRule rule )
     {
         if( nullptr == func ){
             throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
         }
 
-        if( RemoveMode::All == mode ){
+        if( EventRemoveRule::All == rule ){
             remove_element_occurences( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
         }else{
             remove_element( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
@@ -292,7 +292,7 @@ class EventTrigger
 
 
     template<typename T>
-    inline void removeCallback( T&& func, EventRemoveMode mode )
+    inline void removeCallback( T&& func, EventRemoveRule rule )
     {
         void* function_ptr = reinterpret_cast<void*>(&func);
         if( nullptr == function_ptr ){
@@ -301,7 +301,7 @@ class EventTrigger
             throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
         }
 
-        if( EventRemoveMode::All == mode ){
+        if( EventRemoveRule::All == rule ){
             remove_element_occurences( EventTrigger::data( nullptr, function_ptr, nullptr ) );
         }else{
             remove_element( EventTrigger::data( nullptr, function_ptr, nullptr ) );
@@ -543,7 +543,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveMode mode = EventRemoveMode::One )
+    inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveRule mode = EventRemoveRule::One )
     {
         ev_trigger.removeCallback(instance, func, mode);
     }
@@ -570,7 +570,7 @@ public:
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void removeCallback( T&& func, EventRemoveMode mode = EventRemoveMode::One )
+    inline void removeCallback( T&& func, EventRemoveRule mode = EventRemoveRule::One )
     {
         ev_trigger.removeCallback(func, mode);
     }
