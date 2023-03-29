@@ -1,4 +1,4 @@
-test the EventBase and Event class usage
+
 
 add logger class
     switch all output writing references to logger
@@ -8,14 +8,18 @@ make Config recognize /r/n line endings correctly on linux
 
 finish config refactor
 
-logger should add "DEBUG:" string to the start of messages with 'debug' ????
-logger should add "WARNING:" string to the start of messages with 'warn'
-logger should add "ERROR:" string to the start of messages with 'err'
-
 pt::array
 	make utility Vector handling functions for Array too
 	make it standard-iterable
 
+	see HPLEngine's approach
+		they aliased their array type with an std::vector
 
 
+Event
+	check whether event 'AddCallback()' versions are unnecessary
+		with the 'T&&' version introduced
+		'T&&' exclusive features:
+			- functor objects
+			- type[=] lambdas (check others)
 

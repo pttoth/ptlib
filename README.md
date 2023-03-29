@@ -1,6 +1,10 @@
 # ptlib
 
-A library for some generic purpose tools.
+#### A library for some generic purpose tools.
+
+### Alias
+
+Class alias definitions to allow easier/friendlier usage of STL features.
 
 ### Config
 

@@ -1,6 +1,6 @@
 /** -----------------------------------------------------------------------------
   * FILE:    config.h
-  * AUTHOR:  pttoth
+  * AUTHOR:  ptoth
   * EMAIL:   peter.t.toth92@gmail.com
   * PURPOSE: Handles configuration files and their data
   * -----------------------------------------------------------------------------
