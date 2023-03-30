@@ -38,6 +38,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
     ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
     ${MY_PROJ_ROOT}/src/pt/logging.cpp
+    ${MY_PROJ_ROOT}/include/pt/alias.h
     ${MY_PROJ_ROOT}/include/pt/config.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
     ${MY_PROJ_ROOT}/include/pt/event.hpp
@@ -58,10 +59,12 @@ add_executable(ptlib_test
     ${MY_PROJ_ROOT}/src/main.cpp
     ${MY_PROJ_ROOT}/src/TestEvent.cpp
     ${MY_PROJ_ROOT}/src/TestLogger.cpp
+    ${MY_PROJ_ROOT}/src/TestUtility.cpp
     ${MY_PROJ_ROOT}/include/Test.hpp
     ${MY_PROJ_ROOT}/include/TestConfig.hpp
     ${MY_PROJ_ROOT}/include/TestEvent.hpp
     ${MY_PROJ_ROOT}/include/TestLogger.hpp
+    ${MY_PROJ_ROOT}/include/TestUtility.hpp
 )
 
 target_include_directories(ptlib_test PRIVATE

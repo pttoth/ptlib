@@ -8,8 +8,8 @@ popd > /dev/null
 #move to project root directory
 pushd $scriptdir/..
 
-builddir="./build/debian_debug"
-cmake ./projects/debian -B$builddir -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
+builddir="./build/win64_debug"
+cmake ./projects/win64 -B$builddir -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
 
 pushd $builddir
 

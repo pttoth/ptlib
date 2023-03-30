@@ -10,19 +10,91 @@ run()
     std::cout << "--------------------------------------------------\n";
 
     try{
+        {
+            //test autoremoval
+            EventTestClass tc;
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
+            evtrigger(9, 11);
+            evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
+            evtrigger(10, 36);
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
+            evtrigger(26767, 675);
+            ev.shrink_to_fit();
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
+            evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
+            std::cout << "-----\n";
+
+            ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
+            ev.addCallback(foo, pt::EventExecRule::TriggerOnce);
+            ev.addCallback(bar, pt::EventExecRule::TriggerOnce);
+            ev.clear();
+        }
+
+        {
+            //test lambdas
+            evVoid.addCallback( []() -> void
+            {
+                std::cout << "lambda(void) is working\n";
+                std::cout << "---\n";
+            }, pt::EventExecRule::TriggerOnce );
+
+            ev.addCallback( [=](int a, int b) -> void
+            {
+                std::cout << "lambda(int, int) is working\n";
+                std::cout << "  a=" << a << " , b=" << b << "\n";
+                std::cout << "---\n";
+            }, pt::EventExecRule::TriggerOnce );
+
+            struct TestFunctor{
+                void operator()(int pa, int pb){
+                    std::cout << "TestClass::operator() called!\n";
+                    std::cout << "  a=" << pa << " , b=" << pb << "\n";
+                    std::cout << "---\n";
+                }
+            };
+
+            TestFunctor tf;
+            ev.addCallback( tf, pt::EventExecRule::TriggerOnce );
+
+            struct TestNonFunctor{
+                int a;
+                int b;
+            };
+
+            TestNonFunctor tnf;
+            //ev.addCallback( tnf, pt::ExecRule::TriggerOnce ); //has to fail, 'tnf' is not a function object
+
+            evVoidTrigger();
+            evtrigger(456, 6789);
+        }
+
+        {
+            //test deliberate misuses
+            ev.clear();
+            ev.addCallback(nullptr);    //will crash on invocation
+
+            //ev.addCallback(0);        //shouldn't compile, if possible
+            //ev.addCallback(1);
+
+            //evtrigger(5, 15);         //should crash with invalid registrations
+            ev.clear();
+        }
+
         //a regular class and a const class containing an exposed Event and a private EventTrigger
         EventTestClass tc;
         const EventTestClass ctc;
 
         //registering functions happen with Event
         //  trying to register in EventTrigger should fail
-        //evtrigger.addCallback(testfunc); //has to fail (function is private)
+        //evtrigger.addCallback(testfunc); //has to fail ('addCallback()' function is private)
 
         //outside handlers use Event this way
         ev.addCallback(testfunc);
         ev.addCallback(foo);
         ev.addCallback(bar);
-        ev.addCallback(testfunc); //cannot add the same function with the same object twice
+        ev.addCallback(testfunc); //can add the same function with the same object twice
 
         evVoid.addCallback(&testfuncVoid);
 

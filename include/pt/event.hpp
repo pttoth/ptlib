@@ -3,7 +3,7 @@
   * AUTHOR:  ptoth
   * EMAIL:   peter.t.toth92@gmail.com
   * PURPOSE: Class-independent event object.
-  *          Can register and call multiple functions sequentally.
+  *          Can register and call multiple functions sequentially.
   * -----------------------------------------------------------------------------
   */
 
@@ -15,11 +15,20 @@
 
 namespace pt{
 
-#define ALLOW_MULTIPLE_INSTANCES 0x1
+enum class EventExecRule{
+    Persistent = 0,
+    TriggerOnce = 1
+};
+
+enum class EventRemoveRule{
+    One = 0,
+    All = 1
+};
+
 
 /** @class EventTrigger:
  *  @brief Class-independent event object. Has to be wrapped by an Event instance.
- *         The two can register and call multiple functions sequentally in the order of registration.
+ *         The two can register and call multiple functions sequentially in the order of registration.
  */
 template<typename... Signature>
 class EventTrigger
@@ -29,46 +38,50 @@ class EventTrigger
 
     struct data
     {
-        void*                             target;           //used for identification
-        void*                             function_ptr;     //used for identification
-        std::function<void(Signature...)> function_obj;     //used during calling       //FUNC_PARAMS
+        void*                             target        = nullptr;     //used for identification
+        void*                             function_ptr  = nullptr;     //used for identification
+        std::function<void(Signature...)> function_obj;                //used during calling
+        EventExecRule                     rule          = EventExecRule::Persistent;
 
         //ctor
-        data():target(nullptr),
-            function_ptr(nullptr),
-            function_obj()
+        data(): function_obj()
         {}
 
+
         //ctor
-        data(void* t,
-             void* fptr,
-             std::function<void(Signature...)> fobj): target(t),    //FUNC_PARAMS
-                                                      function_ptr(fptr),
-                                                      function_obj(fobj)
+        data( void* t, void* fptr,
+              std::function<void(Signature...)> fobj,
+              EventExecRule execrule = EventExecRule::Persistent ):
+            target(t), function_ptr(fptr), function_obj(fobj), rule(execrule)
         {}
+
 
         /**
          * @brief operator ==:
-         *   used with object sample during searches
-         *      - doesn't check std::function member
+         *   used to compare with a sample object during searches
+         *      - doesn't check 'function_obj' (std::function) member
+         *      - doesn't check 'rule' member
          *      - if 'function_ptr' is nullptr, then returns true for every entry with 'target'
          *      - if 'target' is nullptr, then it's a non-class function
          */
         inline bool operator==(const data& other)const
         {
             if(target == other.target){
-                if( (other.function_ptr == nullptr) //if sample only contains listener id, then function_ptr doesn't matter
-                    ||(function_ptr == other.function_ptr)){
+                if( (nullptr == other.function_ptr) //if sample only contains listener id, then function_ptr doesn't matter
+                    ||(function_ptr == other.function_ptr))
+                {
                     return true;
                 }
             }
             return false;
         }
 
+
         inline bool is_callable() const
         {
             return (function_ptr!=nullptr);
         }
+
 
         inline void invalidate()
         {
@@ -78,18 +91,37 @@ class EventTrigger
         }
     };
 
-    unsigned            mFlags;     //CHECK: may not be needed
-    size_t              mSize;
-    size_t              mCap;
-    size_t              mIndex;     //CHECK: queue may be fragmented, so that index != size  (fix occurences!!!!)
-    EventTrigger::data* mFunctions;
+    size_t              mSize = 0;
+    size_t              mCap = 0;
+    size_t              mIndex = 0;
+    EventTrigger::data* mFunctions = nullptr;
+
+    static const std::string& GetErrStrNullFunctionOnAdd(){
+        static const std::string str( "Attempted to add nullptr as function to event." );
+        return str;
+    }
+
+    static const std::string& GetErrStrNullListenerOnAdd(){
+        static const std::string str( "Attempted to add nullptr as listener to event." );
+        return str;
+    }
+
+    static const std::string& GetErrStrNullFunctionOnRemove(){
+        static const std::string str( "Attempted to remove nullptr as function from event." );
+        return str;
+    }
+
+    static const std::string& GetErrStrNullListenerOnRemove(){
+        static const std::string str( "Attempted to remove nullptr as listener from event." );
+        return str;
+    }
 
     /** @brief: returns the index of the element passed,
      *            or -1 if not contained
      */
-    inline int index_of(const EventTrigger::data& d) const
+    inline int64_t index_of(const EventTrigger::data& d) const
     {
-        for(int i=0; i<mIndex; ++i){
+        for( int64_t i=0; i<mIndex; ++i ){
             if(mFunctions[i] == d){
                 return i;
             }
@@ -97,11 +129,12 @@ class EventTrigger
         return -1;
     }
 
-    inline void defragment_from( EventTrigger::data* from, int const from_cap)
+
+    inline void defragment_from( EventTrigger::data* from, size_t count)
     {
-        int i = 0;
-        int j = 0;
-        while( (i<from_cap) && (j<mCap) ){
+        size_t i = 0;
+        size_t j = 0;
+        while( (i<count) && (j<mCap) ){
             if( from[i].is_callable() ){
                 mFunctions[j] = from[i];
                 ++j;
@@ -111,66 +144,80 @@ class EventTrigger
         mIndex = j;
     }
 
+
     //common mechanics of adding elements
     inline void add_element(EventTrigger::data d)
     {
-        if(nullptr == mFunctions){
+        if( nullptr == mFunctions ){
             reserve(1);
         }
 
-        if( -1 == index_of( d ) ){
-            if( mIndex >= mCap ){ //reached end
-                if( mSize <= mCap/2 ){ //fragmented enough
-                    optimize();
-                }else{
-                    reserve( 2 * mCap );
-                }
+        if( mCap <= mIndex ){ //reached end
+            if( mSize <= mCap/2 ){ //fragmented enough
+                optimize();
+            }else{
+                reserve( mCap * 2 );
             }
-            mFunctions[mIndex] = d;
-            ++mIndex; //CHECK: optimize and reserve fixed index???
-            ++mSize;
         }
-        //TODO: add support multiple registrations
+        mFunctions[mIndex] = d;
+        ++mIndex;
+        ++mSize;
     }
 
-    //common mechanics of removing elements
+
+    //common mechanics of removing 1 element
     inline void remove_element(EventTrigger::data d)
     {
-        int index = index_of(d);
-        if( -1 != index ){
+        int32_t index = index_of(d);
+        if( -1 < index ){
             mFunctions[index].invalidate();
             --mSize;
         }
-        //TODO: add support for removing multiple occurences
     }
+
+
+    //common mechanics of removing all occurences of element
+    inline void remove_element_occurences(EventTrigger::data d)
+    {
+        for( size_t i=0; i<mIndex; ++i){
+            EventTrigger::data& element = mFunctions[i];
+            if( element == d ){
+                element.invalidate();
+                --mSize;
+            }
+        }
+    }
+
 
     //--------------------------------------------------
     //  private functions, that are exposed in Event
     //--------------------------------------------------
 
+
     template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    inline void addCallback(T* instance, void (T::*func)(Signature...), EventExecRule execrule )
     {
         if(nullptr == instance){
-            throw std::invalid_argument("attempted to register nullptr as listener");
+            throw std::invalid_argument( GetErrStrNullListenerOnAdd() );
         }else if(nullptr == func){
-            throw std::invalid_argument("attempted to register nullptr as function");
+            throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
         }
 
         auto lambda = [=](Signature... args) {
             (instance->*func)(args...);
         };
 
-        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), lambda, execrule) );
     }
 
+
     template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const)      //FUNC_PARAMS
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, EventExecRule execrule )
     {
         if(nullptr == instance){
-            throw std::invalid_argument("attempted to register nullptr as listener");
+            throw std::invalid_argument( GetErrStrNullListenerOnAdd() );
         }else if(nullptr == func){
-            throw std::invalid_argument("attempted to register nullptr as function");
+            throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
         }
 
         auto lambda = [=](Signature... args) {
@@ -179,40 +226,93 @@ class EventTrigger
 
         auto instance_id = const_cast<T*>(instance);
 
-        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda) ); //FUNC_PARAMS
+        add_element( EventTrigger::data(reinterpret_cast<void*>(instance_id), reinterpret_cast<void*>(func), lambda, execrule) );
     }
 
-    inline void addCallback( void (*func)(Signature...) )          //FUNC_PARAMS
+
+    //CHECK: with 'T&&' version introduced, is this needed?
+/*
+    inline void addCallback( void (*func)(Signature...), EventExecRule execrule )
     {
         if( nullptr == func ){
-            throw std::invalid_argument("attempted to register nullptr as function");
+            throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
         }
-        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func) );
+        add_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), func, execrule) );
     }
+*/
+
 
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...) )      //FUNC_PARAMS
+    inline void addCallback( T&& func, EventExecRule execrule )
     {
-        if( nullptr == instance ){
-            throw std::invalid_argument("attempted to unregister nullptr as listener");
-        }else if( nullptr == func ){
-            throw std::invalid_argument("attempted to unregister nullptr as function");
+        void* function_ptr = reinterpret_cast<void*>(&func);
+        if( nullptr == function_ptr ){
+            //this is probably impossible, as even explicitly calling with 'nullptr' doesn't result in 'function_ptr' being 'nullptr'
+            //  but this MUST NEVER result in 'nullptr' being function ID as it would result in an invalid container state
+            //  (insertion would treat is as a valid element, while the 'nullptr' function ID would identify it as an invalidated entry)
+            throw std::invalid_argument( GetErrStrNullFunctionOnAdd() );
         }
-        remove_element( EventTrigger::data(reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr) );
+
+        add_element( EventTrigger::data(nullptr, function_ptr, func, execrule) );
     }
 
-    inline void removeCallback(void (*func)(Signature...) )                //FUNC_PARAMS
+
+    template<typename T>
+    inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveRule rule )
+    {
+        if( nullptr == instance ){
+            throw std::invalid_argument( GetErrStrNullListenerOnRemove() );
+        }else if( nullptr == func ){
+            throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
+        }
+
+        if( EventRemoveRule::All == rule ){
+            remove_element_occurences( EventTrigger::data( reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr ) );
+        }else{
+            remove_element( EventTrigger::data( reinterpret_cast<void*>(instance), reinterpret_cast<void*>(func), nullptr ) );
+        }
+    }
+
+
+    //with the 'T&&' version introduced, this is probably not needed
+/*
+    inline void removeCallback(void (*func)(Signature...), EventRemoveRule rule )
     {
         if( nullptr == func ){
-            throw std::invalid_argument("attempted to unregister nullptr as function");
+            throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
         }
-        remove_element( EventTrigger::data(nullptr, reinterpret_cast<void*>(func), nullptr) );
+
+        if( EventRemoveRule::All == rule ){
+            remove_element_occurences( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
+        }else{
+            remove_element( EventTrigger::data( nullptr, reinterpret_cast<void*>(func), nullptr ) );
+        }
     }
+*/
+
+
+    template<typename T>
+    inline void removeCallback( T&& func, EventRemoveRule rule )
+    {
+        void* function_ptr = reinterpret_cast<void*>(&func);
+        if( nullptr == function_ptr ){
+            //this is probably impossible, as even explicitly calling with 'nullptr' doesn't result in 'function_ptr' being 'nullptr'
+            //  but this MUST NEVER result in 'nullptr' being function ID as it would result in an invalid container state
+            throw std::invalid_argument( GetErrStrNullFunctionOnRemove() );
+        }
+
+        if( EventRemoveRule::All == rule ){
+            remove_element_occurences( EventTrigger::data( nullptr, function_ptr, nullptr ) );
+        }else{
+            remove_element( EventTrigger::data( nullptr, function_ptr, nullptr ) );
+        }
+    }
+
 
     inline void removeObject(const void* const object)
     {
         if( nullptr == object ){
-            throw std::invalid_argument("attempted to unregister nullptr as listener");
+            throw std::invalid_argument( GetErrStrNullListenerOnRemove() );
         }
 
         void* object_id = const_cast<void*>(object);
@@ -220,15 +320,23 @@ class EventTrigger
         EventTrigger::data d( reinterpret_cast<void*>(object_id), nullptr, nullptr);
 
         //loop until cannot find any more entries with 'target'
-        int index = 0;
-        while( -1 < index ){
-            index = index_of(d);
-            if( -1 != index ){
-                mFunctions[index].invalidate();
-                --mSize;
-            }
+        int32_t index;
+        while( -1 < (index = index_of(d)) ){
+            mFunctions[index].invalidate();
+            --mSize;
         }
     }
+
+
+    inline void clear()
+    {
+        for(size_t i=0; i<mIndex; ++i){
+            mFunctions[i].invalidate();
+        }
+        mIndex = 0;
+        mSize = 0;
+    }
+
 
     inline void reserve(const size_t new_size)
     {
@@ -236,25 +344,21 @@ class EventTrigger
             EventTrigger::data* old = mFunctions;
             mFunctions = new EventTrigger::data[new_size];
             if(old){
-                defragment_from(old, mIndex);
+                defragment_from(old, mIndex); //sets 'mIndex'
             }
             mCap = new_size;
             delete[] old;
         }
     }
 
+
     inline void optimize()
     {
-        //TODO: don't free up memory if empty, this should only be defragmentation
-        if(0 == mSize){
-            delete[] mFunctions;
-            mCap = 0;
-            mIndex = 0;
-            mFunctions = nullptr;
-        }else if(mSize < mIndex ){
-            defragment_from(mFunctions, mIndex);
+        if(mSize < mIndex ){
+            defragment_from(mFunctions, mIndex); //sets 'mIndex'
         }
     }
+
 
     inline void shrink_to_fit()
     {
@@ -267,87 +371,90 @@ class EventTrigger
             if(mSize < mIndex){
                 EventTrigger::data* old = mFunctions;
                 mFunctions= new EventTrigger::data[mSize];
-                defragment_from(old, mIndex);
+                defragment_from(old, mIndex); //sets 'mIndex'
                 mCap = mSize;
                 delete[] old;
             }
         }
     }
 
+
     //--------------------------------------------------
 
 public:
-    EventTrigger(): mFlags(0), mSize(0),
-                 mCap(0), mIndex(0),
-                 mFunctions(nullptr)
+    EventTrigger()
     {}
 
-    EventTrigger(const EventTrigger& other): mFlags(other.mFlags),
-                                             mSize(other.mSize),
-                                             mCap(other.mCap),
-                                             mIndex(other.mIndex)
+
+    EventTrigger(const EventTrigger& other):
+        mSize(other.mSize), mCap(other.mCap)
     {
         mFunctions = new EventTrigger::data[mCap];
-        for(int i=0; i<mCap; ++i){
-            mFunctions[i] = other.mFunctions[i];
-        }
+        defragment_from( other.mFunctions, other.mIndex ); //sets 'mIndex'
     }
-    EventTrigger(EventTrigger&& source): mFlags(source.mFlags),
-                                         mSize(source.mSize),
-                                         mCap(source.mCap),
-                                         mIndex(source.mIndex)
+
+
+    EventTrigger(EventTrigger&& source):
+        mSize(source.mSize), mCap(source.mCap), mIndex(source.mIndex)
     {
         delete[] mFunctions;
         mFunctions = source.mFunctions;
         source.mFunctions = nullptr;
     }
+
 
     virtual ~EventTrigger()
     {
         delete[] mFunctions;
     }
 
+
     EventTrigger& operator=(const EventTrigger& other)
     {
-        delete[] mFunctions;
-        mFlags = other.mFlags;
-        mSize = other.mSize;
+        EventTrigger::data* old = mFunctions;
+        mFunctions = new EventTrigger::data[other.mCap];
         mCap = other.mCap;
-        mIndex = other.mIndex;
-        mFunctions = new EventTrigger::data[mCap];
-        for(int i=0; i<mCap; ++i){
-            mFunctions[i] = other.mFunctions[i];
-        }
+        mSize = other.mSize;
+        defragment_from( other.mFunctions, other.mIndex ); //sets 'mIndex'
+        delete[] old;
     }
+
 
     EventTrigger& operator=(EventTrigger&& source)
     {
+        //don't defragment here, move has to be fast
         delete[] mFunctions;
-        mFlags = source.mFlags;
         mSize = source.mSize;
         mCap = source.mCap;
         mIndex = source.mIndex;
         mFunctions = source.mFunctions;
         source.mFunctions = nullptr;
     }
+
+
     bool operator==(const EventTrigger& other)const = delete;
 
+
     /**
-     * @brief Fires the event, sequentally executing all
+     * @brief Fires the event, sequentially executing all
      *          registered functions in the order of registration.
      */
-    inline void operator()(Signature...args)        //FUNC_PARAMS
+    inline void operator()(Signature...args)
     {
         if(mFunctions){
             for( size_t i=0; i<mIndex; ++i ){
                 if( mFunctions[i].is_callable() ){
-                    mFunctions[i].function_obj(args...);    //FUNC_PARAMS
+                    mFunctions[i].function_obj(args...);
+                    if( EventExecRule::TriggerOnce == mFunctions[i].rule ){
+                        mFunctions[i].invalidate();
+                        --mSize;
+                    }
                 }
             }
         }
     }
 
-}; //end of 'EventBase'
+}; //end of class 'EventTrigger'
 
 
 
@@ -358,12 +465,12 @@ public:
 template<typename... Signature>
 class Event
 {
-    EventTrigger<Signature...>& ev_base;
+    EventTrigger<Signature...>& ev_trigger;
 public:
-    Event(EventTrigger<Signature...>& eventbase):
-        ev_base(eventbase){
+    Event(EventTrigger<Signature...>& eventtrigger):
+        ev_trigger(eventtrigger){
     }
-    Event(const Event& other)                   = delete;  //Note: Event-EventBase pairing has to be manually restored by owner object during copy!
+    Event(const Event& other)                   = delete;  //Note: Event-EventTrigger pairing has to be manually restored by owner object during copy!
     Event(Event&& source)                       = delete;
     virtual ~Event(){}
     Event& operator=(const Event& other)        = delete;
@@ -371,61 +478,103 @@ public:
 
     bool operator==(const Event& other) const   = delete;
 
-    /**
-     * @brief Registers the class member function received in the parameters.
-     * @param instance: Pointer to the target object.
-     * @param func: Pointer to the member function to call on the target object.
-     * @throws std::invalid_argument
-     */
-    template<typename T>
-    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const )
-    {
-        ev_base.addCallback(instance, func);
-    }
 
     /**
      * @brief Registers the constant class member function received in the parameters.
      * @param instance: Pointer to the target object.
      * @param func: Pointer to the member function to call on the target object.
+     * @param execrule: Controls whether the function should only be executed once.
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void addCallback(T* instance, void (T::*func)(Signature...) )
+    inline void addCallback(const T* const instance, void (T::*func)(Signature...) const, EventExecRule execrule = EventExecRule::Persistent )
     {
-        ev_base.addCallback(instance, func);
+        ev_trigger.addCallback(instance, func, execrule);
     }
 
+
     /**
-     * @brief Registers the standard function received in the parameters.
-     * @param func: Function to call on the target object.
+     * @brief Registers the class member function received in the parameters.
+     * @param instance: Pointer to the target object.
+     * @param func: Pointer to the member function to call on the target object.
+     * @param execrule: Controls whether the function should only be executed once.
      * @throws std::invalid_argument
      */
-    inline void addCallback( void (*func)(Signature...) )
+    template<typename T>
+    inline void addCallback(T* instance, void (T::*func)(Signature...), EventExecRule execrule = EventExecRule::Persistent )
     {
-        ev_base.addCallback(func);
+        ev_trigger.addCallback(instance, func, execrule);
     }
+
+
+    /**
+     * @brief Registers the basic function received in the parameters.
+     * @param func: Function to call.
+     * @param execrule: Controls whether the function should only be executed once.
+     * @throws std::invalid_argument
+     */
+/*
+    inline void addCallback( void (*func)(Signature...), ExecRule execrule = ExecRule::Persistent )
+    {
+        ev_trigger.addCallback(func, execrule);
+    }
+*/
+
+
+    /**
+     * @brief Registers the function/functor received in the parameters.
+     *   Note that lambdas registered with 'Persistent' rule can only be removed by wiping the storage with 'clear()'!
+     * @param func: Function to call.
+     * @param execrule: Controls whether the function/functor should only be executed once.
+     * @throws std::invalid_argument
+     */
+    template<typename T>
+    inline void addCallback( T&& func, EventExecRule execrule = EventExecRule::Persistent )
+    {
+        ev_trigger.addCallback(func, execrule);
+    }
+
 
     /**
      * @brief Removes the class member function defined in the parameters.
      * @param instance: Reference to the target object.
-     * @param func: Class member function to call on the target object.
+     * @param func: Function to remove.
+     * @param mode: Controls whether to remove only one or all registered instances.
      * @throws std::invalid_argument
      */
     template<typename T>
-    inline void removeCallback(T* instance, void (T::*func)(Signature...) )
+    inline void removeCallback(T* instance, void (T::*func)(Signature...), EventRemoveRule mode = EventRemoveRule::One )
     {
-        ev_base.removeCallback(instance, func);
+        ev_trigger.removeCallback(instance, func, mode);
     }
+
 
     /**
      * @brief Removes the standard function defined in the parameters.
-     * @param func: Function to remove from the array.
+     * @param func: Function to remove.
+     * @param mode: Controls whether to remove only one or all registered instances.
      * @throws std::invalid_argument
      */
-    inline void removeCallback(void (*func)(Signature...) )
+/*
+    inline void removeCallback(void (*func)(Signature...), RemoveMode mode = RemoveMode::One )
     {
-        ev_base.removeCallback(func);
+        ev_trigger.removeCallback(func, mode);
     }
+*/
+
+
+    /**
+     * @brief Removes the function/functor defined in the parameters.
+     * @param func: Function/functor to remove.
+     * @param mode: Controls whether to remove only one or all registered instances.
+     * @throws std::invalid_argument
+     */
+    template<typename T>
+    inline void removeCallback( T&& func, EventRemoveRule mode = EventRemoveRule::One )
+    {
+        ev_trigger.removeCallback(func, mode);
+    }
+
 
     /**
      * @brief Removes all function registrations regarding the object received as parameter.
@@ -436,8 +585,9 @@ public:
      */
     inline void removeObject(const void* const object)
     {
-        ev_base.removeObject(object);
+        ev_trigger.removeObject(object);
     }
+
 
     /**
      * @brief Removes all function registrations regarding the object received as parameter.
@@ -448,8 +598,17 @@ public:
      */
     inline void removeObject(void* object)
     {
-        ev_base.removeObject(object);
+        ev_trigger.removeObject(object);
     }
+
+
+    /**
+     * @brief Removes all registered elements. Allocated memory stays.
+     */
+    inline void clear(){
+        ev_trigger.clear();
+    }
+
 
     /**
      * @brief Ensures, that 'size' amount of entries are allocated in memory for the queue.
@@ -457,24 +616,26 @@ public:
      */
     inline void reserve(const size_t new_size)
     {
-        ev_base.reserve(new_size);
+        ev_trigger.reserve(new_size);
     }
+
 
     /**
      * @brief Rearranges storage by clumping together still active entries in memory.
      */
     inline void optimize()
     {
-        ev_base.optimize();
+        ev_trigger.optimize();
     }
+
 
     /**
      * @brief Dumps unnecessary allocated memory.
      */
     inline void shrink_to_fit()
     {
-        ev_base.shrink_to_fit();
+        ev_trigger.shrink_to_fit();
     }
-}; //end of 'Event'
+}; //end of class 'Event'
 
-} //end of namespace PT
+} //end of namespace 'pt'

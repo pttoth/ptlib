@@ -31,10 +31,13 @@ run()
         pt::log::warn  << "testing warn:  ASCII\n";
         pt::log::err   << "testing err:   ASCII\n";
 
+        // this might not be available in C++14, so it's temporarily disabled
+        /*
         pt::debug << "testing debug without 'pt' namespace: ASCII\n";
         pt::out   << "testing out without 'pt' namespace:   ASCII\n";
         pt::warn  << "testing warn without 'pt' namespace:  ASCII\n";
         pt::err   << "testing err without 'pt' namespace:   ASCII\n";
+        */
 
         printAsciiTable();
 

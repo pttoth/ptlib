@@ -19,8 +19,13 @@ getFileName() const
     return pt::log::GetFileName();
 }
 
+
 pt::log::logstream::
 logstream(): mEnabled(true)
-{
-}
+{}
 
+
+pt::log::logstream::
+logstream(const std::string &prefix):
+    mEnabled(true), mMessagePrefix( prefix )
+{}

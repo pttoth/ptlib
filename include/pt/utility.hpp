@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <vector>
 #include <string>
+#include <cstdint>
 
 //return the enum name in parameter as string
 #define EnumToString(ENUM_NAME) #ENUM_NAME
@@ -21,14 +22,15 @@ namespace pt{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 template<typename T>
-inline int
+inline int64_t
 IndexOfInVector(const std::vector<T>& vec, const T& element)
 {
-    for(int i=0; i<vec.size(); ++i){
+    for(int64_t i=0; i<vec.size(); ++i){
         if(vec[i] == element){
             return i;
         }
     }
+
     return -1;
 }
 
@@ -40,6 +42,19 @@ ContainedInVector(const std::vector<T>& vec, const T& element)
 {
     return ( -1 < IndexOfInVector(vec, element) );
 }
+
+
+template<typename T>
+inline bool
+PushBackIfNotInVector( std::vector<T>& vec, T& element )
+{
+    if( not pt::ContainedInVector( vec, element ) ){
+        vec.push_back( element );
+        return true;
+    }
+    return false;
+}
+
 
 template<typename T>
 inline void
@@ -63,8 +78,11 @@ std::string TrimWhitespaces(const std::string& str);
 bool SplitString(std::string* retval, const std::string& str, const char *sequence);
 bool SplitString(std::string* retval, const std::string& str, const std::string& sequence);
 
+
+// doesn't work with non-ASCII chars, skips transforming multi-byte characters
 std::string StringToLower(const std::string& str);
 std::string StringToUpper(const std::string& str);
+
 
 bool MatchRegex(const char* const str, const char* const regex_str);
 bool MatchRegex(const char* str, const std::string& regex_str);
@@ -78,6 +96,10 @@ std::wstring StringToWString(const std::string& string_to_convert);
 void CreateDirectory(const std::string& path);
 void EnsureExistingDirectory(const std::string& path);
 
+template<typename T>
+const T& Clamp( const T& v, const T& lo, const T& hi ){
+    return std::min( std::max( lo, v ), hi );
+}
 
 } //end of namespace
 

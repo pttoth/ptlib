@@ -52,10 +52,10 @@
 
 
 //initializing externs
-pt::log::logstream pt::log::debug{};
-pt::log::logstream pt::log::out{};
-pt::log::logstream pt::log::warn{};
-pt::log::logstream pt::log::err{};
+pt::log::logstream pt::log::debug{ "Debug" };
+pt::log::logstream pt::log::out{ "Log" };
+pt::log::logstream pt::log::warn{ "Warning" };
+pt::log::logstream pt::log::err{ "ERROR" };
 
 
 std::string gRootDirectory;
