@@ -101,7 +101,12 @@ const T& Clamp( const T& v, const T& lo, const T& hi ){
     return std::min( std::max( lo, v ), hi );
 }
 
-} //end of namespace
+// MurmurHash2
+//   source: https://github.com/aappleby/smhasher
+uint32_t MurmurHash2( const void* key, int len, uint32_t seed );
+
+
+} //end of namespace 'pt'
 
 
 //-------------------------------------------------------------------------
