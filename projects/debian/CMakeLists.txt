@@ -28,7 +28,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 
-set(MY_COMPILE_FLAGS "-Wall -Wextra")
+set(MY_COMPILE_FLAGS "-Wall -Wextra -DPT_MEASURE_PERFORMANCE")
 set(CMAKE_C_FLAGS ${MY_COMPILE_FLAGS})
 set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 
@@ -36,14 +36,14 @@ set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
     ${MY_PROJ_ROOT}/src/pt/name.cpp
-    #${MY_PROJ_ROOT}/src/pt/profiler.cpp
+    ${MY_PROJ_ROOT}/src/pt/profiler.cpp
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
     ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
     ${MY_PROJ_ROOT}/src/pt/logging.cpp
     ${MY_PROJ_ROOT}/include/pt/alias.h
     ${MY_PROJ_ROOT}/include/pt/config.h
     ${MY_PROJ_ROOT}/include/pt/name.h
-    #${MY_PROJ_ROOT}/include/pt/profiler.h
+    ${MY_PROJ_ROOT}/include/pt/profiler.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
     ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/logging.h
