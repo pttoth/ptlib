@@ -9,10 +9,15 @@
 
 #pragma once
 
+#include "pt/def.h"
+
 #include <cstddef>
 #include <vector>
 #include <string>
 #include <cstdint>
+
+
+
 
 //return the enum name in parameter as string
 #define EnumToString(ENUM_NAME) #ENUM_NAME
@@ -100,6 +105,9 @@ template<typename T>
 const T& Clamp( const T& v, const T& lo, const T& hi ){
     return std::min( std::max( lo, v ), hi );
 }
+
+void Sleep( size_t time_ms );
+
 
 // MurmurHash2
 //   source: https://github.com/aappleby/smhasher

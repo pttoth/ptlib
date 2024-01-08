@@ -1,12 +1,13 @@
 #include "pt/logging.h"
 
+#include "pt/def.h"
 #include "pt/utility.hpp"
 
-#ifdef __linux__
+#ifdef PT_PLATFORM_LINUX
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#elif _WIN32 || _WIN64
+#elif PT_PLATFORM_WINDOWS
 #include <windows.h>
 #include <tchar.h>
 #include <windef.h>
@@ -105,7 +106,7 @@ ValidatePathLinux(const std::string& path,
 }
 
 
-#ifdef __linux__
+#ifdef PT_PLATFORM_LINUX
 bool
 InitializeLinux(const std::string& root_directory,
                 const std::string& filename,
@@ -128,7 +129,7 @@ InitializeLinux(const std::string& root_directory,
 
 
 
-#elif _WIN32 || _WIN64
+#elif PT_PLATFORM_WINDOWS
 
 
 //need valid filename check? can be a security risk?
@@ -195,9 +196,9 @@ Initialize(const std::string &root_directory,
     //TODO: if uniform root doesn't end in '/', then add it between 'root' and 'filename'
     std::string fullpath = root_directory + filename;
 
-    #ifdef __linux__
+    #ifdef PT_PLATFORM_LINUX
     success = InitializeLinux(root_directory, filename, timeout);
-    #elif _WIN32 || _WIN64
+    #elif PT_PLATFORM_WINDOWS
     success = InitializeWin(root_directory, filename, timeout);
     #endif
 

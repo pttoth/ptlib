@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "pt/def.h"
 #include "pt/utility.hpp"
 
 #include <iostream>
@@ -52,7 +53,7 @@ class logstream{
     bool            mEnabled;
     std::string     mMessagePrefix;
 
-    #ifdef __linux__
+    #ifdef PT_PLATFORM_LINUX
     template<typename T>
     void LogMessageLinux(T data) const{
         //temporary solution
@@ -83,7 +84,7 @@ class logstream{
             fs.close();
         }
     }
-    #elif _WIN32 || _WIN64
+    #elif PT_PLATFORM_WINDOWS
     template<typename T>
     void LogMessageWin(T data) const{
 //test code for handling Unicode paths
@@ -127,9 +128,9 @@ class logstream{
 
     template<typename T>
     void LogMessage(T data) const{
-        #ifdef __linux__
+        #ifdef PT_PLATFORM_LINUX
         LogMessageLinux<T>(data);
-        #elif _WIN32 || _WIN64
+        #elif PT_PLATFORM_WINDOWS
         LogMessageWin<T>(data);
         #endif
     }

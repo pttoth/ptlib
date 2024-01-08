@@ -1,5 +1,19 @@
 #include "pt/utility.hpp"
 
+//-----linux-----
+#ifdef PT_PLATFORM_LINUX
+#include <unistd.h>
+
+//----windows----
+#elif defined PT_PLATFORM_WINDOWS
+#include<windows.h>
+
+//------mac------
+#elif defined PT_PLATFORM_MAC
+//...
+//---------------
+#endif
+
 #include <locale>
 #include <codecvt>
 
@@ -189,11 +203,9 @@ MatchRegex(const std::string& str, const std::string& regex_str)
 }
 
 
-#ifdef __linux__
+#ifdef PT_PLATFORM_LINUX
 #include <sys/types.h>
 #include <sys/stat.h>
-
-
 
 inline void
 CreateDirectoryLinux(const std::string& path)
@@ -212,9 +224,7 @@ CreateDirectoryLinux(const std::string& path)
     }
 }
 
-
-#elif _WIN32 || _WIN64
-
+#elif defined PT_PLATFORM_WINDOWS
 
 inline void
 CreateDirectoryWin(const std::string& path)
@@ -223,17 +233,20 @@ CreateDirectoryWin(const std::string& path)
     throw std::runtime_error("CreateDirectory has not yet been implemented for Windows!\n    File logging won't be available, unless directories already exist!");
 }
 
-
+#elif defined PT_PLATFORM_MAC
+#error "pt::CreateDirectory() is not defined for Mac platform!"
 #endif
 
 
 void pt::
 CreateDirectory(const std::string& path)
 {
-    #ifdef __linux__
+    #ifdef PT_PLATFORM_LINUX
     return CreateDirectoryLinux(path);
-    #elif _WIN32 || _WIN64
+    #elif defined PT_PLATFORM_WINDOWS
     return CreateDirectoryWin(path);
+    #elif defined PT_PLATFORM_MAC
+    return CreateDirectoryMac(path);
     #endif
 }
 
@@ -300,6 +313,19 @@ StringToWString(const std::string& string_to_convert)
 }
 
 
+void pt::
+Sleep( size_t time_ms )
+{
+    #ifdef PT_PLATFORM_LINUX
+    usleep( time_ms * 1000 );
+    #elif defined PT_PLATFORM_WINDOWS
+    Sleep( time_ms );
+    #elif defined PT_PLATFORM_MAC
+    #error "pt::Sleep( size_t ) is not defined for Mac platform!"
+    #endif
+}
+
+
 uint32_t pt::
 MurmurHash2( const void* key, int len, uint32_t seed )
 {
@@ -351,3 +377,5 @@ MurmurHash2( const void* key, int len, uint32_t seed )
 
   return h;
 }
+
+
