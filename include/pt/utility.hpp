@@ -16,11 +16,20 @@
 #include <string>
 #include <cstdint>
 
-
+#include <memory>
 
 
 //return the enum name in parameter as string
 #define EnumToString(ENUM_NAME) #ENUM_NAME
+
+
+
+// alias for shortening 'std::make_shared' calls
+template<typename T, typename... Signature>
+std::shared_ptr<T> NewPtr( Signature... params ){
+    return std::make_shared<T>( params... );
+}
+
 
 namespace pt{
 
@@ -106,7 +115,18 @@ const T& Clamp( const T& v, const T& lo, const T& hi ){
     return std::min( std::max( lo, v ), hi );
 }
 
+
+/**
+ * @brief Sleep for 'time_ms' milliseconds.
+ */
 void Sleep( size_t time_ms );
+
+
+/**
+ * @brief Reads all the contents of file 'path'
+ *          and returns it as std::string.
+ */
+std::string ReadFile( const std::string& path );
 
 
 // MurmurHash2

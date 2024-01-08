@@ -20,6 +20,8 @@
 #include <assert.h>
 #include <algorithm>
 #include <cstring>
+#include <fstream>
+#include <iostream>
 #include <sstream>
 #include <regex>
 
@@ -323,6 +325,25 @@ Sleep( size_t time_ms )
     #elif defined PT_PLATFORM_MAC
     #error "pt::Sleep( size_t ) is not defined for Mac platform!"
     #endif
+}
+
+
+std::string pt::
+ReadFile( const std::string& path )
+{
+    std::ifstream ifs( path );
+    if( !ifs.good() ){
+        std::cerr << "Failed to open/read file: '" << path << "'!\n";
+        return std::string();
+    }
+
+    std::stringstream ss;
+    std::string line;
+    while( !ifs.eof() ){
+        std::getline( ifs, line );
+        ss << line << "\n";
+    }
+    return ss.str();
 }
 
 
