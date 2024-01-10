@@ -6,12 +6,12 @@ scriptdir=$(pwd)
 popd > /dev/null
 
 #move to project root directory
-pushd $scriptdir/..
+pushd "${scriptdir}"/..
 
 builddir="./build/win64"
-cmake ./projects/win64 -B$builddir -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake ./projects/win64 -B"${builddir}" -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
 
-pushd $builddir
+pushd "${builddir}"
 
 #get available core count
 cores=$(nproc)
