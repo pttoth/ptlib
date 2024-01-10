@@ -329,21 +329,35 @@ Sleep( size_t time_ms )
 
 
 std::string pt::
-ReadFile( const std::string& path )
+ReadTextFile( const std::string& path )
 {
     std::ifstream ifs( path );
     if( !ifs.good() ){
+        //TODO: use pt::log::err instead
         std::cerr << "Failed to open/read file: '" << path << "'!\n";
         return std::string();
     }
 
-    std::stringstream ss;
-    std::string line;
-    while( !ifs.eof() ){
-        std::getline( ifs, line );
-        ss << line << "\n";
+    std::string buffer( std::istreambuf_iterator<char>( ifs ), {} );
+    ifs.close();
+    return buffer;
+}
+
+
+std::vector<uint8_t> pt::
+ReadBinaryFile( const std::string& path )
+{
+    std::ifstream ifs( path, std::ios::binary );
+    if( !ifs.good() ){
+        //TODO: use pt::log::err instead
+        std::cerr << "Failed to open/read file: '" << path << "'!\n";
+        return std::vector<uint8_t>();
     }
-    return ss.str();
+
+    // copy all data into a buffer
+    std::vector<uint8_t> buffer( std::istreambuf_iterator<char>( ifs ), {} );
+    ifs.close();
+    return buffer;
 }
 
 
@@ -398,5 +412,6 @@ MurmurHash2( const void* key, int len, uint32_t seed )
 
   return h;
 }
+
 
 

@@ -123,10 +123,16 @@ void Sleep( size_t time_ms );
 
 
 /**
- * @brief Reads all the contents of file 'path'
+ * @brief Reads all text contents of file 'path'
  *          and returns it as std::string.
  */
-std::string ReadFile( const std::string& path );
+std::string ReadTextFile( const std::string& path );
+
+/**
+ * @brief Reads all bytes of file 'path'
+ *          and returns it as an std::vector <uint8_t>.
+ */
+std::vector<uint8_t> ReadBinaryFile( const std::string& path );
 
 
 // MurmurHash2
