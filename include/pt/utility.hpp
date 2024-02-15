@@ -12,11 +12,16 @@
 #include "pt/def.h"
 
 #include <cstddef>
-#include <vector>
-#include <string>
 #include <cstdint>
-
+#include <exception>
 #include <memory>
+#include <string>
+#include <vector>
+
+
+
+#define PT_UNIMPLEMENTED_FUNCTION \
+throw std::logic_error( "Called function is not implemented" );
 
 
 //return the enum name in parameter as string
