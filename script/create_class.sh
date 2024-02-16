@@ -341,9 +341,9 @@ mkdir -p $(dirname $sAbsPathS)
 
 
 #set up substitutions for string patterns
-soParentInclude='#include "'$sParentClassname'.h"'
-soNamespaceOpen="namespace "$sNamespace"{"
-soNamespaceClose="} // end of namespace '"$sNamespace"'"
+soParentInclude="\#include '$sParentClassname'.h"
+soNamespaceOpen="//namespace ClassNameSpace{"
+soNamespaceClose="//} // end of namespace 'ClassNameSpace'"
 soClassName=$sClassname
 soParentClassInherit=": public "$sParentClassname
 soDefDefault=" = default"
@@ -359,8 +359,8 @@ fi
 if [[ bHasNamespace=="false" ]];
 then
 	soNamespace=""
-	soNamespaceOpen=""
-	soNamespaceClose=""
+	#soNamespaceOpen=""
+	#soNamespaceClose=""
 else
 	#TODO: set up 'mkdir' for namespace paths
 	echo
@@ -374,7 +374,7 @@ fi
 
 sIncludeLine="#include \"$sInclPathH\""
 
-cat $scriptdir/data/newclass.h.model | sed "s/__parentInclude__/$soParentInclude/g" | sed "s/__namespaceOpen__/$soNamespaceOpen/g" | sed "s/__namespaceClose__/$soNamespaceClose/g" | sed "s/__className__/$soClassName/g" | sed "s/__parentClassInherit__/$soParentClassInherit/g" | sed "s/__defDefault__/$soDefDefault/g" > $scriptdir/../$sFilePathH
+cat $scriptdir/data/newclass.h.model | sed "s/__parentInclude__/$soParentInclude/g" | sed "s|__namespaceOpen__|$soNamespaceOpen|g" | sed "s|__namespaceClose__|$soNamespaceClose|g" | sed "s/__className__/$soClassName/g" | sed "s/__parentClassInherit__/$soParentClassInherit/g" | sed "s/__defDefault__/$soDefDefault/g" > $scriptdir/../$sFilePathH
 #cat $scriptdir/data/newclass.cpp.model | sed "s/__headerInclude__/$sIncludeLine/g" | sed "s/__className__/$soClassName/g" | sed "s/__usingNamespaceName__/\#using namespace ClassNameSpace;/g" > $sFilePathS
 
 cat $scriptdir/data/newclass.cpp.model | sed -e "s|__headerInclude__|$sIncludeLine|g" | sed "s/__className__/$soClassName/g" | sed "s/__usingNamespaceName__/\/\/using namespace ClassNameSpace;/g" > $scriptdir/../$sFilePathS
