@@ -28,5 +28,16 @@ using Const##CLASSNAME##WPtr  = std::weak_ptr< const CLASSNAME >; \
 using CLASSNAME##UPtr         = std::unique_ptr< CLASSNAME >; \
 using Const##CLASSNAME##UPtr  = std::unique_ptr< const CLASSNAME >;
 
+
+#define PT_FORWARD_DECLARE_STRUCT( STRUCTNAME ) \
+struct STRUCTNAME; \
+using STRUCTNAME##Ptr          = std::shared_ptr< STRUCTNAME >; \
+using Const##STRUCTNAME##Ptr   = std::shared_ptr< const STRUCTNAME >; \
+using STRUCTNAME##WPtr         = std::weak_ptr< STRUCTNAME >; \
+using Const##STRUCTNAME##WPtr  = std::weak_ptr< const STRUCTNAME >; \
+using STRUCTNAME##UPtr         = std::unique_ptr< STRUCTNAME >; \
+using Const##STRUCTNAME##UPtr  = std::unique_ptr< const STRUCTNAME >;
+
+
 //return the enum name in parameter as string
 #define EnumToString(ENUM_NAME) #ENUM_NAME
