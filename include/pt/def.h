@@ -1,5 +1,12 @@
-#pragma once
+/** -----------------------------------------------------------------------------
+  * FILE:    def.h
+  * AUTHOR:  ptoth
+  * EMAIL:   peter.t.toth92@gmail.com
+  * PURPOSE:
+  * -----------------------------------------------------------------------------
+  */
 
+#pragma once
 
 //---------------------------------------------------
 //  platform definitions:
@@ -38,4 +45,3 @@
     #error "Multiple platforms are detected at the same time!"
 
 #endif
-

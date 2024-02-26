@@ -43,6 +43,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/include/pt/alias.h
     ${MY_PROJ_ROOT}/include/pt/config.h
     ${MY_PROJ_ROOT}/include/pt/def.h
+    ${MY_PROJ_ROOT}/include/pt/macros.h
     ${MY_PROJ_ROOT}/include/pt/name.h
     ${MY_PROJ_ROOT}/include/pt/profiler.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
