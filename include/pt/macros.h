@@ -14,6 +14,13 @@
 #include <exception>
 #include <memory>
 
+// compatibility helper macro for defining removable macro functions
+#if defined __cplusplus && __GNUC_PREREQ (2,95)
+# define __PT_VOID_CAST static_cast<void>
+#else
+# define __PT_VOID_CAST (void)
+#endif
+
 
 #define PT_UNIMPLEMENTED_FUNCTION \
 throw std::logic_error( "Called function is not implemented" );

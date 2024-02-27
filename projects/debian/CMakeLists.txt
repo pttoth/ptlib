@@ -28,6 +28,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 
+#custom macros:
+#  PT_DEBUG_ENABLED
+#    enables additional debug logic and verbose logging
+#    !! not having 'NDEBUG' defined will enable 'PT_DEBUG_ENABLED' !!
+#  PT_DEBUG_NOAUTO
+#    prevents auto-defining 'PT_DEBUG_ENABLED' based on 'NDEBUG'
 set(MY_COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -DPT_MEASURE_PERFORMANCE")
 set(CMAKE_C_FLAGS ${MY_COMPILE_FLAGS})
 set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})

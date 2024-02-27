@@ -2,7 +2,8 @@
   * FILE:    def.h
   * AUTHOR:  ptoth
   * EMAIL:   peter.t.toth92@gmail.com
-  * PURPOSE:
+  * PURPOSE: Standalone macros and definitions for project-wide use.
+  *          (They have no include dependencies)
   * -----------------------------------------------------------------------------
   */
 
@@ -44,4 +45,14 @@
 
     #error "Multiple platforms are detected at the same time!"
 
+#endif
+
+//---------------------------------------------------
+//  generic definitions:
+//---------------------------------------------------
+
+#ifndef PT_DEBUG_NOAUTO
+    #ifndef NDEBUG
+        #define PT_DEBUG_ENABLED
+    #endif
 #endif

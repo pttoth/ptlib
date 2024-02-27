@@ -57,24 +57,12 @@ inline log::logstream& err = log::err;
 
 
 // Macro version of debug logger
-//  like assertions, these can be defined to NULL to eliminate unnecessary performance footprint in release builds
-//  #define PT_DISABLE_DEBUG_OUTPUT
-//  note: defining 'NDEBUG' also defines 'PT_DISABLE_DEBUG_OUTPUT'
-
-#ifdef NDEBUG
-#define PT_DISABLE_DEBUG_OUTPUT
-#endif
-
-#if defined __cplusplus && __GNUC_PREREQ (2,95)
-# define __PT_VOID_CAST static_cast<void>
-#else
-# define __PT_VOID_CAST (void)
-#endif
-
-#ifdef PT_DISABLE_DEBUG_OUTPUT
-#define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
-#else
+//  like assertions, these can be macro-disabled
+//  to eliminate unnecessary performance footprint in release builds
+#ifdef PT_DEBUG_ENABLED
 #define PT_LOG_DEBUG(expr) pt::log::debug << expr << std::endl;
+#else
+#define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
 #endif
 
 } //end of namespace 'pt'
