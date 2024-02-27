@@ -1,11 +1,11 @@
 # ----------------------------------------------------------------------------
 #  custom ignores
 # ----------------------------------------------------------------------------
-bin/
-build/
-lib/
-log/
-projects/build-*
+/bin/
+/build/
+/lib/
+/log/
+/projects/build-*
 *.user
 CMakeLists.txt.user.*
 
