@@ -154,6 +154,10 @@ public:
     //void setFile(const char *filename);
     //void setFile(const std::string &filename);
 
+    //TODO:
+    // missing functionality:
+    //  << std::hex, std::dec, etc.
+
     DEFINE_LOGSTREAM_OUT_OPERATOR(const bool)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const short)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const unsigned short)
