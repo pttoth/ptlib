@@ -56,8 +56,12 @@ inline log::logstream& warn = log::warn;
 inline log::logstream& err = log::err;
 
 
-// Macro version of debug logger
-//  like assertions, these can be macro-disabled
+// Macro versions of loggers
+#define PT_LOG_OUT(expr)  pt::log::out << expr << std::endl;
+#define PT_LOG_WARN(expr) pt::log::warn << expr << std::endl;
+#define PT_LOG_ERR(expr)  pt::log::err << expr << std::endl;
+
+//Like assertions, PT_LOG_DEBUG can be macro-disabled
 //  to eliminate unnecessary performance footprint in release builds
 #ifdef PT_DEBUG_ENABLED
 #define PT_LOG_DEBUG(expr) pt::log::debug << expr << std::endl;

@@ -30,7 +30,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 
 #custom macros:
 #  PT_DEBUG_ENABLED
-#    enables additional debug logic and verbose logging
+#    enables additional debug logic and verbose debug logging
 #    !! not having 'NDEBUG' defined will enable 'PT_DEBUG_ENABLED' !!
 #  PT_DEBUG_NOAUTO
 #    prevents auto-defining 'PT_DEBUG_ENABLED' based on 'NDEBUG'
