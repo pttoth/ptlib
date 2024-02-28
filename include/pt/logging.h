@@ -64,6 +64,9 @@ inline log::logstream& err = log::err;
 //Like assertions, PT_LOG_DEBUG can be macro-disabled
 //  to eliminate unnecessary performance footprint in release builds
 #ifdef PT_DEBUG_ENABLED
+//TODO: closing element should be something like 'pt::log::send'
+//  until receiving that, the operator<< calls fill up a local buffer
+//  the closing element will initiate inter-process message transmission
 #define PT_LOG_DEBUG(expr) pt::log::debug << expr << std::endl;
 #else
 #define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
