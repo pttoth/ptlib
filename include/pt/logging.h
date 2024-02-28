@@ -20,6 +20,7 @@ namespace pt{
 namespace log{
 
 //TODO: refactor (placeholder)
+//  enables early references to 'pt::log::send'
 const char send = '\n';
 
 const uint32_t default_timeout = 5000;
@@ -60,17 +61,17 @@ inline log::logstream& err = log::err;
 
 
 // Macro versions of loggers
-#define PT_LOG_OUT(expr)  pt::log::out << expr << std::endl;
-#define PT_LOG_WARN(expr) pt::log::warn << expr << std::endl;
-#define PT_LOG_ERR(expr)  pt::log::err << expr << std::endl;
+#define PT_LOG_OUT(expr)  pt::log::out << expr << pt::log::send;
+#define PT_LOG_WARN(expr) pt::log::warn << expr << pt::log::send;
+#define PT_LOG_ERR(expr)  pt::log::err << expr << pt::log::send;
 
 //Like assertions, PT_LOG_DEBUG can be macro-disabled
 //  to eliminate unnecessary performance footprint in release builds
 #ifdef PT_DEBUG_ENABLED
-//TODO: closing element should be something like 'pt::log::send'
-//  until receiving that, the operator<< calls fill up a local buffer
-//  the closing element will initiate inter-process message transmission
-#define PT_LOG_DEBUG(expr) pt::log::debug << expr << std::endl;
+//TODO: implement 'pt::log::send'
+//  until receiving that value, the operator<< calls only fill up a local buffer
+//  upon receiving that value, logging will initiate inter-process message transmission
+#define PT_LOG_DEBUG(expr) pt::log::debug << expr << pt::log::send;
 #else
 #define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
 #endif
