@@ -11,7 +11,7 @@
 
 #include "def.h"
 
-#include <exception>
+#include <stdexcept>
 #include <memory>
 
 // compatibility helper macro for defining removable macro functions
