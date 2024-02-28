@@ -11,6 +11,9 @@
 
 #include <utility>
 
+//TODO: delet dis
+#include <assert.h>
+
 namespace pt{
 
 template<class T>
@@ -21,6 +24,7 @@ public:
         mEnabled( true ), mLambda( pLambda )
     {}
     virtual ~Guard(){
+        assert( /* check mLambda type! T&& or T? */ false );
         Destroy();
     }
 
@@ -55,7 +59,7 @@ private:
         }
     }
 
-    T&&  mLambda;
+    T&&  mLambda; //TODO: is this right? should only be T ?
     bool mEnabled = true;
 };
 
