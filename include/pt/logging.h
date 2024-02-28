@@ -19,6 +19,9 @@
 namespace pt{
 namespace log{
 
+//TODO: refactor (placeholder)
+const char send = '\n';
+
 const uint32_t default_timeout = 5000;
 
 std::string AutoGenerateLogFileName();
