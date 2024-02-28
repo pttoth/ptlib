@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <utility>
+
 namespace pt{
 
 template<class T>
@@ -19,16 +21,26 @@ public:
         mEnabled( true ), mLambda( pLambda )
     {}
     virtual ~Guard(){
-        if( mEnabled && (nullptr != mLambda) ){
-            mLambda();
-        }
+        Destroy();
     }
 
     Guard( const Guard& other )             = delete;
     Guard& operator=( const Guard& other )  = delete;
-    Guard( Guard&& source )                 = default;
-    Guard& operator=( Guard&& source )      = default;
-
+    Guard( Guard&& source ):
+        mLambda( std::move( source.mLambda ) ),
+        mEnabled( source.mEnabled )
+    {
+        source.mLambda = nullptr;
+        source.mEnabled = false;
+    }
+    Guard& operator=( Guard&& source )
+    {
+        Destroy();
+        mLambda = std::move( source.mLambda );
+        mEnabled = source.mEnabled;
+        source.mLambda = nullptr;
+        source.mEnabled = false;
+    }
     bool operator==( const Guard& other ) const = delete;
 
     bool Disable(){
@@ -37,6 +49,12 @@ public:
 
 protected:
 private:
+    void Destroy(){
+        if( mEnabled && (nullptr != mLambda) ){
+            mLambda();
+        }
+    }
+
     T&&  mLambda;
     bool mEnabled = true;
 };
