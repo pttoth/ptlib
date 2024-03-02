@@ -112,7 +112,7 @@ InitializeLinux(const std::string& root_directory,
                 const std::string& filename,
                 uint32_t timeout)
 {
-    bool success = false;
+    //bool success = false;
 
     if(!ValidatePathLinux(filename, root_directory)){
         return false;

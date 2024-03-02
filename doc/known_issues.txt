@@ -8,9 +8,10 @@ generic:
 	- add documentation for non-obvious functions
 
 event:
-    - doesn't handle multiple registrations of the same function
-		may not be an issue
-    - event doesn't have a 'clear()' function
+    - current entry key-pair (instance ptr, function ptr) violates cpp standard
+        only works with member functions, because GCC allows it
+        ( "-Wpmf-conversions" warnings )
+      find a cpp-allowed solution for this
 
 Config:
 	- refactor private function names containing '_' as starting character

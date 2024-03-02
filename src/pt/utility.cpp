@@ -393,6 +393,8 @@ MurmurHash2( const void* key, int len, uint32_t seed )
     len -= 4;
   }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
   // Handle the last few bytes of the input array
 
   switch(len)
@@ -402,6 +404,7 @@ MurmurHash2( const void* key, int len, uint32_t seed )
   case 1: h ^= data[0];
       h *= m;
   };
+#pragma GCC diagnostic pop
 
   // Do a few final mixes of the hash to ensure the last few
   // bytes are well-incorporated.
@@ -412,6 +415,3 @@ MurmurHash2( const void* key, int len, uint32_t seed )
 
   return h;
 }
-
-
-

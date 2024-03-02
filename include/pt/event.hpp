@@ -38,6 +38,11 @@ class EventTrigger
 
     struct data
     {
+        //TODO: this way of identification causes "-Wpmf-conversions" warnings
+        //  having pointers to member functions violates the cpp standard
+        //  GCC allows it, but warns ( what about other compilers? )
+        //  see if some trickery can solve this as uint32_t/uint64_t instead of 'void*'
+        //  other ways to avoid violating the standard?
         void*                             target        = nullptr;     //used for identification
         void*                             function_ptr  = nullptr;     //used for identification
         std::function<void(Signature...)> function_obj;                //used during calling
@@ -121,7 +126,7 @@ class EventTrigger
      */
     inline int64_t index_of(const EventTrigger::data& d) const
     {
-        for( int64_t i=0; i<mIndex; ++i ){
+        for( size_t i=0; i<mIndex; ++i ){
             if(mFunctions[i] == d){
                 return i;
             }

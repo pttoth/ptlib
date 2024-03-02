@@ -12,7 +12,7 @@ run()
     try{
         {
             //test autoremoval
-            EventTestClass tc;
+            //EventTestClass tc;
             ev.addCallback(testfunc, pt::EventExecRule::TriggerOnce);
             evtrigger(9, 11);
             evtrigger(23, 64);      //this mustn't get called here (TriggerOnce has to remove the registration at the first call)
@@ -63,7 +63,7 @@ run()
                 int b;
             };
 
-            TestNonFunctor tnf;
+            //TestNonFunctor tnf;
             //ev.addCallback( tnf, pt::ExecRule::TriggerOnce ); //has to fail, 'tnf' is not a function object
 
             evVoidTrigger();
