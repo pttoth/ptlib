@@ -11,6 +11,7 @@
 
 #include <utility>
 
+#include <functional>
 //TODO: delet dis
 #include <assert.h>
 
@@ -20,12 +21,11 @@ template<class T>
 class Guard
 {
 public:
-    Guard( T&& pLambda ):
-        mEnabled( true ), mLambda( pLambda )
+    Guard( const T& pLambda ):
+        mLambda( pLambda ), mEnabled( true )
     {}
     virtual ~Guard(){
-        assert( /* check mLambda type! T&& or T? */ false );
-        Destroy();
+        DestroyGuard();
     }
 
     Guard( const Guard& other )             = delete;
@@ -34,15 +34,15 @@ public:
         mLambda( std::move( source.mLambda ) ),
         mEnabled( source.mEnabled )
     {
-        source.mLambda = nullptr;
+        source.mLambda  = nullptr;
         source.mEnabled = false;
     }
     Guard& operator=( Guard&& source )
     {
-        Destroy();
+        DestroyGuard();
         mLambda = std::move( source.mLambda );
         mEnabled = source.mEnabled;
-        source.mLambda = nullptr;
+        source.mLambda  = nullptr;
         source.mEnabled = false;
     }
     bool operator==( const Guard& other ) const = delete;
@@ -53,18 +53,18 @@ public:
 
 protected:
 private:
-    void Destroy(){
-        if( mEnabled && (nullptr != mLambda) ){
+    void DestroyGuard(){
+        if( mEnabled && mLambda ){
             mLambda();
         }
     }
 
-    T&&  mLambda; //TODO: is this right? should only be T ?
+    std::function<void()> mLambda = nullptr;
     bool mEnabled = true;
 };
 
 template<class T>
-Guard<T> CreateGuard( T&& pLambda ){
+Guard<T> CreateGuard( const T& pLambda ){
     return Guard<T>( pLambda );
 }
 
