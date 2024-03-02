@@ -54,11 +54,12 @@ extern logstream err;
 // TODO: might need to add a C++17 checker macro here, or similar (compiler extension check?)
 //  the compiler extensions that make this available before C++17 aren't always, but mostly available
 //aliases for a more convenient usage syntax
+/*
 inline log::logstream& debug = log::debug;
 inline log::logstream& out = log::out;
 inline log::logstream& warn = log::warn;
 inline log::logstream& err = log::err;
-
+*/
 
 // Macro versions of loggers
 #define PT_LOG_OUT(expr)  pt::log::out << expr << pt::log::send;

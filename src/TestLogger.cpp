@@ -30,12 +30,12 @@ run()
         pt::log::out   << "testing out:   ASCII\n";
         pt::log::warn  << "testing warn:  ASCII\n";
         pt::log::err   << "testing err:   ASCII\n";
-
+/*
         pt::debug << "testing debug without 'pt' namespace: ASCII\n";
         pt::out   << "testing out without 'pt' namespace:   ASCII\n";
         pt::warn  << "testing warn without 'pt' namespace:  ASCII\n";
         pt::err   << "testing err without 'pt' namespace:   ASCII\n";
-
+*/
         printAsciiTable();
 
         pt::log::out << "\n";
