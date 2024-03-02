@@ -47,7 +47,7 @@ public:
     }
     bool operator==( const Guard& other ) const = delete;
 
-    bool Disable(){
+    void Disable(){
         mEnabled = false;
     }
 
