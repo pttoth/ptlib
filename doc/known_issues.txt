@@ -12,6 +12,8 @@ event:
         only works with member functions, because GCC allows it
         ( "-Wpmf-conversions" warnings )
       find a cpp-allowed solution for this
+      https://stackoverflow.com/questions/60000/c-inheritance-and-member-function-pointers
+      see: https://stackoverflow.com/questions/1485983/how-can-i-create-a-pointer-to-a-member-function-and-call-it
 
 Config:
 	- refactor private function names containing '_' as starting character
