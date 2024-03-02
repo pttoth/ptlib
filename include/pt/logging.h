@@ -62,9 +62,9 @@ inline log::logstream& err = log::err;
 */
 
 // Macro versions of loggers
-#define PT_LOG_OUT(expr)  pt::log::out << expr << pt::log::send;
-#define PT_LOG_WARN(expr) pt::log::warn << expr << pt::log::send;
-#define PT_LOG_ERR(expr)  pt::log::err << expr << pt::log::send;
+#define PT_LOG_OUT(expr)  pt::log::out << expr << pt::log::send
+#define PT_LOG_WARN(expr) pt::log::warn << expr << pt::log::send
+#define PT_LOG_ERR(expr)  pt::log::err << expr << pt::log::send
 
 //Like assertions, PT_LOG_DEBUG can be macro-disabled
 //  to eliminate unnecessary performance footprint in release builds
@@ -72,7 +72,7 @@ inline log::logstream& err = log::err;
 //TODO: implement 'pt::log::send'
 //  until receiving that value, the operator<< calls only fill up a local buffer
 //  upon receiving that value, logging will initiate inter-process message transmission
-#define PT_LOG_DEBUG(expr) pt::log::debug << expr << pt::log::send;
+#define PT_LOG_DEBUG(expr) pt::log::debug << expr << pt::log::send
 #else
 #define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
 #endif
