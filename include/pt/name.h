@@ -65,7 +65,7 @@ public:
 
     const std::string& GetStdString() const;
     bool IsEmpty() const;
-    void Init();
+    void Init() const;
 
 private:
     //-------- definitions --------

@@ -134,7 +134,7 @@ IsEmpty() const
 
 
 void pt::Name::
-Init()
+Init() const
 {
     Init_();
 }
