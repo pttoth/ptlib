@@ -4,6 +4,7 @@
 #include "pt/utility.hpp"
 
 #include <algorithm>
+#include <assert.h>
 #include <cstring>
 
 uint64_t    pt::Name::smNextFreeID = 1;
@@ -25,28 +26,31 @@ Name( const Name& other ):
 
 pt::Name::
 Name( Name&& source ):
-    mData( source.mData ), mId( source.mId )
-{}
+    mData( std::move(source.mData) ), mId( source.mId )
+{
+    source.mData = nullptr;
+    source.mId   = 0;
+}
 
 
 pt::Name::
 Name( char* const cstr )
 {
-    Construct( cstr );
+    CreatePreInitState_( cstr );
 }
 
 
 pt::Name::
 Name( const char* const cstr )
 {
-    Construct( cstr );
+    CreatePreInitState_( cstr );
 }
 
 
 pt::Name::
 Name( const std::string& str )
 {
-    Construct( str.c_str(), str.length() );
+    CreatePreInitState_( str.c_str() );
 }
 
 
@@ -59,18 +63,20 @@ pt::Name& pt::Name::
 operator=( const Name& other )
 {
     mData = other.mData;
-    mId = other.mId;
+    mId   = other.mId;
     return *this;
 }
 
 
 pt::Name& pt::Name::
-operator=(  Name&& source  )
+operator=( Name&& source )
 {
     if( this != &source ){
         mData = std::move(source.mData);
         mId = source.mId;
     }
+    source.mData = nullptr;
+    source.mId = 0;
     return *this;
 }
 
@@ -86,6 +92,13 @@ operator=( const std::string& str )
 bool pt::Name::
 operator==( const Name& other ) const
 {
+    // sync instances globally, if needed
+    this->Init_();
+    other.Init_();
+
+    if( (0 == mId) || (0 == other.mId) ){
+        return false;
+    }
     return ( mId == other.mId );
 }
 
@@ -93,13 +106,20 @@ operator==( const Name& other ) const
 bool pt::Name::
 operator!=( const Name& other ) const
 {
-    return ( mId != other.mId );
+    bool retval = this->operator==( other );
+    return !retval;
 }
 
 
 const std::string& pt::Name::
 GetStdString() const
 {
+    Init_();
+    if( 0 == mId ){
+        static const std::string DummyEmptyString;
+        return DummyEmptyString;
+    }
+    assert( nullptr != mData );
     return mData->str;
 }
 
@@ -107,16 +127,34 @@ GetStdString() const
 bool pt::Name::
 IsEmpty() const
 {
-    return ( 0 == mId );
+    // check, that mId is not out of sync with mData
+    assert( (0 == mId) && (nullptr == mData) || (0 != mId) && (nullptr != mData) );
+    return (0 == mId) || ( IsInPreInitState_() && 0 == mData->str.length() );
 }
 
 
 void pt::Name::
-Construct( const char* const cstr, size_t length )
+Init()
 {
+    Init_();
+}
+
+
+void pt::Name::
+CreateSyncedState_( const char* const cstr, size_t length ) const
+{
+    assert( nullptr != cstr );
     size_t    strlength = ( 0 < length ) ? length : strlen( cstr );
     uint32_t  hash = pt::MurmurHash2( cstr, strlength, smHashSeed );
     ConstNameDataPtr data;
+
+    //data should already be sanitized here
+    // if new data is empty string
+    if( 0 == strlength ){
+        mData = nullptr;
+        mId   = 0;
+        return;
+    }
 
     pt::MutexLockGuard lock( smMutex );
     auto range = smMapByHash.equal_range( hash );
@@ -139,6 +177,13 @@ Construct( const char* const cstr, size_t length )
 }
 
 
+bool pt::Name::
+IsInPreInitState_() const
+{
+    return ( UINT64_MAX == mId );
+}
+
+
 uint64_t pt::Name::
 TakeNextFreeId()
 {
@@ -156,8 +201,40 @@ TakeNextFreeId_NoLock()
 }
 
 
+void pt::Name::
+CreatePreInitState_( const char* const cstr )
+{
+    if( nullptr == cstr ){
+        mData = nullptr;
+        mId = 0;
+        return;
+    }
+    if( 0 == strlen( cstr ) ){
+        mData = nullptr;
+        mId = 0;
+        return;
+    }
+
+    ConstNameDataPtr pNameData = std::make_shared< const NameData >( std::string(cstr), UINT64_MAX );
+    mData = pNameData;
+    mId = pNameData->id;
+}
+
+
+void pt::Name::
+Init_() const
+{
+    if( IsInPreInitState_() ){
+        ConstNameDataPtr tempPtr = mData; // save a local pointer to prevent destruction
+        CreateSyncedState_( tempPtr->str.c_str(), tempPtr->str.length() );
+    }
+    assert( UINT64_MAX != mId );
+}
+
+
 std::ostream&
 operator<<( std::ostream& os, const pt::Name& obj )
 {
-    return os << obj.GetStdString();
+    os << obj.GetStdString();
+    return os;
 }
