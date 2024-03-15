@@ -28,6 +28,10 @@ namespace cpp{
     //namespace fs = std::filesystem;
 }
 
+
+class Name;
+
+
 namespace log{
 
 
@@ -48,6 +52,7 @@ class logstream;
         } \
         return *this; \
     }
+
 
 class logstream{
     bool            mEnabled;
@@ -174,6 +179,8 @@ public:
     DEFINE_LOGSTREAM_OUT_OPERATOR(const char)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const char*)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const std::string&)
+
+    logstream& operator<<( const Name& data);
 
     DEFINE_LOGSTREAM_OUT_FUNC_OPERATOR(std::ostream&, (std::ostream&))
     DEFINE_LOGSTREAM_OUT_FUNC_OPERATOR(std::ios&, (std::ios&))

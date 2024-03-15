@@ -115,6 +115,7 @@ const std::string& pt::Name::
 GetStdString() const
 {
     Init_();
+    assert( UINT64_MAX != mId );
     if( 0 == mId ){
         static const std::string DummyEmptyString;
         return DummyEmptyString;

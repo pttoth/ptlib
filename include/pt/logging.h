@@ -62,7 +62,8 @@ inline log::logstream& err = log::err;
 */
 
 // Macro versions of loggers
-#define PT_LOG_OUT(expr)  pt::log::out << expr << pt::log::send
+#define PT_LOG_INFO(expr) pt::log::out << expr << pt::log::send
+#define PT_LOG_OUT(expr)  pt::log::out << expr << pt::log::send   //deprecated, will be removed in a later version
 #define PT_LOG_WARN(expr) pt::log::warn << expr << pt::log::send
 #define PT_LOG_ERR(expr)  pt::log::err << expr << pt::log::send
 
