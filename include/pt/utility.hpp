@@ -29,6 +29,9 @@ std::shared_ptr<T> NewPtr( Signature... params ){
 
 namespace pt{
 
+void PrintStackTrace( const char* additional_message = "" );
+
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 template<typename T>

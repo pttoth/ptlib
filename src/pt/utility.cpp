@@ -2,6 +2,7 @@
 
 //-----linux-----
 #ifdef PT_PLATFORM_LINUX
+#include <execinfo.h>
 #include <unistd.h>
 
 //----windows----
@@ -24,6 +25,35 @@
 #include <iostream>
 #include <sstream>
 #include <regex>
+
+void pt::
+PrintStackTrace( const char* additional_message )
+{
+#if defined PT_PLATFORM_LINUX
+    size_t          size;
+    const size_t    maxsize = 256;
+    void*           array[maxsize];
+
+    // get (void*)-s for all entries on the stack
+    size = backtrace( array, maxsize );
+
+    // print out all the frames to stderr
+    fprintf( stderr, "---------- Stack trace ----------\n" );
+    fprintf( stderr, "Error: %s:\n", additional_message );
+    backtrace_symbols_fd( array, size, STDERR_FILENO );
+    fprintf( stderr, "\n" );
+#elif defined PT_PLATFORM_WINDOWS
+    fprintf( stderr, "---------- Stack trace ----------\n" );
+    fprintf( stderr, "Error: %s:\n", additional_message );
+    fprintf( stderr, "No stacktrace implemented for Windows yet!" );
+    fprintf( stderr, "\n" );
+#elif defined PT_PLATFORM_MAC
+    fprintf( stderr, "---------- Stack trace ----------\n" );
+    fprintf( stderr, "Error: %s:\n", additional_message );
+    fprintf( stderr, "No stacktrace implemented for Mac yet!" );
+    fprintf( stderr, "\n" );
+#endif
+}
 
 
 bool pt::
@@ -415,3 +445,5 @@ MurmurHash2( const void* key, int len, uint32_t seed )
 
   return h;
 }
+
+

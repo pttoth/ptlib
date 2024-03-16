@@ -14,6 +14,13 @@
 #include <stdexcept>
 #include <memory>
 
+namespace pt{
+namespace helper{
+    static const char* ErrorMsg_UnimplementedFunction = "Called function is not implemented";
+    void PrintStackTrace( const char* message = "" );
+} // end of namespace 'helper'
+} // end of namespace 'pt'
+
 // compatibility helper macro for defining removable macro functions
 #if defined __cplusplus && __GNUC_PREREQ (2,95)
 # define __PT_VOID_CAST static_cast<void>
@@ -23,7 +30,8 @@
 
 
 #define PT_UNIMPLEMENTED_FUNCTION \
-throw std::logic_error( "Called function is not implemented" );
+    pt::helper::PrintStackTrace( pt::helper::ErrorMsg_UnimplementedFunction ); \
+    throw std::logic_error( pt::helper::ErrorMsg_UnimplementedFunction );
 
 
 #define PT_FORWARD_DECLARE_CLASS( CLASSNAME ) \

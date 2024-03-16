@@ -41,6 +41,7 @@ set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 #build an archive (.a), for static linking
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
+    ${MY_PROJ_ROOT}/src/pt/macros.cpp
     ${MY_PROJ_ROOT}/src/pt/name.cpp
     ${MY_PROJ_ROOT}/src/pt/profiler.cpp
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
