@@ -16,8 +16,9 @@
 
 namespace pt{
 namespace helper{
-    static const char* ErrorMsg_UnimplementedFunction = "Called function is not implemented";
-    void PrintStackTrace( const char* message = "" );
+
+void PrintStackTrace( const char* message = "" );
+
 } // end of namespace 'helper'
 } // end of namespace 'pt'
 
@@ -30,8 +31,8 @@ namespace helper{
 
 
 #define PT_UNIMPLEMENTED_FUNCTION \
-    pt::helper::PrintStackTrace( pt::helper::ErrorMsg_UnimplementedFunction ); \
-    throw std::logic_error( pt::helper::ErrorMsg_UnimplementedFunction );
+    pt::helper::PrintStackTrace( "Called function is not implemented" ); \
+    throw std::logic_error( "Called function is not implemented" );
 
 
 #define PT_FORWARD_DECLARE_CLASS( CLASSNAME ) \
