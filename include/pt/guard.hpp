@@ -9,11 +9,7 @@
 
 #pragma once
 
-#include <utility>
-
 #include <functional>
-//TODO: delet dis
-#include <assert.h>
 
 namespace pt{
 

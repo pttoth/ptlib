@@ -14,7 +14,7 @@
  *      Each unique Name data is kept once, globally, even after instances are destroyed.
  *    Recommended usage:
  *      Avoid one-time use. (prefer 'static const')
- *      Recurring comparisons quickly pay back initial performance cost.
+ *      Frequent comparisons will pay back initial performance cost.
  *      { ...
  *        static const pt::Name my_name1( "AssetName" );
  *        static const pt::Name my_name2( "AssetName" );
@@ -25,9 +25,9 @@
  *      }
  *    In order to avoid static init-order issues,
  *      global index is only acquired during late-init at first usage.
- *    Non-initialized instances can be copied.
- *      This can hurt performance as later, each instance will init separately.
- *      Calling '.Init()' can ensure inner-state, before copying instance.
+ *    Non-synced instances can be copied.
+ *      This can hurt performance as later, each instance will sync separately.
+ *      Calling '.Init()' will ensure synced-state, before copying instance.
  *    The following 'const' functions on uninitialized instances will initiate late-init.
  *      - comparison operators (== and !=)
  *          They init the right-side instance too!
