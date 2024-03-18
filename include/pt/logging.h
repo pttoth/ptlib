@@ -77,11 +77,27 @@ inline log::logstream& err = log::err;
     } \
 }
 
-
 #define PT_LOG_ONCE_INFO(expr) __PT_LOG_ONCE( pt::log::out, expr )
 #define PT_LOG_ONCE_WARN(expr) __PT_LOG_ONCE( pt::log::warn, expr )
 #define PT_LOG_ONCE_ERR(expr) __PT_LOG_ONCE( pt::log::err, expr )
 
+
+#define __PT_LOG_LIMITED( __LOGSTREAM, log_limit, expr ) \
+{ \
+    static int count = 1; \
+    if( count < log_limit ){ \
+        __LOGSTREAM << expr << pt::log::send; \
+        ++count; \
+    }else if( count == log_limit ){ \
+        __LOGSTREAM << expr << pt::log::send; \
+        __LOGSTREAM << "  Limit(" << log_limit << ") reached. Suppressing further logging of this message." << pt::log::send; \
+        ++count; \
+    } \
+}
+
+#define PT_LOG_LIMITED_INFO(log_limit, expr) __PT_LOG_LIMITED( pt::log::out, log_limit, expr )
+#define PT_LOG_LIMITED_WARN(log_limit, expr) __PT_LOG_LIMITED( pt::log::warn, log_limit, expr )
+#define PT_LOG_LIMITED_ERR(log_limit, expr) __PT_LOG_LIMITED( pt::log::err, log_limit, expr )
 
 //Like assertions, PT_LOG_DEBUG can be macro-disabled
 //  to eliminate unnecessary performance footprint in release builds
@@ -91,9 +107,11 @@ inline log::logstream& err = log::err;
 //  upon receiving that value, logging will initiate inter-process message transmission
 #define PT_LOG_DEBUG(expr) pt::log::debug << expr << pt::log::send
 #define PT_LOG_ONCE_DEBUG(expr) __PT_LOG_ONCE( pt::log::debug, expr )
+#define PT_LOG_LIMITED_DEBUG(log_limit, expr) __PT_LOG_LIMITED( pt::log::debug, log_limit, expr )
 #else
 #define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
 #define PT_LOG_ONCE_DEBUG(expr) (__PT_VOID_CAST (0))
+#define PT_LOG_LIMITED_DEBUG(log_limit, expr) (__PT_VOID_CAST (0))
 #endif
 
 } //end of namespace 'pt'
