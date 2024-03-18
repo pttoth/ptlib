@@ -61,11 +61,27 @@ inline log::logstream& warn = log::warn;
 inline log::logstream& err = log::err;
 */
 
+
 // Macro versions of loggers
 #define PT_LOG_INFO(expr) pt::log::out << expr << pt::log::send
 #define PT_LOG_OUT(expr)  pt::log::out << expr << pt::log::send   //deprecated, will be removed in a later version
 #define PT_LOG_WARN(expr) pt::log::warn << expr << pt::log::send
 #define PT_LOG_ERR(expr)  pt::log::err << expr << pt::log::send
+
+#define __PT_LOG_ONCE( __LOGSTREAM, expr ) \
+{ \
+    static bool firsttime = true; \
+    if( firsttime ){ \
+        __LOGSTREAM << expr << pt::log::send; \
+        firsttime = false; \
+    } \
+}
+
+
+#define PT_LOG_ONCE_INFO(expr) __PT_LOG_ONCE( pt::log::out, expr )
+#define PT_LOG_ONCE_WARN(expr) __PT_LOG_ONCE( pt::log::warn, expr )
+#define PT_LOG_ONCE_ERR(expr) __PT_LOG_ONCE( pt::log::err, expr )
+
 
 //Like assertions, PT_LOG_DEBUG can be macro-disabled
 //  to eliminate unnecessary performance footprint in release builds
@@ -74,8 +90,10 @@ inline log::logstream& err = log::err;
 //  until receiving that value, the operator<< calls only fill up a local buffer
 //  upon receiving that value, logging will initiate inter-process message transmission
 #define PT_LOG_DEBUG(expr) pt::log::debug << expr << pt::log::send
+#define PT_LOG_ONCE_DEBUG(expr) __PT_LOG_ONCE( pt::log::debug, expr )
 #else
 #define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
+#define PT_LOG_ONCE_DEBUG(expr) (__PT_VOID_CAST (0))
 #endif
 
 } //end of namespace 'pt'
