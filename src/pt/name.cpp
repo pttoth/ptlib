@@ -74,9 +74,9 @@ operator=( Name&& source )
     if( this != &source ){
         mData = std::move(source.mData);
         mId = source.mId;
+        source.mData = nullptr;
+        source.mId = 0;
     }
-    source.mData = nullptr;
-    source.mId = 0;
     return *this;
 }
 
