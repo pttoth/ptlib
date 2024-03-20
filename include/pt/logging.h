@@ -65,8 +65,8 @@ inline log::logstream& err = log::err;
 // Macro versions of loggers
 #define PT_LOG_INFO(expr) pt::log::out << expr << pt::log::send
 #define PT_LOG_OUT(expr)  pt::log::out << expr << pt::log::send   //deprecated, will be removed in a later version
-#define PT_LOG_WARN(expr) pt::log::warn << expr << pt::log::send
-#define PT_LOG_ERR(expr)  pt::log::err << expr << pt::log::send
+#define PT_LOG_WARN(expr) pt::log::warn << "WARNING: " << expr << pt::log::send
+#define PT_LOG_ERR(expr)  pt::log::err << "ERROR: " << expr << pt::log::send
 
 #define __PT_LOG_ONCE( __LOGSTREAM, expr ) \
 { \
@@ -78,8 +78,8 @@ inline log::logstream& err = log::err;
 }
 
 #define PT_LOG_ONCE_INFO(expr) __PT_LOG_ONCE( pt::log::out, expr )
-#define PT_LOG_ONCE_WARN(expr) __PT_LOG_ONCE( pt::log::warn, expr )
-#define PT_LOG_ONCE_ERR(expr) __PT_LOG_ONCE( pt::log::err, expr )
+#define PT_LOG_ONCE_WARN(expr) __PT_LOG_ONCE( pt::log::warn << "WARNING: " , expr )
+#define PT_LOG_ONCE_ERR(expr) __PT_LOG_ONCE( pt::log::err << "ERROR: " , expr )
 
 
 #define __PT_LOG_LIMITED( __LOGSTREAM, log_limit, expr ) \
@@ -96,8 +96,8 @@ inline log::logstream& err = log::err;
 }
 
 #define PT_LOG_LIMITED_INFO(log_limit, expr) __PT_LOG_LIMITED( pt::log::out, log_limit, expr )
-#define PT_LOG_LIMITED_WARN(log_limit, expr) __PT_LOG_LIMITED( pt::log::warn, log_limit, expr )
-#define PT_LOG_LIMITED_ERR(log_limit, expr) __PT_LOG_LIMITED( pt::log::err, log_limit, expr )
+#define PT_LOG_LIMITED_WARN(log_limit, expr) __PT_LOG_LIMITED( pt::log::warn << "WARNING: " , log_limit, expr )
+#define PT_LOG_LIMITED_ERR(log_limit, expr) __PT_LOG_LIMITED( pt::log::err << "ERROR: " , log_limit, expr )
 
 //Like assertions, PT_LOG_DEBUG can be macro-disabled
 //  to eliminate unnecessary performance footprint in release builds
