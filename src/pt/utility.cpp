@@ -1,5 +1,7 @@
 #include "pt/utility.hpp"
 
+#include "pt/logging.h"
+
 //-----linux-----
 #ifdef PT_PLATFORM_LINUX
 #include <execinfo.h>
@@ -38,18 +40,18 @@ PrintStackTrace( const char* additional_message )
     size = backtrace( array, maxsize );
 
     // print out all the frames to stderr
-    fprintf( stderr, "---------- Stack trace ----------\n" );
     fprintf( stderr, "Error: %s:\n", additional_message );
+    fprintf( stderr, "---------- Stack trace ----------\n" );
     backtrace_symbols_fd( array, size, STDERR_FILENO );
     fprintf( stderr, "\n" );
 #elif defined PT_PLATFORM_WINDOWS
-    fprintf( stderr, "---------- Stack trace ----------\n" );
     fprintf( stderr, "Error: %s:\n", additional_message );
+    fprintf( stderr, "---------- Stack trace ----------\n" );
     fprintf( stderr, "No stacktrace implemented for Windows yet!" );
     fprintf( stderr, "\n" );
 #elif defined PT_PLATFORM_MAC
-    fprintf( stderr, "---------- Stack trace ----------\n" );
     fprintf( stderr, "Error: %s:\n", additional_message );
+    fprintf( stderr, "---------- Stack trace ----------\n" );
     fprintf( stderr, "No stacktrace implemented for Mac yet!" );
     fprintf( stderr, "\n" );
 #endif
@@ -363,8 +365,7 @@ ReadTextFile( const std::string& path )
 {
     std::ifstream ifs( path );
     if( !ifs.good() ){
-        //TODO: use pt::log::err instead
-        std::cerr << "Failed to open/read file: '" << path << "'!\n";
+        PT_LOG_ERR( "Failed to open/read file: '" << path << "'!" );
         return std::string();
     }
 
@@ -379,8 +380,7 @@ ReadBinaryFile( const std::string& path )
 {
     std::ifstream ifs( path, std::ios::binary );
     if( !ifs.good() ){
-        //TODO: use pt::log::err instead
-        std::cerr << "Failed to open/read file: '" << path << "'!\n";
+        PT_LOG_ERR( "Failed to open/read file: '" << path << "'!" );
         return std::vector<uint8_t>();
     }
 

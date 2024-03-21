@@ -12,7 +12,7 @@ PrintStackTrace( const char* message ){
 void pt::helper::
 WarnUnimplementedFunction()
 {
-    pt::PrintStackTrace( "Unimplemented/unfinished function called:" );
+    pt::PrintStackTrace( "Unimplemented/unfinished function called" );
     //TODO: use logging instead
     //TODO: get filename and line number instead of stacktrace
 }

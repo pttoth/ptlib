@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 //#include <experimental/filesystem>
 //#include <filesystem>
@@ -58,13 +59,20 @@ class logstream{
     bool            mEnabled;
     std::string     mMessagePrefix;
 
+    //TODO: make 'LogMessage' compatible with 'ostringstream::rdbuf()' as parameter
+    //  eg.: std::ostringstream oss;
+    //       pt::log::out << oss.rdbuf();
+
     #ifdef PT_PLATFORM_LINUX
     template<typename T>
-    void LogMessageLinux(T data) const{
+    void LogMessageLinux( const T data ) const{
         //temporary solution
         //TODO: enqueue the message in the logger process instead
-        //note: take care of race conditions between debug/out/warn/err
 
+        //TODO: take care of race conditions between debug/out/warn/err
+
+        //TODO: by default, fill a buffer only
+        //      when 'pt::log::send' is received, send the message to the logger process
         std::string fname = this->getFileName();
 
         if( mEnabled ){
@@ -132,7 +140,7 @@ class logstream{
 
 
     template<typename T>
-    void LogMessage(T data) const{
+    void LogMessage( const T data ) const{
         #ifdef PT_PLATFORM_LINUX
         LogMessageLinux<T>(data);
         #elif PT_PLATFORM_WINDOWS
@@ -185,6 +193,25 @@ public:
     DEFINE_LOGSTREAM_OUT_FUNC_OPERATOR(std::ostream&, (std::ostream&))
     DEFINE_LOGSTREAM_OUT_FUNC_OPERATOR(std::ios&, (std::ios&))
     DEFINE_LOGSTREAM_OUT_FUNC_OPERATOR(std::ios_base&, (std::ios_base&))
+
+    template<class T>
+    logstream& operator<<( const std::vector<T> list ){
+        if( mEnabled ){
+            std::ostringstream oss;
+            oss << "[";
+            size_t maxsize = list.size();
+            for( size_t i=0; i<maxsize; ++i ){
+                oss << list[i];
+                if( i+1 < maxsize ){
+                    oss << ", ";
+                }
+            }
+            oss << "]";
+            LogMessage<std::string>( oss.str() ); //TODO: change to 'oss.rdbuf()' after it's compatible
+        }
+        return *this;
+    }
+
 };
 
 } //end of namespace 'log'
