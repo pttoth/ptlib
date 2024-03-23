@@ -265,6 +265,20 @@ setI(int eKey, int i)
 }
 
 
+const std::vector<pt::Config::entry>& pt::Config::
+GetEntriesRef() const
+{
+    return mEntries;
+}
+
+
+const std::string& pt::Config::
+GetPathRef() const
+{
+    return mPath;
+}
+
+
 std::vector<pt::Config::entry>& pt::Config::
 GetEntriesRef()
 {

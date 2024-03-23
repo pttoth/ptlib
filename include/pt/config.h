@@ -67,6 +67,8 @@ protected:
         std::string  val_str;       //string value associated with key
     };
 
+    const std::vector<entry>& GetEntriesRef() const;
+    const std::string&        GetPathRef() const;
     std::vector<entry>& GetEntriesRef();
     std::string&        GetPathRef();
 
