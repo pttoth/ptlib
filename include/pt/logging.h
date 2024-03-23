@@ -74,12 +74,13 @@ extern logstream err;
 #define __PT_LOG_LIMITED( __LOGSTREAM, log_limit, expr ) \
 { \
     static int count = 1; \
-    if( count < log_limit ){ \
+    size_t limit = log_limit; \
+    if( count < limit ){ \
         __LOGSTREAM << expr << pt::log::send; \
         ++count; \
-    }else if( count == log_limit ){ \
+    }else if( count == limit ){ \
         __LOGSTREAM << expr << pt::log::send; \
-        __LOGSTREAM << "  Limit(" << log_limit << ") reached. Suppressing further logging of this message." << pt::log::send; \
+        __LOGSTREAM << "  Limit(" << limit << ") reached. Suppressing further logging of this message." << pt::log::send; \
         ++count; \
     } \
 }
