@@ -57,16 +57,20 @@ public:
     void        setD(int eKey, double d);                   //throws std::invalid_argument
     void        setI(int eKey, int i);                      //throws std::invalid_argument
 
-private:
+protected:
+    static const char*  mSepKeyValue;       //key-value spearator string
+    static const char*  mSepValueComment;   //value-comment spearator string
+
     struct entry{
         int key_id;                 //the key's actual enum as integer
         std::string  key_str;       //enum id as string
         std::string  val_str;       //string value associated with key
     };
 
-    static const char*  mSepKeyValue;       //key-value spearator string
-    static const char*  mSepValueComment;   //value-comment spearator string
+    std::vector<entry>& GetEntriesRef();
+    std::string&        GetPathRef();
 
+private:
     std::vector<entry>  mEntries;   //the stored data
     std::string         mPath;      //file to read from and write to
 

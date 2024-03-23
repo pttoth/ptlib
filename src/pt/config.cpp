@@ -264,6 +264,21 @@ setI(int eKey, int i)
     data = buf;
 }
 
+
+std::vector<pt::Config::entry>& pt::Config::
+GetEntriesRef()
+{
+    return mEntries;
+}
+
+
+std::string& pt::Config::
+GetPathRef()
+{
+    return mPath;
+}
+
+
 std::string Config::
 getData_(int eKey) const
 {
