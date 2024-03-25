@@ -46,6 +46,15 @@ addKey(int eKey, const char *name)
     }
 }
 
+
+void Config::
+clear()
+{
+    mEntries.clear();
+    mPath.clear();
+}
+
+
 void Config::
 read()
 {

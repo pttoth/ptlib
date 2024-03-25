@@ -30,6 +30,7 @@ public:
     bool operator==(const Config &other) const  = delete;
 
     void        addKey(int eKey, char const *name); //throws std::invalid_argument
+    void        clear();
 
     void        read();                         //throws std::invalid_argument, std::logic_error
     void        readF(char const *path);        //throws std::invalid_argument
