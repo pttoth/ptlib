@@ -63,6 +63,8 @@ public:
     bool operator==( const Name& other ) const;
     bool operator!=( const Name& other ) const;
 
+    size_t length() const;
+
     const std::string& GetStdString() const;
     bool IsEmpty() const;
     void Init() const;
