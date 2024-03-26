@@ -114,7 +114,7 @@ operator!=( const Name& other ) const
 size_t pt::Name::
 length() const
 {
-    return mData->str.length();
+    return GetStdString().length();
 }
 
 
