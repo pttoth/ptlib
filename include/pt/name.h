@@ -115,3 +115,9 @@ private:
 } // end of namespace 'pt'
 
 std::ostream& operator<<( std::ostream& os, const pt::Name& obj );
+
+template<> struct std::hash<pt::Name> {
+    std::size_t operator()( pt::Name const& name ) const noexcept {
+        return std::hash<std::string>{}( name.GetStdString() );
+    }
+};
