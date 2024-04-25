@@ -44,6 +44,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/macros.cpp
     ${MY_PROJ_ROOT}/src/pt/name.cpp
     ${MY_PROJ_ROOT}/src/pt/profiler.cpp
+    ${MY_PROJ_ROOT}/src/pt/string.cpp
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
     ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
     ${MY_PROJ_ROOT}/src/pt/logging.cpp
@@ -54,6 +55,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/include/pt/macros.h
     ${MY_PROJ_ROOT}/include/pt/name.h
     ${MY_PROJ_ROOT}/include/pt/profiler.h
+    ${MY_PROJ_ROOT}/include/pt/string.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
     ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/logging.h
