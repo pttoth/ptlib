@@ -42,7 +42,7 @@ PrintStackTrace( const char* additional_message )
     // print out all the frames to stderr
     fprintf( stderr, "Error: %s:\n", additional_message );
     fprintf( stderr, "---------- Stack trace ----------\n" );
-    backtrace_symbols_fd( array, size, STDERR_FILENO );
+    backtrace_symbols_fd( array, size, STDERR_FILENO );     //TODO: this writes to stderr on a separate thread! fix!
     fprintf( stderr, "\n" );
 #elif defined PT_PLATFORM_WINDOWS
     fprintf( stderr, "Error: %s:\n", additional_message );
