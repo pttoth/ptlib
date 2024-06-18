@@ -136,7 +136,7 @@ bool pt::Name::
 IsEmpty() const
 {
     // check, that mId is not out of sync with mData
-    assert( (0 == mId) && (nullptr == mData) || (0 != mId) && (nullptr != mData) );
+    assert( ((0 == mId) && (nullptr == mData)) || ((0 != mId) && (nullptr != mData)) );
     return (0 == mId) || ( IsInPreInitState_() && 0 == mData->str.length() );
 }
 
