@@ -23,3 +23,5 @@ Event
 			- functor objects
 			- type[=] lambdas (check others)
 
+verify Config::readS()
+    says it throws 'std::invalid_exception'
