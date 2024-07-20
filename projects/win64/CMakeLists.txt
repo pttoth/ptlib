@@ -28,18 +28,33 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 
-set(MY_COMPILE_FLAGS "-Wall -Wextra")
+
+#custom macros:
+#  PT_DEBUG_ENABLED
+#    enables additional debug logic and verbose debug logging
+#    !! not having 'NDEBUG' defined will enable 'PT_DEBUG_ENABLED' !!
+#  PT_DEBUG_NOAUTO
+#    prevents auto-defining 'PT_DEBUG_ENABLED' based on 'NDEBUG'
+set(MY_COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -DPT_MEASURE_PERFORMANCE")
 set(CMAKE_C_FLAGS ${MY_COMPILE_FLAGS})
 set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 
 #build an archive (.a), for static linking
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
+    ${MY_PROJ_ROOT}/src/pt/macros.cpp
+    ${MY_PROJ_ROOT}/src/pt/name.cpp
+    ${MY_PROJ_ROOT}/src/pt/profiler.cpp
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
     ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
     ${MY_PROJ_ROOT}/src/pt/logging.cpp
     ${MY_PROJ_ROOT}/include/pt/alias.h
     ${MY_PROJ_ROOT}/include/pt/config.h
+    ${MY_PROJ_ROOT}/include/pt/def.h
+    ${MY_PROJ_ROOT}/include/pt/guard.hpp
+    ${MY_PROJ_ROOT}/include/pt/macros.h
+    ${MY_PROJ_ROOT}/include/pt/name.h
+    ${MY_PROJ_ROOT}/include/pt/profiler.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
     ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/logging.h
