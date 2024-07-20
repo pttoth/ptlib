@@ -97,7 +97,7 @@ class logstream{
             fs.close();
         }
     }
-    #elif PT_PLATFORM_WINDOWS
+    #elif defined PT_PLATFORM_WINDOWS
     template<typename T>
     void LogMessageWin(T data) const{
 //test code for handling Unicode paths
@@ -143,7 +143,7 @@ class logstream{
     void LogMessage( const T data ) const{
         #ifdef PT_PLATFORM_LINUX
         LogMessageLinux<T>(data);
-        #elif PT_PLATFORM_WINDOWS
+        #elif defined PT_PLATFORM_WINDOWS
         LogMessageWin<T>(data);
         #endif
     }

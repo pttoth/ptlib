@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#elif PT_PLATFORM_WINDOWS
+#elif defined PT_PLATFORM_WINDOWS
 #include <windows.h>
 #include <tchar.h>
 #include <windef.h>
@@ -129,7 +129,7 @@ InitializeLinux(const std::string& root_directory,
 
 
 
-#elif PT_PLATFORM_WINDOWS
+#elif defined PT_PLATFORM_WINDOWS
 
 
 //need valid filename check? can be a security risk?
@@ -198,7 +198,7 @@ Initialize(const std::string &root_directory,
 
     #ifdef PT_PLATFORM_LINUX
     success = InitializeLinux(root_directory, filename, timeout);
-    #elif PT_PLATFORM_WINDOWS
+    #elif defined PT_PLATFORM_WINDOWS
     success = InitializeWin(root_directory, filename, timeout);
     #endif
 
