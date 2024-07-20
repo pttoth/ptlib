@@ -99,7 +99,7 @@ class logstream{
     }
     #elif defined PT_PLATFORM_WINDOWS
     template<typename T>
-    void LogMessageWin(T data) const{
+    void LogMessageWin( const T data ) const{
 //test code for handling Unicode paths
 //  MinGW 8.1.0's buggy with c++17 'std::filesystem', need new compiler for this
 /*
