@@ -106,7 +106,7 @@ void CStrToWCStr(wchar_t* output, const char* const text, size_t size);
 std::string WStringToUTF8(const std::wstring& wstring_to_convert);
 std::wstring StringToWString(const std::string& string_to_convert);
 
-void CreateDirectory(const std::string& path);
+void MakeDirectory(const std::string& path);
 void EnsureExistingDirectory(const std::string& path);
 
 template<typename T>

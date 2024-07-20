@@ -273,7 +273,7 @@ CreateDirectoryWin(const std::string& path)
 
 
 void pt::
-CreateDirectory(const std::string& path)
+MakeDirectory(const std::string& path)
 {
     #ifdef PT_PLATFORM_LINUX
     return CreateDirectoryLinux(path);
@@ -302,7 +302,7 @@ EnsureExistingDirectory(const std::string& path)
     while( (curr = path.find('/', prev+1)) != std::string::npos ){
         dir += path.substr(prev, curr-prev);
 
-        CreateDirectory(dir); //throws std::invalid_arguments!
+        MakeDirectory(dir); //throws std::invalid_arguments!
         prev = curr;
     }
 }
