@@ -23,11 +23,22 @@ void WarnUnimplementedFunction();
 } // end of namespace 'helper'
 } // end of namespace 'pt'
 
-// compatibility helper macro for defining removable macro functions
-#if defined __cplusplus && __GNUC_PREREQ (2,95)
-# define __PT_VOID_CAST static_cast<void>
+// COMPATIBILITY
+//   this is a copy of the convenience-macro '__GNUC_PREREQ' found in '/usr/include/features.h'
+//   it's not part of the GNU standard and was not available on Windows...
+#if defined __GNUC__ && defined __GNUC_MINOR__
+# define PT__GNUC_PREREQ(maj, min) \
+    ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
 #else
-# define __PT_VOID_CAST (void)
+# define PT__GNUC_PREREQ(maj, min) 0
+#endif
+
+
+// compatibility helper macro for defining removable macro functions
+#if defined __cplusplus && PT__GNUC_PREREQ (2,95)
+# define PT__VOID_CAST static_cast<void>
+#else
+# define PT__VOID_CAST (void)
 #endif
 
 
