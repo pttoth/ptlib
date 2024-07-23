@@ -121,7 +121,7 @@ class logstream{
 */
 
             std::cout << data;
-
+/*
             std::string fname = this->getFileName();
             std::string path = fname;
             std::fstream fs;
@@ -135,6 +135,7 @@ class logstream{
             fs << data;
 
             fs.close();
+*/
     }
     #endif
 
@@ -178,6 +179,8 @@ public:
     DEFINE_LOGSTREAM_OUT_OPERATOR(const unsigned int)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const long)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const unsigned long)
+    DEFINE_LOGSTREAM_OUT_OPERATOR(const long long)
+    DEFINE_LOGSTREAM_OUT_OPERATOR(const unsigned long long)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const float)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const double)
     DEFINE_LOGSTREAM_OUT_OPERATOR(const long double)
