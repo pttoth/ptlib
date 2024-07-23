@@ -36,9 +36,9 @@ void WarnUnimplementedFunction();
 
 // compatibility helper macro for defining removable macro functions
 #if defined __cplusplus && PT__GNUC_PREREQ (2,95)
-# define PT__VOID_CAST static_cast<void>
+# define __PT_VOID_CAST static_cast<void>
 #else
-# define PT__VOID_CAST (void)
+# define __PT_VOID_CAST (void)
 #endif
 
 
