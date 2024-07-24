@@ -2,25 +2,6 @@
 
 #include "pt/logging.h"
 
-//-----linux-----
-#ifdef PT_PLATFORM_LINUX
-#include <execinfo.h>
-#include <unistd.h>
-
-//----windows----
-#elif defined PT_PLATFORM_WINDOWS
-/*
-#include<windows.h>
-#include<dbghelp.h>
-#include<stdio.h>
-#include<stdlib.h>
-*/
-//------mac------
-#elif defined PT_PLATFORM_MAC
-//...
-//---------------
-#endif
-
 #include <locale>
 #include <codecvt>
 
@@ -31,6 +12,26 @@
 #include <iostream>
 #include <sstream>
 #include <regex>
+
+//-----linux-----
+#ifdef PT_PLATFORM_LINUX
+#include <execinfo.h>
+#include <unistd.h>
+
+//----windows----
+#elif defined PT_PLATFORM_WINDOWS
+
+#include<windows.h>
+/*
+#include<dbghelp.h>
+#include<stdio.h>
+#include<stdlib.h>
+*/
+//------mac------
+#elif defined PT_PLATFORM_MAC
+//...
+//---------------
+#endif
 
 void pt::
 PrintStackTrace( const char* additional_message )
@@ -94,6 +95,20 @@ PrintStackTrace( const char* additional_message )
     fprintf( stderr, "\n" );
 #endif
 }
+
+
+#if defined PT_PLATFORM_WINDOWS
+// helper function because calling 'Sleep()' inside 'pt::Sleep()' would cause infinite recursion
+namespace helper{
+
+void
+SleepWin( size_t time_ms )
+{
+    Sleep( time_ms );
+}
+
+} end of namespace 'helper'
+#endif
 
 
 bool pt::
@@ -391,7 +406,7 @@ Sleep( size_t time_ms )
     #ifdef PT_PLATFORM_LINUX
     usleep( time_ms * 1000 );
     #elif defined PT_PLATFORM_WINDOWS
-    Sleep( time_ms );
+    helper::SleepWin( time_ms );
     #elif defined PT_PLATFORM_MAC
     #error "pt::Sleep( size_t ) is not defined for Mac platform!"
     #endif
