@@ -29,6 +29,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${MY_OUTPUT_DIR_DEBUG})
 
 
+# MinGW - no console, look into this
+#   Windows-only (MINGW)
+#       -Wl,–subsystem,console => Build for console subsystem.
+#       -Wl,–subsystem,windows => Build for winodw subsystem.
+# https://caiorss.github.io/C-Cpp-Notes/compiler-flags-options.html
+
 #custom macros:
 #  PT_DEBUG_ENABLED
 #    enables additional debug logic and verbose debug logging

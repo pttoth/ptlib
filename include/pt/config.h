@@ -18,6 +18,8 @@ namespace pt{
 #define CfgAddKey(CFG_INSTANCE_NAME, ENUM_NAME) \
             CFG_INSTANCE_NAME.addKey(ENUM_NAME, #ENUM_NAME);
 
+// @TODO: remove exception logic entirely!
+
 class Config
 {
 public:
@@ -35,7 +37,7 @@ public:
     void        read();                         //throws std::invalid_argument, std::logic_error
     void        readF(char const *path);        //throws std::invalid_argument
     void        readF(const std::string& path); //throws std::invalid_argument
-    void        readS(const std::string& str);  //throws std::invalid_argument
+    void        readS(const std::string& str);  //throws std::invalid_argument  // @TODO: revise, this might be false
 
     void        write();                                //throws std::invalid_argument, std::logic_error
     void        writeF(char const *path);               //throws std::invalid_argument
