@@ -172,24 +172,43 @@ public:
     // missing functionality:
     //  << std::hex, std::dec, etc.
 
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const bool)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const short)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const unsigned short)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const int)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const unsigned int)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const long)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const unsigned long)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const long long)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const unsigned long long)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const float)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const double)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const long double)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const void*)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const std::streambuf*)
+    //operator<<() defintions:
+    //  generic
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const void* )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const bool )
 
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const char)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const char*)
-    DEFINE_LOGSTREAM_OUT_OPERATOR(const std::string&)
+    //  Integer types (signed)
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const signed char )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const short )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const int )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const long )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const long long )
+
+    //  Integer types (unsigned)
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const unsigned char )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const unsigned short )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const unsigned int )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const unsigned long )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const unsigned long long )
+
+    //  Floating-point types
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const float )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const double )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const long double )
+
+    //  Character types
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const char )
+    //DEFINE_LOGSTREAM_OUT_OPERATOR( const char16_t )       // need testing
+    //DEFINE_LOGSTREAM_OUT_OPERATOR( const char32_t )       // need testing
+    //DEFINE_LOGSTREAM_OUT_OPERATOR( const wchar_t )        // need testing
+
+    //  strings / classes / raw data
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const char* )
+    //DEFINE_LOGSTREAM_OUT_OPERATOR( const char16_t* )      // need testing
+    //DEFINE_LOGSTREAM_OUT_OPERATOR( const char32_t* )      // need testing
+    //DEFINE_LOGSTREAM_OUT_OPERATOR( const wchar_t* )       // need testing
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const std::streambuf* )
+    DEFINE_LOGSTREAM_OUT_OPERATOR( const std::string& )
 
     logstream& operator<<( const Name& data);
 
