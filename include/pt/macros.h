@@ -30,16 +30,15 @@ void WarnDeprecatedFunction();
 //   this is a copy of the convenience-macro '__GNUC_PREREQ' found in '/usr/include/features.h'
 //   it's not part of the GNU standard and is not available on Windows...
 #if defined __GNUC__ && defined __GNUC_MINOR__
-# define PT__GNUC_PREREQ(maj, min) \
+# define __PT_GNUC_PREREQ(maj, min) \
     ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
 #else
-# define PT__GNUC_PREREQ(maj, min) 0
+# define __PT_GNUC_PREREQ(maj, min) 0
 #endif
 
-// @TODO: PT__GNUC_PREREQ -> __PT_GNUC_PREREQ
 
 // compatibility helper macro for defining removable macro functions
-#if defined __cplusplus && PT__GNUC_PREREQ (2,95)
+#if defined __cplusplus && __PT_GNUC_PREREQ (2,95)
 # define __PT_VOID_CAST static_cast<void>
 #else
 # define __PT_VOID_CAST (void)
