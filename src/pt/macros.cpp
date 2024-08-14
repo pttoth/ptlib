@@ -16,3 +16,12 @@ WarnUnimplementedFunction()
     //TODO: use logging instead
     //TODO: get filename and line number instead of stacktrace
 }
+
+
+void pt::helper::
+WarnDeprecatedFunction()
+{
+    pt::PrintStackTrace( "Called function is marked deprecated" );
+    //TODO: use logging instead
+    //TODO: get filename and line number instead of stacktrace
+}

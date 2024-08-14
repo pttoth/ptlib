@@ -19,13 +19,16 @@ namespace helper{
 
 void PrintStackTrace( const char* message = "" );
 void WarnUnimplementedFunction();
+void WarnDeprecatedFunction();
 
 } // end of namespace 'helper'
 } // end of namespace 'pt'
 
+// @TODO: move things without dependencies to 'pt/def.h'
+
 // COMPATIBILITY
 //   this is a copy of the convenience-macro '__GNUC_PREREQ' found in '/usr/include/features.h'
-//   it's not part of the GNU standard and was not available on Windows...
+//   it's not part of the GNU standard and is not available on Windows...
 #if defined __GNUC__ && defined __GNUC_MINOR__
 # define PT__GNUC_PREREQ(maj, min) \
     ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
@@ -33,6 +36,7 @@ void WarnUnimplementedFunction();
 # define PT__GNUC_PREREQ(maj, min) 0
 #endif
 
+// @TODO: PT__GNUC_PREREQ -> __PT_GNUC_PREREQ
 
 // compatibility helper macro for defining removable macro functions
 #if defined __cplusplus && PT__GNUC_PREREQ (2,95)
@@ -48,6 +52,16 @@ void WarnUnimplementedFunction();
 
 #define PT_WARN_UNIMPLEMENTED_FUNCTION \
     pt::helper::WarnUnimplementedFunction();
+
+
+
+#ifdef PT_DEBUG_ENABLED
+    #define PT_WARN_DEPRECATED_FUNCTION \
+        pt::helper::WarnDeprecatedFunction();
+#else
+    #define PT_WARN_DEPRECATED_FUNCTION __PT_VOID_CAST (0);
+#endif
+
 
 
 #define PT_FORWARD_DECLARE_CLASS( CLASSNAME ) \
