@@ -269,6 +269,24 @@ StringToUpper(const std::string& str)
 }
 
 
+std::string pt::
+StringPrefix( const std::string& str, size_t count )
+{
+    return str.substr( 0, count );
+}
+
+
+std::string pt::
+StringPostfix( const std::string& str, size_t count )
+{
+    int32_t startindex = str.length() - count;
+    if( startindex < 0 ){
+        return std::string();
+    }
+    return str.substr( startindex, count );
+}
+
+
 bool pt::
 MatchRegex(const char* const str, const char* const regex_str)
 {

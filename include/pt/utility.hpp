@@ -96,7 +96,8 @@ bool SplitString(std::string* retval, const std::string& str, const std::string&
 // doesn't work with non-ASCII chars, skips transforming multi-byte characters
 std::string StringToLower(const std::string& str);
 std::string StringToUpper(const std::string& str);
-
+std::string StringPrefix( const std::string& str, size_t count );
+std::string StringPostfix( const std::string& str, size_t count );
 
 bool MatchRegex(const char* const str, const char* const regex_str);
 bool MatchRegex(const char* str, const std::string& regex_str);
