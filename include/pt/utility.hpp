@@ -29,6 +29,7 @@ std::shared_ptr<T> NewPtr( Signature... params ){
 
 namespace pt{
 
+void PrintStackTrace( const std::string& additional_message );
 void PrintStackTrace( const char* additional_message = "" );
 
 

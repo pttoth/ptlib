@@ -33,6 +33,14 @@
 //---------------
 #endif
 
+
+void pt::
+PrintStackTrace( const std::string& additional_message )
+{
+    PrintStackTrace( additional_message.c_str() );
+}
+
+
 void pt::
 PrintStackTrace( const char* additional_message )
 {
@@ -498,5 +506,4 @@ MurmurHash2( const void* key, int len, uint32_t seed )
 
   return h;
 }
-
 
