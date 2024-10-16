@@ -120,7 +120,7 @@ const T& Clamp( const T& v, const T& lo, const T& hi ){
 /**
  * @brief Sleep for 'time_ms' milliseconds.
  */
-void Sleep( size_t time_ms );
+void SleepMS( size_t time_ms );
 
 
 /**

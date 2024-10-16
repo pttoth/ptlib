@@ -105,20 +105,6 @@ PrintStackTrace( const char* additional_message )
 }
 
 
-#if defined PT_PLATFORM_WINDOWS
-// helper function because calling 'Sleep()' inside 'pt::Sleep()' would cause infinite recursion
-namespace helper{
-
-void
-SleepWin( size_t time_ms )
-{
-    Sleep( time_ms );
-}
-
-} end of namespace 'helper'
-#endif
-
-
 bool pt::
 IsCharDigit(char c)
 {
@@ -427,15 +413,17 @@ StringToWString(const std::string& string_to_convert)
 
 
 void pt::
-Sleep( size_t time_ms )
+SleepMS( size_t time_ms )
 {
     #ifdef PT_PLATFORM_LINUX
-    usleep( time_ms * 1000 );
+    usleep( time_ms * 1000 );   // Unix API usleep()
     #elif defined PT_PLATFORM_WINDOWS
-    helper::SleepWin( time_ms );
+    Sleep( time_ms );           // WinAPI Sleep()
     #elif defined PT_PLATFORM_MAC
-    #error "pt::Sleep( size_t ) is not defined for Mac platform!"
-    #endif
+    #error "pt::SleepMS( size_t ) is not defined for Mac platform!"
+    #else
+    #error "pt::SleepMS( size_t ) is not defined for this platform!"
+#endif
 }
 
 
