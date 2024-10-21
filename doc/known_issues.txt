@@ -1,11 +1,18 @@
 build:
-	when building from terminal, cmake doesn't find the freshly built 'ptlib.a' to link with the test program
-	calling make twice finishes the build correctly
-	need some research...
+    Windows
+        build produces libraries with '.a' extension
+            why isn't it .lib?
+            does is matter?
+        when building from terminal, cmake doesn't find the freshly built 'ptlib.a' to link with the test program
+            calling make twice finishes the build correctly
+            QtCreator seems to precache libs or something, because a lot of times, it holds locks for these files
+                might be the reason (bug) why it doesn't look for freshly built libs as dependencies
+    need to switch from Windows dev env to cross-compiled builds in Docker
+        ...because MinGW's toolsets are no longer maintained on Windows (stays at 8.1.0, should use 11.0.0 or 12.0.0 instead)
 
 generic:
     - various camelcase problems
-	- add documentation for non-obvious functions
+    - add documentation for non-obvious functions
 
 event:
     - current entry key-pair (instance ptr, function ptr) violates cpp standard
@@ -16,7 +23,7 @@ event:
       see: https://stackoverflow.com/questions/1485983/how-can-i-create-a-pointer-to-a-member-function-and-call-it
 
 Config:
-	- refactor private function names containing '_' as starting character
+    - refactor private function names containing '_' as starting character
     - error prints should use "CONFIG: " in front of every message
         also print config file path
         it should use logger::debug as message output
@@ -24,18 +31,22 @@ Config:
     - need to check other behaviors regarding read / write access to files
     - invalid query exceptions don't contain info about the key and value pair
         fix: added _buildErrorStringInvalidValue(int eKey) prototype, need testing
+
 logging:
     - cannot handle unicode paths yet
         need c++17 and 'std::filesystem' for that
           but 'std::filesystem' is buggy with MinGW 8.1.0
           and there is no newer official prebuilt version
+            MinGW's toolsets are no longer maintained on Windows
+            switch to cross-compilation with Docker...
         c++14 + 'experimental/filesystem' is also inadequate
     - isn't multiprocess yet
     - can't create folders on Windows yet
+
 utility:
     SplitString
         check whether it fails if there is no occurence of separator sequence
-		add documentation for usage
+        add documentation for usage
 
 tests:
     - add test calls for every template function

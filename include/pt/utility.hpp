@@ -93,9 +93,10 @@ bool SplitString(std::string* retval, const std::string& str, const char *sequen
 bool SplitString(std::string* retval, const std::string& str, const std::string& sequence);
 
 
-// doesn't work with non-ASCII chars, skips transforming multi-byte characters
+// Doesn't transform multi-byte (non-english) characters
 std::string StringToLower(const std::string& str);
 std::string StringToUpper(const std::string& str);
+
 std::string StringPrefix( const std::string& str, size_t count );
 std::string StringPostfix( const std::string& str, size_t count );
 
