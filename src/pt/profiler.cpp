@@ -31,11 +31,6 @@ PerfProfiler( const std::string& id ):
     mName( id ), mStartTime( std::chrono::steady_clock::now() )
 {}
 
-pt::PerfProfiler::
-PerfProfiler( const Name& id ):
-    mName( id.GetStdString() ), mStartTime( std::chrono::steady_clock::now() )
-{}
-
 
 pt::PerfProfiler::
 ~PerfProfiler()

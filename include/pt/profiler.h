@@ -39,7 +39,6 @@ public:
     PerfProfiler( char* id );
     PerfProfiler( const char* const id );
     PerfProfiler( const std::string& id );
-    PerfProfiler( const pt::Name& id );
     PerfProfiler( const PerfProfiler& other ) = delete;
     PerfProfiler( PerfProfiler&& other ) = delete;
     virtual ~PerfProfiler();
