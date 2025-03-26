@@ -422,6 +422,7 @@ public:
         mSize = other.mSize;
         defragment_from( other.mFunctions, other.mIndex ); //sets 'mIndex'
         delete[] old;
+        return *this;
     }
 
 
@@ -434,6 +435,7 @@ public:
         mIndex = source.mIndex;
         mFunctions = source.mFunctions;
         source.mFunctions = nullptr;
+        return *this;
     }
 
 
