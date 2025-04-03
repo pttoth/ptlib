@@ -17,6 +17,7 @@
 #include <exception>
 #include <memory>
 #include <string>
+#include <sstream>
 #include <vector>
 
 
@@ -77,6 +78,20 @@ RemoveElementInVector(std::vector<T>& vec, size_t pos)
     auto iter = vec.begin()+pos;
     vec.erase(iter);
 }
+
+template<typename T>
+inline std::string
+GetVectorAsString( const std::vector<T>& vec )
+{
+    std::stringstream ss;
+    ss << "(";
+    for( auto& elem : vec ){
+        ss << "'" << elem << "', ";
+    }
+    ss << ")";
+    return ss.str();
+}
+
 
 bool IsCharDigit(char c);
 bool IsEmptyOrWhitespaceLine(const std::string& str);
