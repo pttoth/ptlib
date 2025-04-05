@@ -461,7 +461,7 @@ parseData_(std::istream &stream)
 
     //running the code from QtCreator, there seems to be a bug,
     //  where ss.str() is longer than it should be and contains garbage at the end
-    //  couldn't find errors in the code, dunno if this is because Qt runs it with different dll-s
+    //  couldn't find errors in the code, dunno if this is because it runs it with different dll-s
     //this cuts off any possible bullshit from the end of the string
     data = ss.str();
     data = data.substr(0, expected_size);
