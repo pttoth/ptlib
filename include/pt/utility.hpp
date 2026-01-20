@@ -157,6 +157,25 @@ std::vector<uint8_t> ReadBinaryFile( const std::string& path );
 uint32_t MurmurHash2( const void* key, int len, uint32_t seed );
 
 
+/**
+ * @brief SmallestPow2GreaterEqThan
+ * @return The smallest, power of 2 number, that is greater than or equal to 'n'.
+ */
+uint64_t SmallestPow2GreaterEqThan( uint64_t n )
+{
+    if (n == 0) return 1;
+    if (n > (1ULL << 63)) return 0; // overflow
+
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    n |= n >> 32;
+    return n + 1;
+}
+
 } //end of namespace 'pt'
 
 
