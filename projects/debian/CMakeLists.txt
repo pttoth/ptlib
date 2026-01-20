@@ -42,6 +42,7 @@ set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
     ${MY_PROJ_ROOT}/src/pt/macros.cpp
+    ${MY_PROJ_ROOT}/src/pt/mem/Memory.cpp
     ${MY_PROJ_ROOT}/src/pt/name.cpp
     ${MY_PROJ_ROOT}/src/pt/profiler.cpp
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
@@ -52,6 +53,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/include/pt/def.h
     ${MY_PROJ_ROOT}/include/pt/guard.hpp
     ${MY_PROJ_ROOT}/include/pt/macros.h
+    ${MY_PROJ_ROOT}/include/pt/mem/Memory.h
     ${MY_PROJ_ROOT}/include/pt/name.h
     ${MY_PROJ_ROOT}/include/pt/profiler.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
