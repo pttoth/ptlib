@@ -107,7 +107,9 @@ ReturnBlock( Block& b )
 std::deque<HeapBlock> pt::mem::heap::
 GetBlocks()
 {
-    return heap::gBlocksPool;
+    PT_UNIMPLEMENTED_FUNCTION
+    //return heap::gBlocksPool;
+    return std::deque<HeapBlock>();
 }
 
 
@@ -128,7 +130,7 @@ CreateArena( u64 bytes )
     Arena a;
     auto blocks = heap::GetBlocks();
 
-    a.mBlock = heap::GetBlocks
+    //a.mBlock = heap::GetBlocks
 
 
     return a;
