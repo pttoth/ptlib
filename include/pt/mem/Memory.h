@@ -86,8 +86,8 @@ struct Arena
     }
 
 
-    template<typename T>
-    T*  Alloc( u64 amount_ ) noexcept
+    template<typename T, typename... Args>
+    T*  Alloc( u64 amount_, Args&&... args ) noexcept
     {
         void* buffer = (void*) AllocRaw( amount_ * sizeof(T), alignof(T) );
         if( nullptr == buffer ) return nullptr;
@@ -97,7 +97,7 @@ struct Arena
         T* p = (T*) buffer;
         try{
             for( u64 i=0; i<amount_; ++i ){
-                new (p+i) T();
+                new (p+i) T( std::forward<Args>(args)... );
                 ++ctor_successes;
             }
         }catch(...){
@@ -146,13 +146,9 @@ struct Arena
         return p;
     }
 
-
-    // TODO: add parameterized allocation
-    //.....
-
-
     template<typename T>
-    u64 RemainingSize() const noexcept{
+    u64 RemainingSize() const noexcept
+    {
         return RemainingSizeWithAlignment( sizeof(T), alignof(T) );
     }
 
@@ -165,7 +161,7 @@ struct Arena
 
         // verification, that Arena ptr is inside Block range
         assert( mBlock.mData <= mPtr );
-        assert( mPtr < endPtr );
+        assert( mPtr <= endPtr );
         if( endPtr <= alignedPtr ) return 0;
 
         return (endPtr - alignedPtr) / typeSize_;
