@@ -56,6 +56,7 @@ struct Arena
 
     Arena() noexcept = default;
 
+
     virtual ~Arena() noexcept
     {
         Reset();
@@ -66,70 +67,74 @@ struct Arena
         }
     }
 
-    //void* AllocRaw( u64 bytes ) noexcept  //TODO: add this header
-    void* AllocRaw( u64 bytes )
+
+    void* AllocRaw( u64 bytes_, size_t typeAlignment_ = alignof(u8) ) noexcept
     {
-        // TODO: write this
-        //  currently zero inits the buffer
-        //      return (void*) Alloc<u8>( bytes );
-        PT_UNIMPLEMENTED_FUNCTION
-        return nullptr;
+        u64 freeAmount = this->RemainingSizeWithAlignment( 1, 1 );
+        if( freeAmount < bytes_ ) return nullptr;
+
+        // Past this point, it is expected, that all alignment and size params are correct.
+        //  No further bounds checking needed.
+
+        // align 'mPtr' upward
+        uintptr_t alignedPtr = (mPtr + typeAlignment_ - 1) & ~(typeAlignment_ - 1);
+        uintptr_t retval = alignedPtr;
+
+        mPtr = alignedPtr + bytes_;
+
+        return (void*) retval;
     }
 
 
     template<typename T>
-    T*  Alloc( u64 amount ) noexcept
+    T*  Alloc( u64 amount_ ) noexcept
     {
-        u64 freeAmount = this->RemainingSize<T>();
-        if( freeAmount < amount ) return nullptr;
+        void* buffer = (void*) AllocRaw( amount_ * sizeof(T), alignof(T) );
+        if( nullptr == buffer ) return nullptr;
 
-        // Past this point, it is expected, that all alignment and size params are correct.
-
-        // align 'mPtr' upward
-        uintptr_t alignment = alignof(T);
-        uintptr_t alignedPtr = (mPtr + alignment - 1) & ~(alignment - 1);
-        uintptr_t retval = alignedPtr;
-        // TODO: verify this...
-
-        mPtr = alignedPtr + amount*sizeof(T);
-
-        // construct objects
+        // construct T objects
         u64 ctor_successes = 0; // count successes, in case exceptions occur
-        T* p = (T*) retval;
+        T* p = (T*) buffer;
         try{
-            for( u64 i=0; i<amount; ++i ){
+            for( u64 i=0; i<amount_; ++i ){
                 new (p+i) T();
                 ++ctor_successes;
             }
         }catch(...){
-            // call destructors for previous, successfully constructed instances
+            // some construction threw an exception
+            //  clean up the ones that already succeeded
             for( u64 i=0; i<ctor_successes; ++i ){
-                (p+ctor_successes-1-i)->~T();
+                try{
+                    (p+ctor_successes-1-i)->~T();
+                }catch(...){
+                    // TODO: log error
+                    assert(false);
+                }
             }
+            assert(false);
             // TODO: log error
             return nullptr;
         }
 
-
-        // store cleanup function
+        // store cleanup function for this allocation
         if( mCleanupsCount < mCleanupsArraySize ){
             // store in array (on stack)
-            mCleanups[mCleanupsCount] = [p, amount]() noexcept{
-                for( u64 i=0; i<amount; ++i ){
+            mCleanups[mCleanupsCount] = [p, amount_]() noexcept{
+                for( u64 i=0; i<amount_; ++i ){
                     try{
-                        (p+amount-1-i)->~T();   // reverse destruction order
+                        (p+amount_-1-i)->~T();   // reverse destruction order
                     }catch(...){
                         // TODO: log error
                     }
                 }
             };
         }else{
-            // store in overflow vector (on heap)
+            // ... or store in overflow vector (on heap)
             mCleanupsOverflow.reserve(32);
-            mCleanupsOverflow.push_back( [p, amount]() noexcept{
-                for( u64 i=0; i<amount; ++i ){
+            mCleanupsOverflow.push_back( [p, amount_]() noexcept{
+                for( u64 i=0; i<amount_; ++i ){
                     try{
-                        (p+amount-1-i)->~T();   // reverse destruction order
+                        (p+amount_-1-i)->~T();   // reverse destruction order
                     }catch(...){
                         // TODO: log error
                     }
@@ -138,7 +143,7 @@ struct Arena
         }
         ++mCleanupsCount;
 
-        return (T*) retval;
+        return p;
     }
 
 
@@ -147,20 +152,23 @@ struct Arena
 
 
     template<typename T>
-    u64 RemainingSize() const noexcept
+    u64 RemainingSize() const noexcept{
+        return RemainingSizeWithAlignment( sizeof(T), alignof(T) );
+    }
+
+
+    u64 RemainingSizeWithAlignment( size_t typeSize_, size_t typeAlignment_ ) const noexcept
     {
-        // verify, that Arena ptr is inside Block range
-        assert( mBlock.mData <= mPtr );
-        assert( mPtr < mBlock.mData + mBlock.mCapacity );
-
         // align 'mPtr' upward
-        uintptr_t alignment = alignof(T);
-        uintptr_t alignedPtr = (mPtr + alignment - 1) & ~(alignment - 1);
-
+        uintptr_t alignedPtr = (mPtr + typeAlignment_ - 1) & ~(typeAlignment_ - 1);
         uintptr_t endPtr = mBlock.mData + mBlock.mCapacity;
+
+        // verification, that Arena ptr is inside Block range
+        assert( mBlock.mData <= mPtr );
+        assert( mPtr < endPtr );
         if( endPtr <= alignedPtr ) return 0;
 
-        return (endPtr - alignedPtr) / sizeof(T);
+        return (endPtr - alignedPtr) / typeSize_;
     }
 
 
