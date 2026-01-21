@@ -161,7 +161,8 @@ uint32_t MurmurHash2( const void* key, int len, uint32_t seed );
  * @brief SmallestPow2GreaterEqThan
  * @return The smallest, power of 2 number, that is greater than or equal to 'n'.
  */
-uint64_t SmallestPow2GreaterEqThan( uint64_t n )
+inline uint64_t
+SmallestPow2GreaterEqThan( uint64_t n )
 {
     if (n == 0) return 1;
     if (n > (1ULL << 63)) return 0; // overflow
@@ -174,6 +175,14 @@ uint64_t SmallestPow2GreaterEqThan( uint64_t n )
     n |= n >> 16;
     n |= n >> 32;
     return n + 1;
+}
+
+
+template<typename T>
+inline uintptr_t
+AlignAs( uintptr_t p_ )
+{
+    return (p_ + alignof(T) - 1) & ~(alignof(T) - 1);
 }
 
 } //end of namespace 'pt'
