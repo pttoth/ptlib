@@ -43,7 +43,7 @@ void    ReturnBlock( Block& );  // returns the memory into ready pool
 struct Arena
 {
     heap::Block     mBlock;
-    uintptr_t       mPtr     = mBlock.mData;
+    uintptr_t       mPtr     = 0;
     bool            mManaged = false;
 
     static const u64    mCleanupsArraySize  = 64;
@@ -54,10 +54,17 @@ struct Arena
     std::vector<std::function<void()>>                      mCleanupsOverflow; // only used if ran out of array
 
 
-    Arena() noexcept = default;
+    // nulls all values, does not free anything (for move semantics)
+    void _NullifyValues() noexcept
+    {
+        mBlock      = heap::Block();
+        mPtr        = 0;
+        mManaged    = false;
+    }
 
 
-    virtual ~Arena() noexcept
+    // Resets Arena, frees all resources and nulls all values
+    void _ReleaseResouces() noexcept
     {
         Reset();
         if( mManaged ){
@@ -65,7 +72,38 @@ struct Arena
         }else{
             heap::ReturnBlock( mBlock );
         }
+        _NullifyValues();
     }
+
+
+    Arena() noexcept = default;
+    Arena( const Arena& ) = delete;
+    Arena( Arena&& rhs ):
+        mBlock( rhs.mBlock ), mPtr( rhs.mPtr ), mManaged( rhs.mManaged )
+    {
+        rhs._NullifyValues();
+    }
+
+
+    virtual ~Arena() noexcept
+    {
+        _ReleaseResouces();
+    }
+
+
+    Arena& operator=( const Arena& ) = delete;
+    Arena& operator=( Arena&& rhs )
+    {
+        _ReleaseResouces();
+        mBlock  = rhs.mBlock;
+        mPtr    = rhs.mPtr;
+        mManaged = rhs.mManaged;
+
+        rhs._NullifyValues();
+        return *this;
+    }
+
+    bool operator==( const Arena& ) = delete;
 
 
     void* AllocRaw( u64 bytes_, size_t typeAlignment_ = alignof(u8) ) noexcept
@@ -146,6 +184,7 @@ struct Arena
         return p;
     }
 
+
     template<typename T>
     u64 RemainingSize() const noexcept
     {
@@ -155,6 +194,8 @@ struct Arena
 
     u64 RemainingSizeWithAlignment( size_t typeSize_, size_t typeAlignment_ ) const noexcept
     {
+        if( 0 == mPtr ) return 0;
+
         // align 'mPtr' upward
         uintptr_t alignedPtr = (mPtr + typeAlignment_ - 1) & ~(typeAlignment_ - 1);
         uintptr_t endPtr = mBlock.mData + mBlock.mCapacity;
