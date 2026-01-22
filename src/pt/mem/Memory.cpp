@@ -139,18 +139,6 @@ GetRemainingBytes( Arena& a )
 }
 
 
-pt::mem::Arena pt::mem::
-CreateArena( u64 bytes )
-{
-    Arena a;
-    auto blocks = heap::GetBlocks();
-
-    //a.mBlock = heap::GetBlocks
-
-
-    return a;
-}
-
 
 bool pt::mem::
 Initialize()
