@@ -54,57 +54,16 @@ struct Arena
     std::array<std::function<void()>,mCleanupsArraySize>    mCleanups;
     std::vector<std::function<void()>>                      mCleanupsOverflow; // only used if ran out of array
 
-
-    // nulls all values, does not free anything (for move semantics)
-    void _NullifyValues() noexcept
-    {
-        mBlock      = heap::Block();
-        mPtr        = 0;
-        mManaged    = false;
-    }
-
-
-    // Resets Arena, frees all resources and nulls all values
-    void _ReleaseResouces() noexcept
-    {
-        Reset();
-        if( mManaged ){
-            heap::DestroyBlock( mBlock );
-        }else{
-            heap::ReturnBlock( mBlock );
-        }
-        _NullifyValues();
-    }
-
+//--------------------------------------------------
 
     Arena() noexcept = default;
-    Arena( const Arena& ) = delete;
-    Arena( Arena&& rhs ):
-        mBlock( rhs.mBlock ), mPtr( rhs.mPtr ), mManaged( rhs.mManaged )
-    {
-        rhs._NullifyValues();
-    }
-
 
     virtual ~Arena() noexcept
     {
-        _ReleaseResouces();
+        if( 0 < mPtr ){
+            // TODO: print error
+        }
     }
-
-
-    Arena& operator=( const Arena& ) = delete;
-    Arena& operator=( Arena&& rhs )
-    {
-        _ReleaseResouces();
-        mBlock  = rhs.mBlock;
-        mPtr    = rhs.mPtr;
-        mManaged = rhs.mManaged;
-
-        rhs._NullifyValues();
-        return *this;
-    }
-
-    bool operator==( const Arena& ) = delete;
 
 
     template<typename T = u8>
@@ -177,6 +136,24 @@ struct Arena
         ++mCleanupsCount;
 
         return buffer;
+    }
+
+
+    void ReleaseResources() noexcept
+    {
+        Reset();
+        if( mManaged ){
+            heap::DestroyBlock( mBlock );
+        }else{
+            heap::ReturnBlock( mBlock );
+        }
+
+        mBlock          = heap::Block();
+        mPtr            = 0;
+        mManaged        = false;
+        mCleanupsCount  = 0;
+        mCleanups.fill( nullptr );
+        mCleanupsOverflow.clear();
     }
 
 
