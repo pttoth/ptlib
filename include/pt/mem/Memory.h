@@ -58,12 +58,7 @@ struct Arena
 
     Arena() noexcept = default;
 
-    virtual ~Arena() noexcept
-    {
-        if( 0 < mPtr ){
-            // TODO: print error
-        }
-    }
+    virtual ~Arena() noexcept;
 
 
     template<typename T = u8>

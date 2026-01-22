@@ -35,6 +35,21 @@ u64 GetRemainingBytes( Arena& );    // TODO: find out, if needed
 bool                    gInitialized = false;
 
 
+#include "pt/macros.h"
+#include "pt/logging.h"
+
+Arena::
+~Arena() noexcept
+{
+    if( 0 < mPtr ){
+        // TODO: use logger core
+        PrintStackTrace( "WARNING: Destroyed non-empty Arena!\n" );
+        //pt::PrintStackTrace( "WARNING: Destroyed non-empty Arena!\n" );
+    }
+    assert( 0 == mPtr );
+}
+
+
 } } // end of namespace 'pt::mem'
 
 //--------------------------------------------------
