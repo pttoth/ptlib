@@ -68,8 +68,8 @@ Reset() noexcept
             // this should be impossible, but just in case...
             //  absolutely and utterly FUBAR case
             //  just print an error and a debug stacktrace, then ignore
+            pt::PrintStackTrace( "Unexpected exception while resetting Arena" );
             assert( false );
-            // TODO: log error
         }
     }
     //  starting array
@@ -86,8 +86,8 @@ Reset() noexcept
             // this should be impossible, but just in case...
             //  absolutely and utterly FUBAR case
             //  just print an error and a debug stacktrace, then ignore
+            pt::PrintStackTrace( "Unexpected exception while resetting Arena" );
             assert( false );
-            // TODO: log error
         }
     }
     mCleanupsOverflow.clear();
