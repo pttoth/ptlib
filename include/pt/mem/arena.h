@@ -1,10 +1,14 @@
 #pragma once
 
 #include "pt/mem/Memory.h"
+#include "pt/utility.hpp"
+#include <array>
+#include <cassert>
+#include <functional>
+#include <vector>
 
 namespace pt{
 namespace mem{
-
 
 struct Arena
 {

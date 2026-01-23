@@ -3,6 +3,8 @@
 #include "pt/logging.h"
 #include "pt/utility.hpp"
 
+#include <cassert>
+
 using namespace pt::mem;
 
 
