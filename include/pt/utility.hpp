@@ -96,6 +96,9 @@ GetVectorAsString( const std::vector<T>& vec )
 bool IsCharDigit(char c);
 bool IsEmptyOrWhitespaceLine(const std::string& str);
 
+bool IsPowerOfTwo( uint64_t ) noexcept;
+
+
 /**
  * @brief IsStringNumeric:  Determines, whether the string is a number in text format.
  *                           Supports negative numbers. Doesn't support whitespaces.

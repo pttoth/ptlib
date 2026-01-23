@@ -123,6 +123,13 @@ IsEmptyOrWhitespaceLine(const std::string &str)
 
 
 bool pt::
+IsPowerOfTwo( uint64_t n ) noexcept
+{
+   return n > 0 && (n & (n - 1)) == 0;
+}
+
+
+bool pt::
 IsStringNumeric(const std::string &str)
 {
     //not empty
