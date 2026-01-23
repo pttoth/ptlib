@@ -36,7 +36,7 @@ struct Arena
 //    template<typename T>
 //    static Arena CreateArena( u64 amount ) noexcept;
 
-    static Arena DestroyArena( Arena& ) noexcept;
+    static void DestroyArena( Arena& ) noexcept;
 
 //    template<typename T = u8>
 //    T* AllocRaw( u64 amount_ ) noexcept;
@@ -51,7 +51,6 @@ struct Arena
 //    u64 RemainingSize() const noexcept;
 
     void Reset() noexcept;
-    void ReleaseResources() noexcept;
 
 //-------------------------
 //  Template defs

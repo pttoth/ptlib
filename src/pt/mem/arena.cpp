@@ -1,6 +1,19 @@
 #include "pt/mem/arena.h"
 
+#include "pt/logging.h"
+#include "pt/utility.hpp"
+
 using namespace pt::mem;
+
+
+Arena::
+~Arena() noexcept
+{
+    if( 0 < mPtr ){
+        pt::PrintStackTrace( "WARNING: Destructor running on non-empty Arena!" );
+    }
+    assert( 0 == mPtr );
+}
 
 
 Arena Arena::
@@ -18,28 +31,21 @@ CreateArena( u64 bytes ) noexcept
 
 
 void Arena::
-ReleaseResources() noexcept
+DestroyArena( Arena& arena ) noexcept
 {
-    Reset();
-    if( mManaged ){
-        heap::DestroyBlock( mBlock );
+    arena.Reset();
+    if( arena.mManaged ){
+        heap::DestroyBlock( arena.mBlock );
     }else{
-        heap::ReturnBlock( mBlock );
+        heap::ReturnBlock( arena.mBlock );
     }
 
-    mBlock          = heap::Block();
-    mPtr            = 0;
-    mManaged        = false;
-    mCleanupsCount  = 0;
-    mCleanups.fill( nullptr );
-    mCleanupsOverflow.clear();
-}
-
-
-Arena Arena::
-DestroyArena( Arena& ) noexcept
-{
-    PT_UNIMPLEMENTED_FUNCTION
+    arena.mBlock          = heap::Block();
+    arena.mPtr            = 0;
+    arena.mManaged        = false;
+    arena.mCleanupsCount  = 0;
+    arena.mCleanups.fill( nullptr );
+    arena.mCleanupsOverflow.clear();
 }
 
 
