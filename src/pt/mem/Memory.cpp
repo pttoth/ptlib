@@ -1,9 +1,12 @@
 #include "pt/mem/Memory.h"
-#include "pt/utility.hpp"
-#include <cstdlib>
-#include <cassert>
 
-using HeapBlock = pt::mem::heap::Block;
+#include "pt/logging.h"
+#include "pt/macros.h"
+#include "pt/utility.hpp"
+
+#include <array>
+#include <cassert>
+#include <vector>
 
 //--------------------------------------------------
 //  Private interface of Memory
@@ -12,42 +15,33 @@ namespace pt{
 namespace mem{
 namespace heap{
 
-bool    AllocateBlock( HeapBlock& outBlock_, size_t capacity_ );
-void    CreateBlocksFromMemory( HeapBlock* outBlocks_, u64 numBlocks_, size_t blockCapacity_, uintptr_t startPtr_ );
-std::deque<heap::Block>     GetBlocks();
-
 
 //-----
-std::vector<HeapBlock>  gOwnedBlocks;        // memory here needs to be freed on 'Quit()'
-i32                     gCurrentBlockIdx;    // round-robin current idx
+std::vector<Block>  gOwnedBlocks;        // memory here needs to be freed on 'Quit()'
+i32                 gCurrentBlockIdx;    // round-robin current idx
 
-std::vector<std::deque<HeapBlock>>  gBlocksPool;
+std::vector<std::deque<Block>>  gBlocksPool;
 
-//std::deque<HeapBlock>   gBlocksPool;         // memory chunks, that can be assigned to Arenas
+// TODO: reorder in .cpp correctly
+u64 GetMaximumAvailableBlockCapacity() noexcept
+{
+    PT_UNIMPLEMENTED_FUNCTION
+}
+
+// TODO: reorder in .cpp correctly
+
+Block RequestBlock(size_t capacity_) noexcept
+{
+
+}
+
+
 
 } // end of namespace 'heap'
 
 
+bool                gInitialized = false;
 
-u64 GetRemainingBytes( Arena& );    // TODO: find out, if needed
-
-
-bool                    gInitialized = false;
-
-
-#include "pt/macros.h"
-#include "pt/logging.h"
-
-Arena::
-~Arena() noexcept
-{
-    if( 0 < mPtr ){
-        // TODO: use logger core
-        PrintStackTrace( "WARNING: Destroyed non-empty Arena!\n" );
-        //pt::PrintStackTrace( "WARNING: Destroyed non-empty Arena!\n" );
-    }
-    assert( 0 == mPtr );
-}
 
 
 } } // end of namespace 'pt::mem'
@@ -55,51 +49,60 @@ Arena::
 //--------------------------------------------------
 
 bool pt::mem::heap::
-AllocateBlock( Block& outBlock_, size_t capacity_ )
+AllocateBlock( Block& block_, size_t capacity_ ) noexcept
 {
-    const size_t minalign   = PT_MEM_ALIGNMENT_MINIMUM;
-    const size_t cap        = capacity_;
+    constexpr size_t minalign   = PT_MEM_ALIGNMENT_MINIMUM;
 
     // sanitize input
-    assert( 0 < cap );
-    if( 0 == cap ) return false;
+    assert( IsStub( block_ ) );
+    if( !IsStub( block_ ) ) return false;
 
     // round up real capacity to nearest min alignment
-    size_t realcap      = cap + (minalign - (cap % minalign)) % minalign;
-    outBlock_.mCapacity = cap;
-    //TODO: set project to c++17
-    outBlock_.mData     = (uintptr_t) malloc( realcap );    // drop this
-    //outBlock_.mData     = (uintptr_t) aligned_alloc( minalign, realcap ); // use this
+    size_t realcap      = capacity_ + (minalign - (capacity_ % minalign)) % minalign;
+    block_.mCapacity = capacity_;
+    block_.mData     = (uintptr_t) malloc( realcap );    // drop this
+    //block_.mData     = (uintptr_t) aligned_alloc( minalign, realcap ); // TODO: use this (set project to c++17)
 
     return true;
 }
 
 
-void pt::mem::heap::
-CreateBlocksFromMemory( Block* outBlocks_, u64 numBlocks_, size_t blockCapacity_, uintptr_t startPtr_ )
+bool pt::mem::heap::
+CreateBlocksFromMemory( Block* outBlocks_, u64 numBlocks_, size_t blockCapacity_, uintptr_t startPtr_, size_t bytes_ )
 {
     assert( nullptr != outBlocks_ );
     assert( 0 < numBlocks_ );
     assert( 0 < blockCapacity_ );
     assert( 0 != startPtr_ );
+    assert( numBlocks_*blockCapacity_ <= bytes_ );
 
-    if( nullptr == outBlocks_ ) return;
-    if( 0 == startPtr_ ) return;
-    if( 0 == blockCapacity_ ) return;
+    if( nullptr == outBlocks_ ) return false;
+    if( 0 == numBlocks_ ) return false;
+    if( 0 == blockCapacity_ ) return false;
+    if( 0 == startPtr_ ) return false;
+    if( bytes_ < numBlocks_*blockCapacity_ ) return false;
 
     for( u64 i=0; i<numBlocks_; ++i ){
-        Block& current = outBlocks_[i];
-        current.mCapacity   = blockCapacity_;
-        current.mData       = startPtr_ + i*blockCapacity_;
+        outBlocks_[i].mCapacity = blockCapacity_;
+        outBlocks_[i].mData     = startPtr_ + i*blockCapacity_;
     }
+
+    return true;
 }
 
 
-void pt::mem::heap::
-DestroyBlock( Block& block_ )
+bool pt::mem::heap::
+IsStub( Block& block_ ) noexcept
 {
-    assert( 0 != block_.mData );
-    assert( 0 < block_.mCapacity );
+    return (0 == block_.mData) || (0 == block_.mCapacity);
+}
+
+
+// TODO: move up to match ordering in header
+void pt::mem::heap::
+DestroyBlock( Block& block_ ) noexcept
+{
+    assert( !IsStub( block_ ) );
 
     free( (void*) block_.mData );
 
@@ -108,19 +111,36 @@ DestroyBlock( Block& block_ )
 }
 
 
-void pt::mem::heap::
-ReturnBlock( Block& b )
+bool pt::mem::heap::
+ReturnBlock( Block& block_ ) noexcept
 {
-    PT_UNIMPLEMENTED_FUNCTION
-    auto pool = GetBlocks();
+    const bool  capacityValid   = (0 < block_.mCapacity) && !IsPowerOfTwo( block_.mCapacity );
+    const u64   capacityMax     = GetMaximumAvailableBlockCapacity();
+    assert( !IsStub( block_ ) );
+    assert( capacityValid );
+    assert( block_.mCapacity <= capacityMax );
 
+    // if Block data is invalid, don't give back to mem pool
+    //  as it cannot have originated from the mem pool
+    // - Block is empty or invalid
+    if( IsStub( block_ )
+        || !capacityValid
+        || (capacityMax < block_.mCapacity)
+    ){
+        const char* msg = "MemManager: Tried to return invalid Block! Skipping.";
+        PT_LOG_ERR( msg );
+        PrintStackTrace( msg );
+        return false;
+    }
 
-
+    auto pool = GetFreeBlocksOfSize( block_.mCapacity );
+    pool.push_back( block_ );
+    return true;
 }
 
 
-std::deque<HeapBlock> pt::mem::heap::
-GetBlocks()
+std::deque<HeapBlock>& pt::mem::heap::
+GetBlocks() noexcept
 {
     PT_UNIMPLEMENTED_FUNCTION
     //return heap::gBlocksPool;
