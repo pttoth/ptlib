@@ -36,7 +36,7 @@ DestroyBlock( Block& block_ ) noexcept
 
 
 bool pt::mem::
-IsStub( Block& block_ ) noexcept
+IsStub( const Block& block_ ) noexcept
 {
     return (0 == block_.mData) || (0 == block_.mCapacity);
 }
