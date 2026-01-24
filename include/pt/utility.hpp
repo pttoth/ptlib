@@ -7,6 +7,8 @@
   * -----------------------------------------------------------------------------
   */
 
+// TODO: clean up ordering, formatting, overall readability!
+
 #pragma once
 
 #include "pt/def.h"
@@ -96,7 +98,11 @@ GetVectorAsString( const std::vector<T>& vec )
 bool IsCharDigit(char c);
 bool IsEmptyOrWhitespaceLine(const std::string& str);
 
-bool IsPowerOfTwo( uint64_t ) noexcept;
+constexpr bool
+IsPowerOfTwo( uint64_t n ) noexcept
+{
+   return (n > 0) && (n & (n - 1)) == 0;
+}
 
 
 /**
@@ -161,11 +167,11 @@ uint32_t MurmurHash2( const void* key, int len, uint32_t seed );
 
 
 /**
- * @brief SmallestPow2GreaterEqThan
- * @return The smallest, power of 2 number, that is greater than or equal to 'n'.
+ * @brief NextPowerOfTwo
+ *  Returns the smallest, power of 2 number, that is greater than or equal to 'n'.
  */
-inline uint64_t
-SmallestPow2GreaterEqThan( uint64_t n )
+constexpr uint64_t
+NextPowerOfTwo( uint64_t n )
 {
     if (n == 0) return 1;
     if (n > (1ULL << 63)) return 0; // overflow
