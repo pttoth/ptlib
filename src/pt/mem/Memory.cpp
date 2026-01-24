@@ -18,7 +18,7 @@ namespace heap{
 
 //-----
 std::vector<Block>  gOwnedBlocks;        // memory here needs to be freed on 'Quit()'
-i32                 gCurrentBlockIdx;    // round-robin current idx
+s32                 gCurrentBlockIdx;    // round-robin current idx
 
 std::vector<std::deque<Block>>  gBlocksPool;
 
@@ -48,24 +48,6 @@ bool                gInitialized = false;
 
 //--------------------------------------------------
 
-bool pt::mem::heap::
-AllocateBlock( Block& block_, size_t capacity_ ) noexcept
-{
-    constexpr size_t minalign   = PT_MEM_ALIGNMENT_MINIMUM;
-
-    // sanitize input
-    assert( IsStub( block_ ) );
-    if( !IsStub( block_ ) ) return false;
-
-    // round up real capacity to nearest min alignment
-    size_t realcap      = capacity_ + (minalign - (capacity_ % minalign)) % minalign;
-    block_.mCapacity = capacity_;
-    block_.mData     = (uintptr_t) malloc( realcap );    // drop this
-    //block_.mData     = (uintptr_t) aligned_alloc( minalign, realcap ); // TODO: use this (set project to c++17)
-
-    return true;
-}
-
 
 bool pt::mem::heap::
 CreateBlocksFromMemory( Block* outBlocks_, u64 numBlocks_, size_t blockCapacity_, uintptr_t startPtr_, size_t bytes_ )
@@ -92,26 +74,6 @@ CreateBlocksFromMemory( Block* outBlocks_, u64 numBlocks_, size_t blockCapacity_
 
 
 bool pt::mem::heap::
-IsStub( Block& block_ ) noexcept
-{
-    return (0 == block_.mData) || (0 == block_.mCapacity);
-}
-
-
-// TODO: move up to match ordering in header
-void pt::mem::heap::
-DestroyBlock( Block& block_ ) noexcept
-{
-    assert( !IsStub( block_ ) );
-
-    free( (void*) block_.mData );
-
-    block_.mData     = 0;
-    block_.mCapacity = 0;
-}
-
-
-bool pt::mem::heap::
 ReturnBlock( Block& block_ ) noexcept
 {
     const bool  capacityValid   = (0 < block_.mCapacity) && !IsPowerOfTwo( block_.mCapacity );
@@ -122,7 +84,6 @@ ReturnBlock( Block& block_ ) noexcept
 
     // if Block data is invalid, don't give back to mem pool
     //  as it cannot have originated from the mem pool
-    // - Block is empty or invalid
     if( IsStub( block_ )
         || !capacityValid
         || (capacityMax < block_.mCapacity)

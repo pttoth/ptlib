@@ -20,20 +20,6 @@ namespace mem{
 //--------------------------------------------------
 namespace heap{
 
-// heap::Block
-//  A piece of heap memory.
-//  Makes no assumptions on usage whatsoever.
-struct Block
-{
-    uintptr_t   mData       = 0;
-    u64         mCapacity   = 0;
-};
-
-/**
- * @brief AllocateBlock
- *  Allocates 'capacity_' of bytes and returns a Block pointing to it.
- */
-bool    AllocateBlock( Block& outBlock_, size_t capacity_ ) noexcept;
 
 /**
  * @brief CreateBlocksFromMemory
@@ -47,26 +33,6 @@ bool    AllocateBlock( Block& outBlock_, size_t capacity_ ) noexcept;
  * @return Returns 'true' on total success, 'false' in any other case. Partial or even full results can be thrown away safely (no allocations).
  */
 bool    CreateBlocksFromMemory( Block* outBlocks_, u64 numBlocks_, size_t blockCapacity_, uintptr_t startPtr_, size_t bytes_ );
-
-// TODO: finish doc
-/**
- * @brief DestroyBlock
- *
- */
-void    DestroyBlock( Block& ) noexcept; // frees the memory block
-
-/**
- * @brief IsStub
- *  Determines whether Block is a stub (pointer or capacity is 0).
- */
-bool    IsStub( Block& ) noexcept;
-
-/**
- * @brief IsValid
- *  Determines whether Block is not a stub (pointer and capacity are not null).
- */
-bool    IsValid( Block& ) noexcept;
-
 
 // TODO: need borrower first
 /**

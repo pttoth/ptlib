@@ -43,6 +43,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
     ${MY_PROJ_ROOT}/src/pt/macros.cpp
     ${MY_PROJ_ROOT}/src/pt/mem/arena.cpp
+    ${MY_PROJ_ROOT}/src/pt/mem/block.cpp
     ${MY_PROJ_ROOT}/src/pt/mem/Memory.cpp
     ${MY_PROJ_ROOT}/src/pt/name.cpp
     ${MY_PROJ_ROOT}/src/pt/profiler.cpp
@@ -55,6 +56,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/include/pt/guard.hpp
     ${MY_PROJ_ROOT}/include/pt/macros.h
     ${MY_PROJ_ROOT}/include/pt/mem/arena.h
+    ${MY_PROJ_ROOT}/include/pt/mem/block.h
     ${MY_PROJ_ROOT}/include/pt/mem/Memory.h
     ${MY_PROJ_ROOT}/include/pt/name.h
     ${MY_PROJ_ROOT}/include/pt/profiler.h
