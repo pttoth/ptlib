@@ -47,6 +47,19 @@
 
 #endif
 
+// Check, if build target is 32 or 64 bit
+//  Intended supported platforms: Windows/Linux - x86/x86_64/arm32/AArch64 - GCC/Clang/MSVC
+#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__) || defined(__LP64__) || defined(_LP64)
+    #define PT_PLATFORM_64_BIT
+    static_assert( (sizeof(void*) == 8), "Unknown, exotic platform!" );
+#elif defined(_WIN32) || defined(__ILP32__) || defined(__i386__) || defined(__arm__) || defined(__thumb__)
+    #define PT_PLATFORM_32_BIT
+    static_assert( (sizeof(void*) == 4), "Unknown, exotic platform!" );
+#else
+    #error "Unknown platform!"
+#endif
+
+
 //---------------------------------------------------
 //  generic definitions:
 //---------------------------------------------------
