@@ -64,6 +64,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/logging.h
     ${MY_PROJ_ROOT}/include/pt/log/logstream.hpp
+    ${MY_PROJ_ROOT}/include/pt/util/countl_zero.h
 )
 
 target_include_directories(ptlib PRIVATE
