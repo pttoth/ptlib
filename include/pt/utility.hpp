@@ -1,19 +1,21 @@
-/** -----------------------------------------------------------------------------
-  * FILE:    utility.hpp
-  * AUTHOR:  ptoth
-  * EMAIL:   peter.t.toth92@gmail.com
-  * PURPOSE: Contains some utility functions for which
-  *          the standard STL methods are more or less messy
-  * -----------------------------------------------------------------------------
-  */
+//-----------------------------------------------------------------------------
+// FILE:    utility.hpp
+// AUTHOR:  ptoth
+// EMAIL:   peter.t.toth92@gmail.com
+// PURPOSE: Contains some utility functions for which
+//          the standard STL methods are more or less messy
+//-----------------------------------------------------------------------------
+
 
 // TODO: clean up ordering, formatting, overall readability!
 
 #pragma once
 
+#include "pt/alias.h"
 #include "pt/def.h"
-//#include "pt/macros.h"
+#include "pt/util/countl_zero.h"
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -166,14 +168,21 @@ std::vector<uint8_t> ReadBinaryFile( const std::string& path );
 uint32_t MurmurHash2( const void* key, int len, uint32_t seed );
 
 
-/**
- * @brief NextPowerOfTwo
- *  Returns the smallest, power of 2 number, that is greater than or equal to 'n'.
- */
-constexpr uint64_t
-NextPowerOfTwo( uint64_t n )
+// RoundToNextPowerOfTwo
+//  Returns the smallest, power of 2 number, that is greater than or equal to 'n'.
+inline u32
+RoundToNextPowerOfTwo( u64 n ) noexcept
 {
+#undef PT_COUNTL_ZERO_64_HARDWARE_SUPPORTED
+#ifdef PT_COUNTL_ZERO_64_HARDWARE_SUPPORTED
+    if( n <= 1 ) return 1;
+    return u32(1) << (64 - pt::util::countl_zero64( n-1 ));
+#else
+    // No compiler or platform-specific code.
+    //  Significantly slower than 'countl_zero()' with hardware support,
+    //  but faster than the software implementation of 'countl_zero()'.
     if (n == 0) return 1;
+    assert( n <= (1ULL << 63) );
     if (n > (1ULL << 63)) return 0; // overflow
 
     n--;
@@ -184,6 +193,7 @@ NextPowerOfTwo( uint64_t n )
     n |= n >> 16;
     n |= n >> 32;
     return n + 1;
+#endif
 }
 
 
