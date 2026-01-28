@@ -1,12 +1,11 @@
-/** -----------------------------------------------------------------------------
-  * FILE:    block.h
-  * AUTHOR:  ptoth
-  * EMAIL:   peter.t.toth92@gmail.com
-  * PURPOSE: A piece of heap memory. Makes no assumptions on usage whatsoever.
-  *     Avoids RAII -> Blocks can point to subsections of other Blocks.
-  *     Useful in managing lifecycles of nicely sized chunks to avoid mem fragmentation.
-  * -----------------------------------------------------------------------------
-  */
+//-----------------------------------------------------------------------------
+// FILE:    block.h
+// AUTHOR:  ptoth
+// EMAIL:   peter.t.toth92@gmail.com
+// PURPOSE: A piece of heap memory. Makes no assumptions on usage whatsoever.
+//  Avoids RAII -> Blocks can point to subsections of other Blocks.
+//  Useful in managing lifecycles of nicely sized chunks to avoid mem fragmentation.
+//-----------------------------------------------------------------------------
 
 #pragma once
 
@@ -32,14 +31,28 @@ namespace helper{
     #define PT_MEM_ALIGNMENT_MINIMUM 4*1024     // 4 kbyte
 #endif
 
-// 'MinimumAlignment'
-//  Type-safe copy of 'PT_MEM_ALIGNMENT_MINIMUM'
-constexpr u64 MinimumAlignment = PT_MEM_ALIGNMENT_MINIMUM;
+// PT_MEM_BLOCKSIZE_DEFAULT
+//  //TODO: add desc
+//  Must be power of two.
+#ifndef PT_MEM_BLOCKSIZE_DEFAULT
+    #define PT_MEM_BLOCKSIZE_DEFAULT 2*1024*1024 // 2 MB
+#endif
+
 
 //------------------------------
+constexpr u64 MinimumAlignment = PT_MEM_ALIGNMENT_MINIMUM;
+
 // Ensure power-of-two requirement of 'PT_MEM_ALIGNMENT_MINIMUM'
 static_assert( pt::mem::helper::IsPowerOfTwo( MinimumAlignment ),
               "'PT_MEM_ALIGNMENT_MINIMUM' must be a power of two");
+//------------------------------
+constexpr u64 DefaultBlocksize = PT_MEM_BLOCKSIZE_DEFAULT;
+
+// Ensure power-of-two requirement of 'PT_MEM_BLOCKSIZE_DEFAULT'
+static_assert( pt::mem::helper::IsPowerOfTwo( DefaultBlocksize ),
+              "'PT_MEM_BLOCKSIZE_DEFAULT' must be a power of two");
+//------------------------------
+
 
 //--------------------------------------------------
 //  Block
