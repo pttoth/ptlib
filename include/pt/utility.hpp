@@ -9,6 +9,8 @@
 
 // TODO: clean up ordering, formatting, overall readability!
 
+// TODO: add constexpr to functions where applicable!
+
 #pragma once
 
 #include "pt/alias.h"
@@ -170,7 +172,9 @@ uint32_t MurmurHash2( const void* key, int len, uint32_t seed );
 
 // RoundToNextPowerOfTwo
 //  Returns the smallest, power of 2 number, that is greater than or equal to 'n'.
-inline u32
+//  Edge case: n == 0 -> out: 1
+//  return - guaranteed nonzero uint
+constexpr u32
 RoundToNextPowerOfTwo( u64 n ) noexcept
 {
 #undef PT_COUNTL_ZERO_64_HARDWARE_SUPPORTED
@@ -194,6 +198,35 @@ RoundToNextPowerOfTwo( u64 n ) noexcept
     n |= n >> 32;
     return n + 1;
 #endif
+}
+
+
+// ExponentOfPowerOfTwo64_NoCheck
+//  Optimal log2 function for known power-of-two input.
+//  'n' must be a power of two, otherwise, undefined behavior.
+//  Caller must sanitize input! Use 'ExponentOfPowerOfTwo64()' if needed.
+constexpr u32 ExponentOfPowerOfTwo64_NoCheck( u64 n ) noexcept
+{
+    assert( 0 < n );
+    assert( pt::IsPowerOfTwo( n ) );
+    // TODO: can be more optimal, if pt::util::countr_zero64() is implemented.
+    return 63 - pt::util::countl_zero64( n );
+}
+
+
+// ExponentOfPowerOfTwo64
+//  Optimal log2 function for known power-of-two input.
+//  'n' must be a power of two, otherwise, the function returns 0.
+constexpr u32 ExponentOfPowerOfTwo64( u64 n ) noexcept
+{
+    assert( 0 < n );
+    if( 0 == n ) return 64;
+
+    bool isPowTwo = pt::IsPowerOfTwo( n );
+    assert( isPowTwo );
+    if( !isPowTwo ) return 0;
+
+    return ExponentOfPowerOfTwo64_NoCheck( n );
 }
 
 
