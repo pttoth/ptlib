@@ -30,7 +30,7 @@ namespace platformspecific{
 // GCC, Clang
 #if defined(__GNUC__) || defined(__clang__)
 #define PT_COUNTL_ZERO_32_GCC_CLANG_SUPPORTED
-inline int
+constexpr int
 countl_zero32_gcc_clang( uint32_t x ) noexcept
 {
     // '__builtin_clz()' measures unsigned int, not strictly 32 bits!
@@ -46,7 +46,7 @@ countl_zero32_gcc_clang( uint32_t x ) noexcept
 //  TODO: ARM might break!
 #if defined(_MSC_VER)
 #define PT_COUNTL_ZERO_32_MSVC_SUPPORTED
-inline int
+constexpr int
 countl_zero32_msvc( uint32_t x ) noexcept
 {
     if ( x == 0 ) return 32;
@@ -59,7 +59,7 @@ countl_zero32_msvc( uint32_t x ) noexcept
 // Fallback for compilers without the above builtins
 // (unlikely case on GCC/Clang/MSVC + x64/AArch64)
 // Fully portable, but slow!
-inline int
+constexpr int
 countl_zero32_compat( uint32_t x ) noexcept
 {
     if ( x == 0 ) return 32;
@@ -87,7 +87,7 @@ countl_zero32_compat( uint32_t x ) noexcept
 // - clz instruction on x86-64 / AArch64 / ARM64
 #if defined(__GNUC__) || defined(__clang__)
 #define PT_COUNTL_ZERO_64_GCC_CLANG_SUPPORTED
-inline int
+constexpr int
 countl_zero64_gcc_clang( uint64_t x ) noexcept
 {
     // '__builtin_clzll()' measures ull, not strictly 64 bits!
@@ -104,7 +104,7 @@ countl_zero64_gcc_clang( uint64_t x ) noexcept
 //  TODO: ARM64 might break!
 #if defined(_MSC_VER)
 #define PT_COUNTL_ZERO_64_MSVC_SUPPORTED
-inline int
+constexpr int
 countl_zero64_msvc( uint64_t x ) noexcept
 {
     if ( x == 0 ) return 64;
@@ -118,7 +118,7 @@ countl_zero64_msvc( uint64_t x ) noexcept
 // Fallback for compilers without the above builtins
 // (unlikely case on GCC/Clang/MSVC + x64/AArch64)
 // Fully portable, but slow!
-inline int
+constexpr int
 countl_zero64_compat( uint64_t x ) noexcept
 {
     if ( x == 0 ) return 64;
@@ -147,7 +147,7 @@ countl_zero64_compat( uint64_t x ) noexcept
 #endif
 
 
-inline int
+constexpr int
 countl_zero32( uint32_t x ) noexcept
 {
 #if defined(PT_COUNTL_ZERO_32_GCC_CLANG_SUPPORTED)
@@ -165,7 +165,7 @@ countl_zero32( uint32_t x ) noexcept
 }
 
 
-inline int
+constexpr int
 countl_zero64( uint64_t x ) noexcept
 {
 #if defined(PT_COUNTL_ZERO_64_GCC_CLANG_SUPPORTED)
