@@ -13,47 +13,6 @@
 
 namespace pt{
 namespace mem{
-
-//--------------------------------------------------
-//  Macros and static asserts
-//--------------------------------------------------
-namespace helper{
-    constexpr bool IsPowerOfTwo( uint64_t n ) noexcept{
-       return (n > 0) && (n & (n - 1)) == 0;
-    }
-} // end of namespace 'helper'
-//------------------------------
-
-// PT_MEM_ALIGNMENT_MINIMUM
-//  Defines minimum memory alignment for allocations with 'AllocateBlock()'
-//  Must be power of two.
-#ifndef PT_MEM_ALIGNMENT_MINIMUM
-    #define PT_MEM_ALIGNMENT_MINIMUM 4*1024     // 4 kbyte
-#endif
-
-// PT_MEM_BLOCKSIZE_DEFAULT
-//  //TODO: add desc
-//  Must be power of two.
-#ifndef PT_MEM_BLOCKSIZE_DEFAULT
-    #define PT_MEM_BLOCKSIZE_DEFAULT 2*1024*1024 // 2 MB
-#endif
-
-
-//------------------------------
-constexpr u64 MinimumAlignment = PT_MEM_ALIGNMENT_MINIMUM;
-
-// Ensure power-of-two requirement of 'PT_MEM_ALIGNMENT_MINIMUM'
-static_assert( pt::mem::helper::IsPowerOfTwo( MinimumAlignment ),
-              "'PT_MEM_ALIGNMENT_MINIMUM' must be a power of two");
-//------------------------------
-constexpr u64 DefaultBlocksize = PT_MEM_BLOCKSIZE_DEFAULT;
-
-// Ensure power-of-two requirement of 'PT_MEM_BLOCKSIZE_DEFAULT'
-static_assert( pt::mem::helper::IsPowerOfTwo( DefaultBlocksize ),
-              "'PT_MEM_BLOCKSIZE_DEFAULT' must be a power of two");
-//------------------------------
-
-
 //--------------------------------------------------
 //  Block
 //--------------------------------------------------
@@ -61,6 +20,13 @@ struct Block
 {
     uintptr_t   mData       = 0;
     u64         mCapacity   = 0;
+
+    Block() noexcept                        = default;
+    ~Block() noexcept                       = default; // no virtual!
+    Block(const Block&) noexcept            = default;
+    Block(Block&&) noexcept                 = default;
+    Block& operator=(const Block&) noexcept = default;
+    Block& operator=(Block&&) noexcept      = default;
 };
 
 // AllocateBlock
