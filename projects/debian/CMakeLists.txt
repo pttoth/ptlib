@@ -43,20 +43,24 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
     ${MY_PROJ_ROOT}/src/pt/macros.cpp
     ${MY_PROJ_ROOT}/src/pt/name.cpp
+    ${MY_PROJ_ROOT}/src/pt/list.cpp
+    ${MY_PROJ_ROOT}/src/pt/logging.cpp
     ${MY_PROJ_ROOT}/src/pt/profiler.cpp
+    ${MY_PROJ_ROOT}/src/pt/stdutil.cpp
     ${MY_PROJ_ROOT}/src/pt/utility.cpp
     ${MY_PROJ_ROOT}/src/pt/log/logstream.cpp
-    ${MY_PROJ_ROOT}/src/pt/logging.cpp
     ${MY_PROJ_ROOT}/include/pt/alias.h
     ${MY_PROJ_ROOT}/include/pt/config.h
     ${MY_PROJ_ROOT}/include/pt/def.h
+    ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/guard.hpp
+    ${MY_PROJ_ROOT}/include/pt/list.h
+    ${MY_PROJ_ROOT}/include/pt/logging.h
     ${MY_PROJ_ROOT}/include/pt/macros.h
     ${MY_PROJ_ROOT}/include/pt/name.h
     ${MY_PROJ_ROOT}/include/pt/profiler.h
+    ${MY_PROJ_ROOT}/include/pt/stdutil.h
     ${MY_PROJ_ROOT}/include/pt/utility.hpp
-    ${MY_PROJ_ROOT}/include/pt/event.hpp
-    ${MY_PROJ_ROOT}/include/pt/logging.h
     ${MY_PROJ_ROOT}/include/pt/log/logstream.hpp
 )
 
