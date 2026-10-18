@@ -45,40 +45,23 @@ struct List
 
     // TODO: need sentinel init!!!!
 
-    // TODO: review, whether union is good here
-    //  might be better with named getter funcs
-    union Sentinels{
-        struct S{
-            Node   mHead;
-            Node   mTail;
-            Node   mHeadFree;
-            Node   mTailFree;
-            Node   mStubRW;
-            Node   mStubRO;
-        } name;
-        Node v[6];
-    };
-
     // The few highest value indices are taken for sentinel nodes (head and tail);
     static_assert( 8*sizeof(handle::index) != handle::bitcount_index,
                    "'handle::bitcount_index' is maxxed, need to adjsut List::stMaxIndex!" );
     static constexpr handle::index stMaxIndex = (handle::index{1} << handle::bitcount_index) - 1;
-    static constexpr handle::index stMinSentinelIndex = stMaxIndex - 6;
+    static constexpr handle::index stMinSentinelIndex = stMaxIndex - 3;
 
     static constexpr HNode  stHeadHandle     = CreateHandle( 1, 0, stMinSentinelIndex + 0 );
     static constexpr HNode  stTailHandle     = CreateHandle( 1, 0, stMinSentinelIndex + 1 );
     static constexpr HNode  stHeadFreeHandle = CreateHandle( 1, 0, stMinSentinelIndex + 2 );
     static constexpr HNode  stTailFreeHandle = CreateHandle( 1, 0, stMinSentinelIndex + 3 );
-    static constexpr HNode  stStubRWHandle   = CreateHandle( 1, 0, stMinSentinelIndex + 4 );
-    static constexpr HNode  stStubROHandle   = CreateHandle( 1, 0, stMinSentinelIndex + 5 );
 
     //-----
 
     std::vector<Node>   mNodes;
-
-
-    Sentinels mSentinels;
-
+    Node                mSentinels[4];
+    Node                mStubRW;
+    Node                mStubRO;
 
 };
 
@@ -111,6 +94,7 @@ namespace list{
 
 const Node&     GetRef      ( const List& list, HNode  hNode )  noexcept;
 Node&           GetRef      (       List& list, HNode  hNode )  noexcept;
+void            Init        (       List& list               )  noexcept;
 void            PushBack    (       List& list, Handle h     )  noexcept;
 void            PushFront   (       List& list, Handle h     )  noexcept;
 void            Remove      (       List& list, HNode  hNode )  noexcept;
@@ -125,6 +109,16 @@ bool            ConnectBeforeNode   (       List& list, HNode hTargetNode, HNode
 void            DisconnectNode      (       List& list, HNode hNode ) noexcept;
 const Node&     GetRef_NoChecks     ( const List& list, HNode hNode ) noexcept;
 Node&           GetRef_NoChecks     (       List& list, HNode hNode ) noexcept;
+const Node&     GetSentinelHead     ( const List& list ) noexcept;
+Node&           GetSentinelHead     (       List& list ) noexcept;
+const Node&     GetSentinelTail     ( const List& list ) noexcept;
+Node&           GetSentinelTail     (       List& list ) noexcept;
+const Node&     GetSentinelHeadFree ( const List& list ) noexcept;
+Node&           GetSentinelHeadFree (       List& list ) noexcept;
+const Node&     GetSentinelTailFree ( const List& list ) noexcept;
+Node&           GetSentinelTailFree (       List& list ) noexcept;
+bool            Initialized         ( const List& list ) noexcept;
+
 
 // Returns a free node, creates one, if needed.
 HNode           TakeFreeNode        (       List& list ) noexcept;
@@ -178,7 +172,7 @@ GetRef( const List& list, HNode hNode ) noexcept
     bool valid = !IsStub( node )
               && ( hNode.Type() == 1 )
               && ( hNode.Age()  == node.mAge );
-    return valid ? node : list.mSentinels.name.mStubRO;
+    return valid ? node : list.mStubRO;
 }
 
 
@@ -189,7 +183,7 @@ GetRef( List& list, HNode hNode ) noexcept
     bool valid = !IsStub( node )
               && ( hNode.Type() == 1 )
               && ( hNode.Age()  == node.mAge );
-    return valid ? node : list.mSentinels.name.mStubRW;
+    return valid ? node : list.mStubRW;
 }
 
 
@@ -239,14 +233,14 @@ GetRef_NoChecks( const List& list, HNode hNode ) noexcept
     handle::index i = hNode.Index();
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
-        return list.mSentinels.v[ iSentinel ];
+        return list.mSentinels[ iSentinel ];
     }
 
     if( i < Size( list.mNodes ) ){
         return list.mNodes[i];
     }
 
-    return list.mSentinels.name.mStubRO;
+    return list.mStubRO;
 }
 
 
@@ -256,7 +250,7 @@ GetRef_NoChecks( List& list, HNode hNode ) noexcept
     handle::index i = hNode.Index();
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
-        return list.mSentinels.v[ iSentinel ];
+        return list.mSentinels[ iSentinel ];
     }
 
     if( i < Size( list.mNodes ) ){
@@ -264,7 +258,68 @@ GetRef_NoChecks( List& list, HNode hNode ) noexcept
     }
 
     // TODO: reset the stub (is the writable stub even a good approach???)
-    return list.mSentinels.name.mStubRW;
+    return list.mStubRW;
 }
 
 
+PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
+GetSentinelHead( const List& list ) noexcept
+{
+    return list.mSentinels[0];
+}
+
+
+PT_FORCE_INLINE pt::list::Node& pt::list::priv::
+GetSentinelHead( List& list ) noexcept
+{
+    return list.mSentinels[0];
+}
+
+
+PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
+GetSentinelTail( const List& list ) noexcept
+{
+    return list.mSentinels[1];
+}
+
+
+PT_FORCE_INLINE pt::list::Node& pt::list::priv::
+GetSentinelTail( List& list ) noexcept
+{
+    return list.mSentinels[1];
+}
+
+
+PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
+GetSentinelHeadFree( const List& list ) noexcept
+{
+    return list.mSentinels[2];
+}
+
+
+PT_FORCE_INLINE pt::list::Node& pt::list::priv::
+GetSentinelHeadFree( List& list ) noexcept
+{
+    return list.mSentinels[2];
+}
+
+
+PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
+GetSentinelTailFree( const List& list ) noexcept
+{
+    return list.mSentinels[3];
+}
+
+
+PT_FORCE_INLINE pt::list::Node& pt::list::priv::
+GetSentinelTailFree( List& list ) noexcept
+{
+    return list.mSentinels[3];
+}
+
+
+PT_FORCE_INLINE bool pt::list::priv::
+Initialized( const List& list ) noexcept
+{
+    return !IsStub( list.mSentinels[0] );
+}

@@ -4,6 +4,46 @@
 // List
 
 void pt::list::
+Init( List& list ) noexcept
+{
+    priv::GetSentinelHead( list ) =
+        Node{ .mHandle  = 0,
+              .mNextH   = List::stTailHandle,
+              .mPrevH   = 0,
+              .mAge     = 0 };
+
+    priv::GetSentinelTail( list ) =
+        Node{ .mHandle  = 0,
+              .mNextH   = 0,
+              .mPrevH   = List::stHeadHandle,
+              .mAge     = 0 };
+
+    priv::GetSentinelHeadFree( list ) =
+        Node{ .mHandle  = 0,
+              .mNextH   = List::stTailFreeHandle,
+              .mPrevH   = 0,
+              .mAge     = 0 };
+
+    priv::GetSentinelTailFree( list ) =
+        Node{ .mHandle  = 0,
+              .mNextH   = 0,
+              .mPrevH   = List::stHeadFreeHandle,
+              .mAge     = 0 };
+
+    list.mStubRO = Node{ .mHandle   = 0,
+                         .mNextH    = 0,
+                         .mPrevH    = 0,
+                         .mAge      = 0 };
+
+    list.mStubRW = Node{ .mHandle   = 0,
+                         .mNextH    = 0,
+                         .mPrevH    = 0,
+                         .mAge      = 0 };
+
+}
+
+
+void pt::list::
 PushBack( List& list, Handle h ) noexcept
 {
     HNode   hNode   = priv::TakeFreeNode( list );
@@ -52,7 +92,7 @@ Search( const List& list, Handle hNode ) noexcept
 {
     if( IsStub( hNode ) ) return HNode{0};
 
-    HNode hCurrentNode = list.mSentinels.name.mHead.mNextH;
+    HNode hCurrentNode = priv::GetSentinelHead( list ).mNextH;
     u64 failsafeCount = 0;
 
     // traverse list
