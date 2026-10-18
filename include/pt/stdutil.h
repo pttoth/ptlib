@@ -28,7 +28,6 @@ PushBack( std::vector<T>& v, T& element )
 }
 
 
-
 template<typename T>
 PT_FORCE_INLINE void
 Reserve( std::vector<T>& v, u64 size )
