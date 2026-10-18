@@ -6,6 +6,8 @@
 void pt::list::
 Init( List& list ) noexcept
 {
+    if( priv::Initialized( list ) ) return;
+
     priv::GetSentinelHead( list ) =
         Node{ .mHandle  = 0,
               .mNextH   = List::stTailHandle,
@@ -46,6 +48,7 @@ Init( List& list ) noexcept
 void pt::list::
 PushBack( List& list, Handle h ) noexcept
 {
+    assert( priv::Initialized( list ) );
     HNode   hNode   = priv::TakeFreeNode( list );
     Node&   node    = GetRef( list, hNode );
 
@@ -61,6 +64,7 @@ PushBack( List& list, Handle h ) noexcept
 void pt::list::
 PushFront( List& list, Handle h ) noexcept
 {
+    assert( priv::Initialized( list ) );
     HNode   hNode   = priv::TakeFreeNode( list );
     Node&   node    = GetRef( list, hNode );
 
@@ -90,6 +94,7 @@ Remove( List& list, HNode hNode )  noexcept
 pt::list::HNode pt::list::
 Search( const List& list, Handle hNode ) noexcept
 {
+    assert( priv::Initialized( list ) );
     if( IsStub( hNode ) ) return HNode{0};
 
     HNode hCurrentNode = priv::GetSentinelHead( list ).mNextH;

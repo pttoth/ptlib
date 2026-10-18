@@ -43,8 +43,6 @@ struct List
     using Node      = list::Node;
     using HNode     = list::HNode;
 
-    // TODO: need sentinel init!!!!
-
     // The few highest value indices are taken for sentinel nodes (head and tail);
     static_assert( 8*sizeof(handle::index) != handle::bitcount_index,
                    "'handle::bitcount_index' is maxxed, need to adjsut List::stMaxIndex!" );
@@ -132,6 +130,13 @@ HNode           TakeFreeNode        (       List& list ) noexcept;
 //-------------------------
 // Node
 PT_FORCE_INLINE bool pt::list::
+IsStub( const Node& node ) noexcept
+{
+    return IsStub( node.mPrevH ) && IsStub( node.mNextH ) && IsStub( node.mHandle );
+}
+
+
+PT_FORCE_INLINE bool pt::list::
 SetNext( Node& node, HNode hNode ) noexcept
 {
     bool h_valid = !IsStub( hNode );
@@ -149,13 +154,6 @@ SetPrev( Node& node, HNode hNode ) noexcept
 }
 
 
-PT_FORCE_INLINE bool pt::list::
-IsStub( const Node& node ) noexcept
-{
-    return IsStub( node.mPrevH ) && IsStub( node.mNextH ) && IsStub( node.mHandle );
-}
-
-
 PT_FORCE_INLINE void pt::list::
 Reset( Node& node ) noexcept
 {
@@ -168,6 +166,7 @@ Reset( Node& node ) noexcept
 PT_FORCE_INLINE const pt::list::Node& pt::list::
 GetRef( const List& list, HNode hNode ) noexcept
 {
+    assert( priv::Initialized( list ) );
     const Node& node = priv::GetRef_NoChecks( list, hNode );
     bool valid = !IsStub( node )
               && ( hNode.Type() == 1 )
@@ -179,6 +178,7 @@ GetRef( const List& list, HNode hNode ) noexcept
 PT_FORCE_INLINE pt::list::Node& pt::list::
 GetRef( List& list, HNode hNode ) noexcept
 {
+    assert( priv::Initialized( list ) );
     Node& node = priv::GetRef_NoChecks( list, hNode );
     bool valid = !IsStub( node )
               && ( hNode.Type() == 1 )
@@ -230,6 +230,7 @@ DisconnectNode( List& list, HNode hNode ) noexcept
 PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
 GetRef_NoChecks( const List& list, HNode hNode ) noexcept
 {
+    assert( priv::Initialized( list ) );
     handle::index i = hNode.Index();
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
@@ -247,6 +248,7 @@ GetRef_NoChecks( const List& list, HNode hNode ) noexcept
 PT_FORCE_INLINE pt::list::Node& pt::list::priv::
 GetRef_NoChecks( List& list, HNode hNode ) noexcept
 {
+    assert( priv::Initialized( list ) );
     handle::index i = hNode.Index();
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
