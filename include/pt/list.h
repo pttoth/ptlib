@@ -43,33 +43,38 @@ struct List
     using Node      = list::Node;
     using HNode     = list::HNode;
 
+    union Sentinels{
+        struct S{
+            Node   mHead;
+            Node   mTail;
+            Node   mHeadFree;
+            Node   mTailFree;
+            Node   mStubRW;
+            Node   mStubRO;
+        } name;
+        Node v[6];
+    };
+
     // The few highest value indices are taken for sentinel nodes (head and tail);
     static_assert( 8*sizeof(handle::index) != handle::bitcount_index,
                    "'handle::bitcount_index' is maxxed, need to adjsut List::stMaxIndex!" );
     static constexpr handle::index stMaxIndex = (handle::index{1} << handle::bitcount_index) - 1;
+    static constexpr handle::index stMinSentinelIndex = stMaxIndex - 6;
 
-
-    static constexpr handle::index stMinSentinelIndex = stMaxIndex - 3; // TODO: update
-
-    // TODO: solve handle -> ref resolution too!
-    //      eg.: mStubRO was added
-    static constexpr HNode  stHeadHandle     = CreateHandle( 1, 0, stMaxIndex - 0);
-    static constexpr HNode  stTailHandle     = CreateHandle( 1, 0, stMaxIndex - 1 );
-    static constexpr HNode  stHeadFreeHandle = CreateHandle( 1, 0, stMaxIndex - 2 );
-    static constexpr HNode  stTailFreeHandle = CreateHandle( 1, 0, stMaxIndex - 3 );
+    static constexpr HNode  stHeadHandle     = CreateHandle( 1, 0, stMinSentinelIndex + 0 );
+    static constexpr HNode  stTailHandle     = CreateHandle( 1, 0, stMinSentinelIndex + 1 );
+    static constexpr HNode  stHeadFreeHandle = CreateHandle( 1, 0, stMinSentinelIndex + 2 );
+    static constexpr HNode  stTailFreeHandle = CreateHandle( 1, 0, stMinSentinelIndex + 3 );
+    static constexpr HNode  stStubRWHandle   = CreateHandle( 1, 0, stMinSentinelIndex + 4 );
+    static constexpr HNode  stStubROHandle   = CreateHandle( 1, 0, stMinSentinelIndex + 5 );
 
     //-----
 
     std::vector<Node>   mNodes;
-    Node                mSentinels[6];
 
-    // TODO: do this right
-    Node&   mHead       = mSentinels[0];
-    Node&   mHeadFree   = mSentinels[1];
-    Node&   mTail       = mSentinels[2];
-    Node&   mTailFree   = mSentinels[3];
-    Node&   mStubRW     = mSentinels[4];
-    Node&   mStubRO     = mSentinels[5];
+
+    Sentinels mSentinels;
+
 
 };
 
@@ -169,7 +174,7 @@ GetRef( const List& list, HNode hNode ) noexcept
     bool valid = IsStub( node )
               || ( hNode.Type() != 1 )
               || ( hNode.Age()  != node.mAge );
-    return valid ? node : list.mStubRO;
+    return valid ? node : list.mSentinels.name.mStubRO;
 }
 
 
@@ -180,7 +185,7 @@ GetRef( List& list, HNode hNode ) noexcept
     bool valid = IsStub( node )
               || ( hNode.Type() != 1 )
               || ( hNode.Age()  != node.mAge );
-    return valid ? node : list.mStubRW;
+    return valid ? node : list.mSentinels.name.mStubRW;
 }
 
 
@@ -230,14 +235,14 @@ GetRef_NoChecks( const List& list, HNode hNode ) noexcept
     handle::index i = hNode.Index();
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
-        return list.mSentinels[ iSentinel ];
+        return list.mSentinels.v[ iSentinel ];
     }
 
     if( i < Size( list.mNodes ) ){
         return list.mNodes[i];
     }
 
-    return list.mStubRO;
+    return list.mSentinels.name.mStubRO;
 }
 
 
@@ -247,14 +252,14 @@ GetRef_NoChecks( List& list, HNode hNode ) noexcept
     handle::index i = hNode.Index();
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
-        return list.mSentinels[ iSentinel ];
+        return list.mSentinels.v[ iSentinel ];
     }
 
     if( i < Size( list.mNodes ) ){
         return list.mNodes[i];
     }
 
-    return list.mStubRW;
+    return list.mSentinels.name.mStubRW;
 }
 
 

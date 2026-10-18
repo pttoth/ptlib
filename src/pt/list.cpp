@@ -95,7 +95,7 @@ TakeFreeNode( List& list ) noexcept
         ConnectAfterNode( list, list.stHeadFreeHandle, newNode );
     }
 
-    HNode hNode = list.mHeadFree.mNextH;
+    HNode hNode = list.mSentinels.name.mHeadFree.mNextH;
     DisconnectNode( list, hNode );
     return hNode;
 }
