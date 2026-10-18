@@ -43,6 +43,10 @@ struct List
     using Node      = list::Node;
     using HNode     = list::HNode;
 
+    // TODO: need sentinel init!!!!
+
+    // TODO: review, whether union is good here
+    //  might be better with named getter funcs
     union Sentinels{
         struct S{
             Node   mHead;
@@ -171,9 +175,9 @@ PT_FORCE_INLINE const pt::list::Node& pt::list::
 GetRef( const List& list, HNode hNode ) noexcept
 {
     const Node& node = priv::GetRef_NoChecks( list, hNode );
-    bool valid = IsStub( node )
-              || ( hNode.Type() != 1 )
-              || ( hNode.Age()  != node.mAge );
+    bool valid = !IsStub( node )
+              && ( hNode.Type() == 1 )
+              && ( hNode.Age()  == node.mAge );
     return valid ? node : list.mSentinels.name.mStubRO;
 }
 
@@ -182,9 +186,9 @@ PT_FORCE_INLINE pt::list::Node& pt::list::
 GetRef( List& list, HNode hNode ) noexcept
 {
     Node& node = priv::GetRef_NoChecks( list, hNode );
-    bool valid = IsStub( node )
-              || ( hNode.Type() != 1 )
-              || ( hNode.Age()  != node.mAge );
+    bool valid = !IsStub( node )
+              && ( hNode.Type() == 1 )
+              && ( hNode.Age()  == node.mAge );
     return valid ? node : list.mSentinels.name.mStubRW;
 }
 
@@ -259,6 +263,7 @@ GetRef_NoChecks( List& list, HNode hNode ) noexcept
         return list.mNodes[i];
     }
 
+    // TODO: reset the stub (is the writable stub even a good approach???)
     return list.mSentinels.name.mStubRW;
 }
 
