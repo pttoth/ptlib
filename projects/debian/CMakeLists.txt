@@ -41,6 +41,7 @@ set(CMAKE_CXX_FLAGS ${MY_COMPILE_FLAGS})
 #build an archive (.a), for static linking
 add_library(ptlib
     ${MY_PROJ_ROOT}/src/pt/config.cpp
+    ${MY_PROJ_ROOT}/src/pt/handle.cpp
     ${MY_PROJ_ROOT}/src/pt/macros.cpp
     ${MY_PROJ_ROOT}/src/pt/name.cpp
     ${MY_PROJ_ROOT}/src/pt/list.cpp
@@ -54,6 +55,7 @@ add_library(ptlib
     ${MY_PROJ_ROOT}/include/pt/def.h
     ${MY_PROJ_ROOT}/include/pt/event.hpp
     ${MY_PROJ_ROOT}/include/pt/guard.hpp
+    ${MY_PROJ_ROOT}/include/pt/handle.h
     ${MY_PROJ_ROOT}/include/pt/list.h
     ${MY_PROJ_ROOT}/include/pt/logging.h
     ${MY_PROJ_ROOT}/include/pt/macros.h

@@ -1,16 +1,15 @@
-/** -----------------------------------------------------------------------------
-  * FILE:    list.h
-  * AUTHOR:  ptoth
-  * EMAIL:   peter.t.toth92@gmail.com
-  * PURPOSE: Linked list class.
-  *           Can only hold handles, no templates.
-  * -----------------------------------------------------------------------------
-  */
-
+//-----------------------------------------------------------------------------
+//  FILE:    list.h
+//  AUTHOR:  ptoth
+//  EMAIL:   peter.t.toth92@gmail.com
+//  PURPOSE: Linked list class.
+//            Can only hold handles, no templates.
+//-----------------------------------------------------------------------------
 
 #pragma once
 
 #include "def.h"
+#include "handle.h"
 #include "stdutil.h"
 #include <cassert>
 #include <vector>
@@ -18,34 +17,21 @@
 //--------------------------------------------------
 namespace pt{
 
-struct Handle
-{
-    u32     mAge;
-    u32     mIndex;
-
-    bool operator==( const Handle& rhs ) const{
-        return ( mAge == rhs.mAge ) && ( mIndex && rhs.mIndex );
-    }
-};
-
-
 //-----
 namespace list{
 
-// TODO: use this
 struct HNode: public Handle
-{};
-
-// TODO: drop this
-using NodeIndex = s32;
+{
+    using Handle::Handle;
+};
 
 
 struct Node{
-    static const NodeIndex  stInvalidIndex  = INT32_MIN;
-
-    Handle    mHandle;
-    NodeIndex mNextIndex      = stInvalidIndex;
-    NodeIndex mPreviousIndex  = stInvalidIndex;
+    Handle      mHandle;
+    HNode       mNextH;
+    HNode       mPrevH;
+    // from Handle
+    handle::age mAge = 0;
 };
 
 } // end of namespace 'list'
@@ -55,20 +41,36 @@ struct Node{
 struct List
 {
     using Node      = list::Node;
-    using NodeIndex = list::NodeIndex;
+    using HNode     = list::HNode;
 
-    static const NodeIndex  stHeadIndex         = -1;
-    static const NodeIndex  stTailIndex         = -2;
-    static const NodeIndex  stHeadFreeIndex     = -3;
-    static const NodeIndex  stTailFreeIndex     = -4;
+    // The few highest value indices are taken for sentinel nodes (head and tail);
+    static_assert( 8*sizeof(handle::index) != handle::bitcount_index,
+                   "'handle::bitcount_index' is maxxed, need to adjsut List::stMaxIndex!" );
+    static constexpr handle::index stMaxIndex = (handle::index{1} << handle::bitcount_index) - 1;
+
+
+    static constexpr handle::index stMinSentinelIndex = stMaxIndex - 3; // TODO: update
+
+    // TODO: solve handle -> ref resolution too!
+    //      eg.: mStubRO was added
+    static constexpr HNode  stHeadHandle     = CreateHandle( 1, 0, stMaxIndex - 0);
+    static constexpr HNode  stTailHandle     = CreateHandle( 1, 0, stMaxIndex - 1 );
+    static constexpr HNode  stHeadFreeHandle = CreateHandle( 1, 0, stMaxIndex - 2 );
+    static constexpr HNode  stTailFreeHandle = CreateHandle( 1, 0, stMaxIndex - 3 );
+
+    //-----
 
     std::vector<Node>   mNodes;
+    Node                mSentinels[6];
 
-    Node    mHead;
-    Node    mHeadFree;
-    Node    mTail;
-    Node    mTailFree;
-    Node    mStub;
+    // TODO: do this right
+    Node&   mHead       = mSentinels[0];
+    Node&   mHeadFree   = mSentinels[1];
+    Node&   mTail       = mSentinels[2];
+    Node&   mTailFree   = mSentinels[3];
+    Node&   mStubRW     = mSentinels[4];
+    Node&   mStubRO     = mSentinels[5];
+
 };
 
 } // end of namespace 'pt'
@@ -77,225 +79,182 @@ struct List
 //--------------------------------------------------
 //  Functions
 //--------------------------------------------------
+//-------------------------
+// Node
 namespace pt{
 namespace list{
 
-// Node
-bool            IsStub              ( const Node& node );
+bool    IsStub      ( const Node& node )    noexcept;
+//  SetNext/Prev: Ignores 'h' if it is a stub.
+bool    SetNext     ( Node& node, HNode h ) noexcept;
+bool    SetPrev     ( Node& node, HNode h ) noexcept;
+void    Reset       ( Node& node )          noexcept;
 
-// List
-void            PushBack            ( List& list, Handle handle );
-void            PushFront           ( List& list, Handle handle );
-
-
-namespace priv{
-
-void            AddEmptyNode        (       List& list );
-bool            ConnectAfterNode    (       List& list, s32 indexTarget, s32 indexNewNode );
-bool            ConnectBeforeNode   (       List& list, s32 indexTarget, s32 indexNewNode );
-void            DisconnectNode      (       List& list, NodeIndex nodeIndex );
-bool            HasFreeNode         ( const List& list );
-const Node&     ResolveNodeIndex    ( const List& list, s32 nodeIndex );
-Node&           ResolveNodeIndex    (       List& list, s32 nodeIndex );
-NodeIndex       Search              ( const List& list, Handle h );
-NodeIndex       TakeFreeNode        (       List& list );
-NodeIndex       TakeFreeNodeForced  (       List& list );
-bool            ValidNodeIndex      ( const List& list, s32 index );
-
-} // end of namespace 'priv'
 } // end of namespace 'list'
 } // end of namespace 'pt'
 
+
+
+//-------------------------
+// List
+namespace pt{
+namespace list{
+
+const Node&     GetRef      ( const List& list, HNode  hNode )  noexcept;
+Node&           GetRef      (       List& list, HNode  hNode )  noexcept;
+void            PushBack    (       List& list, Handle h     )  noexcept;
+void            PushFront   (       List& list, Handle h     )  noexcept;
+void            Remove      (       List& list, HNode  hNode )  noexcept;
+HNode           Search      ( const List& list, Handle h     )  noexcept;
+
+
+namespace priv{
+// These expect already-sanitized inputs!
+
+bool            ConnectAfterNode    (       List& list, HNode hTargetNode, HNode hNewNode ) noexcept;
+bool            ConnectBeforeNode   (       List& list, HNode hTargetNode, HNode hNewNode ) noexcept;
+void            DisconnectNode      (       List& list, HNode hNode ) noexcept;
+const Node&     GetRef_NoChecks     ( const List& list, HNode hNode ) noexcept;
+Node&           GetRef_NoChecks     (       List& list, HNode hNode ) noexcept;
+
+// Returns a free node, creates one, if needed.
+HNode           TakeFreeNode        (       List& list ) noexcept;
+
+} // end of namespace 'priv'
+
+} // end of namespace 'list'
+} // end of namespace 'pt'
+
+
 //-------------------------
 // Node
-bool pt::list::
-IsStub( const Node& node )
+PT_FORCE_INLINE bool pt::list::
+SetNext( Node& node, HNode hNode ) noexcept
 {
-    return ( INT32_MIN == node.mPreviousIndex )
-        && ( INT32_MIN == node.mNextIndex );
+    bool h_valid = !IsStub( hNode );
+    node.mNextH = h_valid ? hNode : node.mNextH;
+    return h_valid;
+}
+
+
+PT_FORCE_INLINE bool pt::list::
+SetPrev( Node& node, HNode hNode ) noexcept
+{
+    bool h_valid = !IsStub( hNode );
+    node.mPrevH = h_valid ? hNode : node.mPrevH;
+    return h_valid;
+}
+
+
+PT_FORCE_INLINE bool pt::list::
+IsStub( const Node& node ) noexcept
+{
+    return IsStub( node.mPrevH ) && IsStub( node.mNextH ) && IsStub( node.mHandle );
+}
+
+
+PT_FORCE_INLINE void pt::list::
+Reset( Node& node ) noexcept
+{
+    node = Node{};
 }
 
 
 //-------------------------
 // List
-void pt::list::priv::
-AddEmptyNode( List& list )
+PT_FORCE_INLINE const pt::list::Node& pt::list::
+GetRef( const List& list, HNode hNode ) noexcept
 {
-    s32 newNodeIndex = Size( list.mNodes );
-    EmplaceBack( list.mNodes );
-    ConnectAfterNode( list, list.stHeadFreeIndex, newNodeIndex );
+    const Node& node = priv::GetRef_NoChecks( list, hNode );
+    bool valid = IsStub( node )
+              || ( hNode.Type() != 1 )
+              || ( hNode.Age()  != node.mAge );
+    return valid ? node : list.mStubRO;
 }
 
 
-bool pt::list::priv::
-HasFreeNode( const List& list )
+PT_FORCE_INLINE pt::list::Node& pt::list::
+GetRef( List& list, HNode hNode ) noexcept
 {
-    return list.stTailFreeIndex == list.mHeadFree.mNextIndex;
+    Node& node = priv::GetRef_NoChecks( list, hNode );
+    bool valid = IsStub( node )
+              || ( hNode.Type() != 1 )
+              || ( hNode.Age()  != node.mAge );
+    return valid ? node : list.mStubRW;
 }
 
 
-bool pt::list::priv::
-ConnectAfterNode( List& list, s32 indexTarget, s32 indexNewNode )
+PT_FORCE_INLINE bool pt::list::priv::
+ConnectAfterNode( List& list, HNode hTargetNode, HNode hNewNode ) noexcept
 {
-    bool paramsValid = ValidNodeIndex( list, indexTarget )
-                    && ValidNodeIndex( list, indexNewNode );
-    assert( paramsValid );
-    if( !paramsValid ) return false;
+    Node& targetNode    = GetRef_NoChecks( list, hTargetNode );
+    Node& newNode       = GetRef_NoChecks( list, hNewNode );
+    Node& nextNode      = GetRef_NoChecks( list, targetNode.mNextH );
 
-    Node& targetNode    = ResolveNodeIndex( list, indexTarget );
-    Node& newNode       = ResolveNodeIndex( list, indexNewNode );
-    Node& nextNode      = ResolveNodeIndex( list, targetNode.mNextIndex );
-
-    newNode.mPreviousIndex  = indexTarget;
-    newNode.mNextIndex      = targetNode.mNextIndex;
-
-    nextNode.mPreviousIndex = indexNewNode;
-    targetNode.mNextIndex   = indexNewNode;
+    // update connections
+    newNode.mPrevH      = hTargetNode;
+    newNode.mNextH      = targetNode.mNextH;
+    targetNode.mNextH   = hNewNode;
+    nextNode.mPrevH     = hNewNode;
 
     return true;
 }
 
 
-bool pt::list::priv::
-ConnectBeforeNode( List& list, s32 indexTarget, s32 indexNewNode )
+PT_FORCE_INLINE bool pt::list::priv::
+ConnectBeforeNode( List& list, HNode hTargetNode, HNode hNewNode ) noexcept
 {
-    bool paramsValid = ValidNodeIndex( list, indexTarget )
-                    && ValidNodeIndex( list, indexNewNode );
-    assert( paramsValid );
-    if( !paramsValid ) return false;
-
-
-    Node& node = ResolveNodeIndex( list, indexTarget );
-    return ConnectAfterNode( list, node.mPreviousIndex, indexNewNode );
+    Node& targetNode = GetRef( list, hTargetNode );
+    return ConnectAfterNode( list, targetNode.mPrevH, hNewNode );
 }
 
 
-void pt::list::
-PushBack( List& list, Handle handle )
+PT_FORCE_INLINE void pt::list::priv::
+DisconnectNode( List& list, HNode hNode ) noexcept
 {
-    NodeIndex   nodeIndex       = priv::TakeFreeNodeForced( list );
-    Node&       node            = priv::ResolveNodeIndex( list, nodeIndex );
-
-    node.mHandle = handle;
-
-    priv::DisconnectNode( list, nodeIndex );
-    priv::ConnectBeforeNode( list, list.stTailIndex, nodeIndex );
-}
-
-
-void pt::list::
-PushFront( List& list, Handle handle )
-{
-    NodeIndex   nodeIndex   = priv::TakeFreeNodeForced( list );
-    Node&       node        = priv::ResolveNodeIndex( list, nodeIndex );
-
-    node.mHandle = handle;
-
-    priv::DisconnectNode( list, nodeIndex );
-    priv::ConnectAfterNode( list, list.stHeadIndex, nodeIndex );
-}
-
-
-void pt::list::priv::
-DisconnectNode( List& list, NodeIndex nodeIndex )
-{
-    Node&       node        = ResolveNodeIndex( list, nodeIndex );
-    Node&       nextNode    = ResolveNodeIndex( list, node.mNextIndex );
-    Node&       prevNode    = ResolveNodeIndex( list, node.mPreviousIndex );
+    Node&   node        = GetRef_NoChecks( list, hNode );
+    Node&   nextNode    = GetRef_NoChecks( list, node.mNextH );
+    Node&   prevNode    = GetRef_NoChecks( list, node.mPrevH );
 
     // remove node from chain
-    prevNode.mNextIndex         = node.mNextIndex;
-    nextNode.mPreviousIndex     = node.mPreviousIndex;
-    // reset node indices
-    node.mNextIndex             = Node::stInvalidIndex;
-    node.mPreviousIndex         = Node::stInvalidIndex;
+    prevNode.mNextH  = node.mNextH;
+    nextNode.mPrevH  = node.mPrevH;
+    Reset( node.mNextH );
+    Reset( node.mPrevH );
 }
 
 
-const pt::list::Node& pt::list::priv::
-ResolveNodeIndex( const List& list, s32 nodeIndex )
+PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
+GetRef_NoChecks( const List& list, HNode hNode ) noexcept
 {
-    if( -1 < nodeIndex && nodeIndex < (s32) Size( list.mNodes ) ){
-        return list.mNodes[nodeIndex];
+    handle::index i = hNode.Index();
+    if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
+        handle::index iSentinel = i - list.stMinSentinelIndex;
+        return list.mSentinels[ iSentinel ];
     }
 
-    if( list.stHeadIndex      == nodeIndex )  return list.mHead;
-    if( list.stTailIndex      == nodeIndex )  return list.mTail;
-    if( list.stHeadFreeIndex  == nodeIndex )  return list.mHeadFree;
-    if( list.stTailFreeIndex  == nodeIndex )  return list.mTailFree;
-
-    return list.mStub;
-}
-
-
-pt::list::Node& pt::list::priv::
-ResolveNodeIndex( List& list, s32 nodeIndex )
-{
-    if( -1 < nodeIndex && nodeIndex < (s32) Size( list.mNodes ) ){
-        return list.mNodes[nodeIndex];
+    if( i < Size( list.mNodes ) ){
+        return list.mNodes[i];
     }
 
-    if( list.stHeadIndex      == nodeIndex )  return list.mHead;
-    if( list.stTailIndex      == nodeIndex )  return list.mTail;
-    if( list.stHeadFreeIndex  == nodeIndex )  return list.mHeadFree;
-    if( list.stTailFreeIndex  == nodeIndex )  return list.mTailFree;
-
-    return list.mStub;
+    return list.mStubRO;
 }
 
 
-pt::list::NodeIndex pt::list::priv::
-Search( const List& list, Handle h )
+PT_FORCE_INLINE pt::list::Node& pt::list::priv::
+GetRef_NoChecks( List& list, HNode hNode ) noexcept
 {
-    const Node* prevNode            = &list.mHead;
-    NodeIndex   currentNodeIndex    = prevNode->mNextIndex;
-
-    u64 failsafeCount = 0;
-
-    // traverse list
-    while( currentNodeIndex != list.stTailIndex ){
-        const Node* currentNode = &ResolveNodeIndex( list, currentNodeIndex );
-        if( h == currentNode->mHandle ){
-            return currentNodeIndex;
-        }
-
-        prevNode = currentNode;
-
-        // failsafe to prevent infinite loops if errors occur
-        bool infiniteLoop = ( Size( list.mNodes ) < failsafeCount );
-        assert( !infiniteLoop );
-        if( infiniteLoop ) return Node::stInvalidIndex;
-
-        ++failsafeCount;
+    handle::index i = hNode.Index();
+    if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
+        handle::index iSentinel = i - list.stMinSentinelIndex;
+        return list.mSentinels[ iSentinel ];
     }
 
-    return Node::stInvalidIndex;
-}
-
-
-pt::list::NodeIndex pt::list::priv::
-TakeFreeNode( List& list )
-{
-    if( !HasFreeNode( list ) ) return Node::stInvalidIndex;
-
-    DisconnectNode( list, list.mHeadFree.mNextIndex );
-    return list.mHeadFree.mNextIndex;
-}
-
-
-pt::list::NodeIndex pt::list::priv::
-TakeFreeNodeForced( List& list )
-{
-    if( !HasFreeNode( list ) ){
-        AddEmptyNode( list );
+    if( i < Size( list.mNodes ) ){
+        return list.mNodes[i];
     }
 
-    return TakeFreeNode( list );
+    return list.mStubRW;
 }
 
 
-bool pt::list::priv::
-ValidNodeIndex( const List& list, s32 index )
-{
-    return ( -1 < index ) && ( index < (s32) Size( list.mNodes ) );
-}
