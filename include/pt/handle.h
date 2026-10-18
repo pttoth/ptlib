@@ -82,6 +82,7 @@ namespace pt{
         static_assert( sizeof(value) * 8 == bitcount_age + bitcount_free + bitcount_index + bitcount_type,
                        "'pt::Handle' bit distribution does not add up!" );
 
+        // TODO: evaluate, whether to use this, or delete altogether
         // helper class
         //  Classes can inherit this to ensure age member.
         //  experimental: Might cause alignment issues and unnecessary padding.
@@ -103,7 +104,6 @@ namespace pt{
         constexpr handle::index   Index() const noexcept;
         constexpr handle::type    Type()  const noexcept;
 
-        // TODO: implement
         void SetAge     ( handle::age   age     ) noexcept;
         void SetIndex   ( handle::index index   ) noexcept;
         void SetType    ( handle::type  type    ) noexcept;
@@ -191,6 +191,48 @@ PT_FORCE_INLINE constexpr pt::handle::type pt::Handle::
 Type() const noexcept
 {
     return static_cast<handle::type>( ( mVal >> handle::shift_type ) & handle::mask_type );
+}
+
+
+PT_FORCE_INLINE void pt::Handle::
+SetAge( handle::age age ) noexcept
+{
+    using hval = handle::value;
+
+    // clear the age bits in mVal
+    constexpr hval clearingMask = ~( hval( handle::mask_age ) << handle::shift_age );
+    // shift up age bits to correct position
+    hval shiftedAge =  ( hval(age) & handle::mask_age ) << handle::shift_age;
+
+    mVal = ( mVal & clearingMask ) | shiftedAge;
+}
+
+
+PT_FORCE_INLINE void pt::Handle::
+SetIndex( handle::index index ) noexcept
+{
+    using hval = handle::value;
+
+    // clear the index bits in mVal
+    constexpr hval clearingMask = ~( hval( handle::mask_index ) << handle::shift_index );
+    // shift up index bits to correct position
+    hval shiftedIndex = ( hval(index) & handle::mask_index ) << handle::shift_index;
+
+    mVal = ( mVal & clearingMask ) | shiftedIndex;
+}
+
+
+PT_FORCE_INLINE void pt::Handle::
+SetType( handle::type type ) noexcept
+{
+    using hval = handle::value;
+
+    // clear the type bits in mVal
+    constexpr hval clearingMask = ~( hval( handle::mask_type ) << handle::shift_type );
+    // shift up type bits to correct position
+    hval shiftedType = ( hval(type) & handle::mask_type ) << handle::shift_type;
+
+    mVal = ( mVal & clearingMask ) | shiftedType;
 }
 
 
