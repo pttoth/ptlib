@@ -1,0 +1,4 @@
+added project generation
+
+remove doc/ garbage
+
