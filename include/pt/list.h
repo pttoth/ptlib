@@ -115,6 +115,8 @@ const Node&     GetSentinelHeadFree ( const List& list ) noexcept;
 Node&           GetSentinelHeadFree (       List& list ) noexcept;
 const Node&     GetSentinelTailFree ( const List& list ) noexcept;
 Node&           GetSentinelTailFree (       List& list ) noexcept;
+const Node&     GetStub             ( const List& list ) noexcept;
+Node&           GetStub             (       List& list ) noexcept;
 bool            Initialized         ( const List& list ) noexcept;
 
 
@@ -171,7 +173,7 @@ GetRef( const List& list, HNode hNode ) noexcept
     bool valid = !IsStub( node )
               && ( hNode.Type() == 1 )
               && ( hNode.Age()  == node.mAge );
-    return valid ? node : list.mStubRO;
+    return valid ? node : priv::GetStub( list );
 }
 
 
@@ -183,7 +185,7 @@ GetRef( List& list, HNode hNode ) noexcept
     bool valid = !IsStub( node )
               && ( hNode.Type() == 1 )
               && ( hNode.Age()  == node.mAge );
-    return valid ? node : list.mStubRW;
+    return valid ? node : priv::GetStub( list );
 }
 
 
@@ -241,7 +243,7 @@ GetRef_NoChecks( const List& list, HNode hNode ) noexcept
         return list.mNodes[i];
     }
 
-    return list.mStubRO;
+    return priv::GetStub( list );
 }
 
 
@@ -259,8 +261,7 @@ GetRef_NoChecks( List& list, HNode hNode ) noexcept
         return list.mNodes[i];
     }
 
-    // TODO: reset the stub (is the writable stub even a good approach???)
-    return list.mStubRW;
+    return priv::GetStub( list );
 }
 
 
@@ -317,6 +318,21 @@ PT_FORCE_INLINE pt::list::Node& pt::list::priv::
 GetSentinelTailFree( List& list ) noexcept
 {
     return list.mSentinels[3];
+}
+
+
+PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
+GetStub( const List& list ) noexcept
+{
+    return list.mStubRO;
+}
+
+
+PT_FORCE_INLINE pt::list::Node& pt::list::priv::
+GetStub( List& list ) noexcept
+{
+    Reset( list.mStubRW );
+    return list.mStubRW;
 }
 
 
