@@ -125,9 +125,10 @@ Search( const List& list, Handle hNode ) noexcept
 pt::list::HNode pt::list::priv::
 TakeFreeNode( List& list ) noexcept
 {
+    const Node& headFreeNode = GetSentinelHeadFree( list );
+
     // check for available free nodes
-    const Node& headNode = GetRef_NoChecks( list, list.stHeadFreeHandle );
-    if( headNode.mNextH == list.stTailFreeHandle ){
+    if( headFreeNode.mNextH == list.stTailFreeHandle ){
         // add empty node
         handle::index index = Size( list.mNodes );
         bool err_OutOfIndexSpace = ( List::stMinSentinelIndex <= index );
@@ -139,9 +140,8 @@ TakeFreeNode( List& list ) noexcept
         ConnectAfterNode( list, list.stHeadFreeHandle, newNode );
     }
 
-    // TODO: need head.next == tail validation here
-
-    HNode hNode = list.mSentinels.name.mHeadFree.mNextH;
+    HNode hNode = headFreeNode.mNextH;
+    // Func earlier ensured that a node is available, so no tail-check needed
     DisconnectNode( list, hNode );
     return hNode;
 }
