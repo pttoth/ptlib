@@ -85,3 +85,34 @@ using Const##STRUCTNAME##UPtr  = std::unique_ptr< const STRUCTNAME >;
 
 //return the enum name in parameter as string
 #define EnumToString(ENUM_NAME) #ENUM_NAME
+
+//--------------------------------------------------
+// Hints for branch predictor
+#if defined(_MSVC_LANG)
+    #define CPP_LANG_VERSION _MSVC_LANG
+#else
+    #define CPP_LANG_VERSION __cplusplus
+#endif
+
+#if CPP_LANG_VERSION >= 202002L
+
+    #define IF_LIKELY(condition)   if (condition) [[likely]]
+    #define IF_UNLIKELY(condition) if (condition) [[unlikely]]
+
+#elif defined(__clang__) && __has_cpp_attribute(clang::likely)
+
+    #define IF_LIKELY(condition)   if (condition) [[clang::likely]]
+    #define IF_UNLIKELY(condition) if (condition) [[clang::unlikely]]
+
+#elif defined(__GNUC__)
+
+    #define IF_LIKELY(condition)   if (__builtin_expect(!!(condition), 1))
+    #define IF_UNLIKELY(condition) if (__builtin_expect(!!(condition), 0))
+
+#else
+
+    #define IF_LIKELY(condition)   if (condition)
+    #define IF_UNLIKELY(condition) if (condition)
+
+#endif
+//--------------------------------------------------
