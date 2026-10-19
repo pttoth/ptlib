@@ -74,6 +74,7 @@ struct List
 namespace pt{
 namespace list{
 
+bool    Expired     ( const Node& node ) noexcept;
 bool    IsStub      ( const Node& node )    noexcept;
 //  SetNext/Prev: Ignores 'h' if it is a stub.
 bool    SetNext     ( Node& node, HNode h ) noexcept;
@@ -105,8 +106,8 @@ namespace priv{
 bool            ConnectAfterNode    (       List& list, HNode hTargetNode, HNode hNewNode ) noexcept;
 bool            ConnectBeforeNode   (       List& list, HNode hTargetNode, HNode hNewNode ) noexcept;
 void            DisconnectNode      (       List& list, HNode hNode ) noexcept;
-const Node&     GetRef_NoChecks     ( const List& list, HNode hNode ) noexcept;
-Node&           GetRef_NoChecks     (       List& list, HNode hNode ) noexcept;
+const Node&     GetNode             ( const List& list, handle::index index ) noexcept;
+Node&           GetNode             (       List& list, handle::index index ) noexcept;
 const Node&     GetSentinelHead     ( const List& list ) noexcept;
 Node&           GetSentinelHead     (       List& list ) noexcept;
 const Node&     GetSentinelTail     ( const List& list ) noexcept;
@@ -131,6 +132,14 @@ HNode           TakeFreeNode        (       List& list ) noexcept;
 
 //-------------------------
 // Node
+
+PT_FORCE_INLINE bool pt::list::
+Expired( const Node& node ) noexcept
+{
+    return node.mAge == handle::age
+}
+
+
 PT_FORCE_INLINE bool pt::list::
 IsStub( const Node& node ) noexcept
 {
@@ -169,7 +178,7 @@ PT_FORCE_INLINE const pt::list::Node& pt::list::
 GetRef( const List& list, HNode hNode ) noexcept
 {
     assert( priv::Initialized( list ) );
-    const Node& node = priv::GetRef_NoChecks( list, hNode );
+    const Node& node = priv::GetNode( list, hNode.Index() );
     bool valid = !IsStub( node )
               && ( hNode.Type() == 1 )
               && ( hNode.Age()  == node.mAge );
@@ -181,7 +190,7 @@ PT_FORCE_INLINE pt::list::Node& pt::list::
 GetRef( List& list, HNode hNode ) noexcept
 {
     assert( priv::Initialized( list ) );
-    Node& node = priv::GetRef_NoChecks( list, hNode );
+    Node& node = priv::GetNode( list, hNode.Index() );
     bool valid = !IsStub( node )
               && ( hNode.Type() == 1 )
               && ( hNode.Age()  == node.mAge );
@@ -192,9 +201,9 @@ GetRef( List& list, HNode hNode ) noexcept
 PT_FORCE_INLINE bool pt::list::priv::
 ConnectAfterNode( List& list, HNode hTargetNode, HNode hNewNode ) noexcept
 {
-    Node& targetNode    = GetRef_NoChecks( list, hTargetNode );
-    Node& newNode       = GetRef_NoChecks( list, hNewNode );
-    Node& nextNode      = GetRef_NoChecks( list, targetNode.mNextH );
+    Node& targetNode    = GetNode( list, hTargetNode.Index() );
+    Node& newNode       = GetNode( list, hNewNode.Index() );
+    Node& nextNode      = GetNode( list, targetNode.mNextH.Index() );
 
     // update connections
     newNode.mPrevH      = hTargetNode;
@@ -217,9 +226,9 @@ ConnectBeforeNode( List& list, HNode hTargetNode, HNode hNewNode ) noexcept
 PT_FORCE_INLINE void pt::list::priv::
 DisconnectNode( List& list, HNode hNode ) noexcept
 {
-    Node&   node        = GetRef_NoChecks( list, hNode );
-    Node&   nextNode    = GetRef_NoChecks( list, node.mNextH );
-    Node&   prevNode    = GetRef_NoChecks( list, node.mPrevH );
+    Node&   node        = GetNode( list, hNode.Index() );
+    Node&   nextNode    = GetNode( list, node.mNextH.Index() );
+    Node&   prevNode    = GetNode( list, node.mPrevH.Index() );
 
     // remove node from chain
     prevNode.mNextH  = node.mNextH;
@@ -230,10 +239,9 @@ DisconnectNode( List& list, HNode hNode ) noexcept
 
 
 PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
-GetRef_NoChecks( const List& list, HNode hNode ) noexcept
+GetNode( const List& list, handle::index i ) noexcept
 {
     assert( priv::Initialized( list ) );
-    handle::index i = hNode.Index();
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
         return list.mSentinels[ iSentinel ];
@@ -248,10 +256,9 @@ GetRef_NoChecks( const List& list, HNode hNode ) noexcept
 
 
 PT_FORCE_INLINE pt::list::Node& pt::list::priv::
-GetRef_NoChecks( List& list, HNode hNode ) noexcept
+GetNode( List& list, handle::index i ) noexcept
 {
     assert( priv::Initialized( list ) );
-    handle::index i = hNode.Index();
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
         return list.mSentinels[ iSentinel ];
