@@ -58,6 +58,9 @@ namespace pt{
         using index     = u32;
         using type      = u16;  // create a custom enum
 
+        // TODO: unify caming with c or st prefix
+        const       age ageMax        = UINT32_MAX;
+
         constexpr   u8 bitcount_index   = 24;
         constexpr   u8 bitcount_age     = 20;
         constexpr   u8 bitcount_type    = 14;

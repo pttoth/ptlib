@@ -65,15 +65,15 @@ void pt::list::
 PushFront( List& list, Handle h ) noexcept
 {
     assert( priv::Initialized( list ) );
-    HNode   hNode   = priv::TakeFreeNode( list );
-    Node&   node    = GetRef( list, hNode );
+    HNode   hFreeNode   = priv::TakeFreeNode( list );
+    Node&   node        = GetRef( list, hFreeNode );
 
     if( IsStub( node ) ) return;
 
     node.mHandle = h;
 
-    priv::DisconnectNode( list, hNode );
-    priv::ConnectAfterNode( list, list.stHeadHandle, hNode );
+    priv::DisconnectNode( list, hFreeNode );
+    priv::ConnectAfterNode( list, list.stHeadHandle, hFreeNode );
 }
 
 

@@ -75,6 +75,7 @@ namespace pt{
 namespace list{
 
 bool    Expired     ( const Node& node ) noexcept;
+void    IncrementAge( Node& node ) noexcept;
 bool    IsStub      ( const Node& node )    noexcept;
 //  SetNext/Prev: Ignores 'h' if it is a stub.
 bool    SetNext     ( Node& node, HNode h ) noexcept;
@@ -100,14 +101,18 @@ void            Remove      (       List& list, HNode  hNode )  noexcept;
 HNode           Search      ( const List& list, Handle h     )  noexcept;
 
 
-namespace priv{
-// These expect already-sanitized inputs!
+namespace priv{ // These expect already-sanitized inputs!
 
 bool            ConnectAfterNode    (       List& list, HNode hTargetNode, HNode hNewNode ) noexcept;
 bool            ConnectBeforeNode   (       List& list, HNode hTargetNode, HNode hNewNode ) noexcept;
 void            DisconnectNode      (       List& list, HNode hNode ) noexcept;
-const Node&     GetNode             ( const List& list, handle::index index ) noexcept;
-Node&           GetNode             (       List& list, handle::index index ) noexcept;
+bool            IndexValid          ( List& list, handle::index index ) noexcept;
+
+// GetNode:
+//  Returns the node at 'index'. Only returns stub, if index is invalid.
+const Node&     GetNode             ( const List& list, handle::index index, bool& o_success ) noexcept;
+Node&           GetNode             (       List& list, handle::index index, bool& o_success ) noexcept;
+
 const Node&     GetSentinelHead     ( const List& list ) noexcept;
 Node&           GetSentinelHead     (       List& list ) noexcept;
 const Node&     GetSentinelTail     ( const List& list ) noexcept;
@@ -119,6 +124,7 @@ Node&           GetSentinelTailFree (       List& list ) noexcept;
 const Node&     GetStub             ( const List& list ) noexcept;
 Node&           GetStub             (       List& list ) noexcept;
 bool            Initialized         ( const List& list ) noexcept;
+void            ReturnNode          (       List& list, HNode hNode ) noexcept;
 
 
 // Returns a free node, creates one, if needed.
@@ -132,11 +138,18 @@ HNode           TakeFreeNode        (       List& list ) noexcept;
 
 //-------------------------
 // Node
-
 PT_FORCE_INLINE bool pt::list::
 Expired( const Node& node ) noexcept
 {
-    return node.mAge == handle::age
+    return node.mAge == handle::ageMax;
+}
+
+
+PT_FORCE_INLINE void pt::list::
+IncrementAge( Node& node ) noexcept
+{
+    bool underLimit = ( node.mAge < handle::ageMax );
+    node.mAge += underLimit ? 1 : 0 ;
 }
 
 
@@ -178,10 +191,11 @@ PT_FORCE_INLINE const pt::list::Node& pt::list::
 GetRef( const List& list, HNode hNode ) noexcept
 {
     assert( priv::Initialized( list ) );
-    const Node& node = priv::GetNode( list, hNode.Index() );
-    bool valid = !IsStub( node )
-              && ( hNode.Type() == 1 )
-              && ( hNode.Age()  == node.mAge );
+    bool suc;
+    const Node& node = priv::GetNode( list, hNode.Index(), suc );
+    bool valid = suc && ( hNode.Age()  == node.mAge );
+    assert( hNode.Type() == 1 );
+    assert( !IsStub( node ) );
     return valid ? node : priv::GetStub( list );
 }
 
@@ -190,10 +204,10 @@ PT_FORCE_INLINE pt::list::Node& pt::list::
 GetRef( List& list, HNode hNode ) noexcept
 {
     assert( priv::Initialized( list ) );
-    Node& node = priv::GetNode( list, hNode.Index() );
-    bool valid = !IsStub( node )
-              && ( hNode.Type() == 1 )
-              && ( hNode.Age()  == node.mAge );
+    bool suc;
+    Node& node = priv::GetNode( list, hNode.Index(), suc );
+    bool valid = suc && ( hNode.Type() == 1 )
+                     && ( hNode.Age()  == node.mAge );
     return valid ? node : priv::GetStub( list );
 }
 
@@ -227,21 +241,46 @@ PT_FORCE_INLINE void pt::list::priv::
 DisconnectNode( List& list, HNode hNode ) noexcept
 {
     Node&   node        = GetNode( list, hNode.Index() );
-    Node&   nextNode    = GetNode( list, node.mNextH.Index() );
     Node&   prevNode    = GetNode( list, node.mPrevH.Index() );
+    Node&   nextNode    = GetNode( list, node.mNextH.Index() );
+    assert( !IsStub( nextNode ) );
+    assert( !IsStub( prevNode ) );
+
+    bool    prevStub    = IsStub( prevNode );
+    bool    nextStub    = IsStub( nextNode );
+    bool    valid       = ! ( prevStub || nextStub );
 
     // remove node from chain
-    prevNode.mNextH  = node.mNextH;
-    nextNode.mPrevH  = node.mPrevH;
+    prevNode.mNextH  = valid ? node.mNextH : HNode{0};
+    nextNode.mPrevH  = valid ? node.mPrevH : HNode{0};
+
+
     Reset( node.mNextH );
     Reset( node.mPrevH );
+
+    ++node.mAge;
+
+    bool underAgeLimit = ( handle::ageMax == node.mAge );
+    HNode newHandle;
+    newHandle.SetIndex( hNode.Index() + 1 );
+
+    return underAgeLimit ? newHandle : HNode{0} ;
+}
+
+
+PT_FORCE_INLINE bool pt::list::priv::
+IndexValid( List& list, handle::index i ) noexcept
+{
+
 }
 
 
 PT_FORCE_INLINE const pt::list::Node& pt::list::priv::
-GetNode( const List& list, handle::index i ) noexcept
+GetNode( const List& list, handle::index i, bool& o_success ) noexcept
 {
     assert( priv::Initialized( list ) );
+    o_success = true;
+
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
         return list.mSentinels[ iSentinel ];
@@ -251,14 +290,17 @@ GetNode( const List& list, handle::index i ) noexcept
         return list.mNodes[i];
     }
 
+    o_success = false;
     return priv::GetStub( list );
 }
 
 
 PT_FORCE_INLINE pt::list::Node& pt::list::priv::
-GetNode( List& list, handle::index i ) noexcept
+GetNode( List& list, handle::index i, bool& o_success ) noexcept
 {
     assert( priv::Initialized( list ) );
+    o_success = true;
+
     if( (list.stMinSentinelIndex <= i) && ( i <= list.stMaxIndex ) ){
         handle::index iSentinel = i - list.stMinSentinelIndex;
         return list.mSentinels[ iSentinel ];
@@ -268,6 +310,7 @@ GetNode( List& list, handle::index i ) noexcept
         return list.mNodes[i];
     }
 
+    o_success = true;
     return priv::GetStub( list );
 }
 
@@ -347,4 +390,12 @@ PT_FORCE_INLINE bool pt::list::priv::
 Initialized( const List& list ) noexcept
 {
     return !IsStub( list.mSentinels[0] );
+}
+
+
+PT_FORCE_INLINE void pt::list::priv::
+ReturnNode( List& list, HNode hNode ) noexcept
+{
+    priv::DisconnectNode( list, hFreeNode );
+    priv::ConnectAfterNode( list, list.stHeadHandle, hFreeNode );
 }
