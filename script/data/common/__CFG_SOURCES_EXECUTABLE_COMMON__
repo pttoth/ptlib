@@ -1,0 +1,4 @@
+${DIR_PROJ_ROOT}/src/main.cpp
+${DIR_PROJ_ROOT}/src/TestEvent.cpp
+${DIR_PROJ_ROOT}/src/TestLogger.cpp
+${DIR_PROJ_ROOT}/src/TestUtility.cpp

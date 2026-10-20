@@ -1,1 +1,1 @@
--Wall -Wextra
+-Wall -Wextra -Wno-unused-parameter -DPT_MEASURE_PERFORMANCE

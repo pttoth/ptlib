@@ -1,0 +1,5 @@
+${DIR_PROJ_ROOT}/include/Test.hpp
+${DIR_PROJ_ROOT}/include/TestConfig.hpp
+${DIR_PROJ_ROOT}/include/TestEvent.hpp
+${DIR_PROJ_ROOT}/include/TestLogger.hpp
+${DIR_PROJ_ROOT}/include/TestUtility.hpp

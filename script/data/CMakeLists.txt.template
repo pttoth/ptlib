@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.5 )
 
-project( cmake_template_project LANGUAGES C CXX )
+project( __CFG_PROJECT_NAME__ LANGUAGES C CXX )
 
 set( CMAKE_CXX_STANDARD 14 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
@@ -29,10 +29,12 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG       ${DIR_BIN_DEBUG} )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG       ${DIR_BIN_DEBUG} )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG       ${DIR_BIN_DEBUG} )
 
-
-# TODO: delete( docu says, this shouldn't be modified )
-#set( CMAKE_CACHEFILE_DIR                       ${DIR_BUILD} )
-
+#custom macros:
+#  PT_DEBUG_ENABLED
+#    enables additional debug logic and verbose debug logging
+#    !! not having 'NDEBUG' defined will enable 'PT_DEBUG_ENABLED' !!
+#  PT_DEBUG_NOAUTO
+#    prevents auto-defining 'PT_DEBUG_ENABLED' based on 'NDEBUG'
 
 # common compile flags
 set( COMPILE_FLAGS_COMMON       "__CFG_COMPILE_FLAGS_COMMON__" )
@@ -57,12 +59,33 @@ endif()
 #----------------------
 
 
+#build an archive (.a), for static linking
+add_library( __CFG_TARGET_LIBRARY_NAME__
+
+__CFG_SOURCES_LIBRARY_COMMON__
+__CFG_HEADERS_LIBRARY_COMMON__
+
+)
+
+
+target_include_directories( __CFG_TARGET_LIBRARY_NAME__ PRIVATE
+
+__CFG_INCLUDE_DIRS__
+__CFG_INCLUDE_DIRS_COMMON__
+
+)
+
+
+set_target_properties( __CFG_TARGET_LIBRARY_NAME__ PROPERTIES COMPILE_FLAGS
+    "${COMPILE_FLAGS} -fPIC"
+)
+
+
+#build Test app
 add_executable( __CFG_TARGET_EXECUTABLE_NAME__
 
-__CFG_SOURCES__
-__CFG_SOURCES_COMMON__
-__CFG_HEADERS__
-__CFG_HEADERS_COMMON__
+__CFG_SOURCES_EXECUTABLE_COMMON__
+__CFG_HEADERS_EXECUTABLE_COMMON__
 
 )
 
@@ -75,13 +98,6 @@ __CFG_INCLUDE_DIRS_COMMON__
 )
 
 
-#guide to set up library linking paths
-#  directories and library names both come here
-#target_link_libraries( __CFG_TARGET_EXECUTABLE_NAME__
-#   -L<directory>
-#   -l<applib>
-#)
-
 #set up library linking paths
 target_link_libraries( __CFG_TARGET_EXECUTABLE_NAME__
 
@@ -89,3 +105,5 @@ __CFG_LINK__
 __CFG_LINK_COMMON__
 
 )
+
+add_dependencies(ptlib_test ptlib)

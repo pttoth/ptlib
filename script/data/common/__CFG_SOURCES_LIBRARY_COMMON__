@@ -1,0 +1,9 @@
+${DIR_PROJ_ROOT}/src/pt/config.cpp
+${DIR_PROJ_ROOT}/src/pt/macros.cpp
+${DIR_PROJ_ROOT}/src/pt/name.cpp
+${DIR_PROJ_ROOT}/src/pt/list.cpp
+${DIR_PROJ_ROOT}/src/pt/logging.cpp
+${DIR_PROJ_ROOT}/src/pt/profiler.cpp
+${DIR_PROJ_ROOT}/src/pt/stdutil.cpp
+${DIR_PROJ_ROOT}/src/pt/utility.cpp
+${DIR_PROJ_ROOT}/src/pt/log/logstream.cpp
