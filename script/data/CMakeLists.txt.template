@@ -48,14 +48,14 @@ set( CMAKE_CXX_FLAGS            "${COMPILE_FLAGS}" )
 
 
 #----- linux only -----
-set(CMAKE_INSTALL_RPATH "")
+#set(CMAKE_INSTALL_RPATH "")
 
 # TODO: probably need to remove
-#   try using the starter script and set 
+#   try using the starter script and set
 #       LD_LIBRARY_PATH="/path/to/mydir:$LD_LIBRARY_PATH"
-if( ENABLE_TEST_RPATH )
-    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
-endif()
+#if( ENABLE_TEST_RPATH )
+#    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+#endif()
 #----------------------
 
 
