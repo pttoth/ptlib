@@ -114,7 +114,6 @@ pt::list::HNode pt::list::
 Search( const List& list, Handle h ) noexcept
 {
     IF_UNLIKELY( !priv::Initialized( list ) ){
-        assert( false );
         return HNode{0};
     }
 

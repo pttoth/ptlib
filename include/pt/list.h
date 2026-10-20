@@ -181,8 +181,6 @@ GetRef( const List& list, const HNode& hNode ) noexcept
 {
     bool initialized = priv::Initialized( list );
     bool validHNode  = priv::ValidHNode( hNode );
-    assert( initialized );
-    assert( validHNode );
     IF_UNLIKELY( !initialized || !validHNode )  return priv::GetStub( list );
 
     bool suc;
@@ -199,11 +197,7 @@ GetRef( List& list, HNode hNode ) noexcept
 {
     bool initialized = priv::Initialized( list );
     bool validHNode  = priv::ValidHNode( hNode );
-    assert( validHNode );
-    IF_UNLIKELY( !validHNode ) return priv::GetStub( list );
-    IF_UNLIKELY( !initialized ){
-        Init( list );
-    }
+    IF_UNLIKELY( !initialized || !validHNode )  return priv::GetStub( list );
 
     bool suc;
     Node& node = priv::GetNode( list, hNode.Index(), suc );
