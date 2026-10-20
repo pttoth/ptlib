@@ -52,15 +52,15 @@ struct List
     using Node      = list::Node;
     using HNode     = list::HNode;
 
-    // The few highest value indices are taken for sentinel nodes (head and tail);
     static_assert( 8*sizeof(handle::index) != handle::bitcount_index,
                    "'handle::bitcount_index' is maxxed, need to adjust List::stMaxIndex!" );
 
-    // Highest value in index interval means invalid index.
-    static constexpr handle::index stInvalidIndex   = handle::index_max;
+    // Highest value in index interval means "invalid index".
     // The highest ones before that are control node indices.
-    static constexpr handle::index stMaxIndex           = stInvalidIndex - 1;
-    static constexpr handle::index stMinSentinelIndex   = stMaxIndex - 3;
+    static constexpr handle::index  stInvalidIndex      = handle::index_max;
+    static constexpr handle::index  stMaxIndex          = stInvalidIndex - 1;
+    static constexpr handle::index  stMinSentinelIndex  = stMaxIndex - 3;
+
     static constexpr HNode  stHeadHandle        = CreateHandle( 1, 0, stMinSentinelIndex + 0 );
     static constexpr HNode  stTailHandle        = CreateHandle( 1, 0, stMinSentinelIndex + 1 );
     static constexpr HNode  stHeadFreeHandle    = CreateHandle( 1, 0, stMinSentinelIndex + 2 );
@@ -100,28 +100,29 @@ void    Reset       (       Node& node ) noexcept;
 // List
 namespace pt{
 namespace list{
+
 // These functions can be called from outside.
 //  Therefore all incoming data and logic sanitization need to happen here.
 // NOTE: Passing to these functions a 'hNode', that is not part of 'list' is Undefined Behavior!
-const Node& GetRef      ( const List& list, const HNode&  hNode )  noexcept;
-Node&       GetRef      (       List& list, HNode  hNode )  noexcept;
-void        Init        (       List& list               )  noexcept;
-void        PushBack    (       List& list, Handle h     )  noexcept;
-void        PushFront   (       List& list, Handle h     )  noexcept;
-void        Remove      (       List& list, HNode  hNode )  noexcept;
+const Node& GetRef      ( const List& list, const HNode& hNode  )  noexcept;
+Node&       GetRef      (       List& list, HNode       hNode   )  noexcept;
+void        Init        (       List& list                      )  noexcept;
+void        PushBack    (       List& list, Handle      h       )  noexcept;
+void        PushFront   (       List& list, Handle      h       )  noexcept;
+void        Remove      (       List& list, HNode       hNode   )  noexcept;
 // Search: O(n)
-HNode       Search      ( const List& list, Handle h     )  noexcept;
+HNode       Search      ( const List& list, Handle      h       )  noexcept;
 
 
 namespace priv{
 // These functions are considered private and not to be called from outside.
 //  Therefore, they expect correct inputs, logic and container state.
 
-void            ConnectAfterNode    ( List& list, handle::index iTargetNode, handle::index iNewNode ) noexcept;
-void            ConnectBeforeNode   ( List& list, handle::index iTargetNode, handle::index iNewNode ) noexcept;
-void            DisconnectNode      ( List& list, handle::index iNode ) noexcept;
-const Node&     GetNode             ( const List& list, handle::index index, bool& o_success ) noexcept;
-Node&           GetNode             (       List& list, handle::index index, bool& o_success ) noexcept;
+void            ConnectAfterNode    (       List& list, handle::index iTargetNode, handle::index iNewNode ) noexcept;
+void            ConnectBeforeNode   (       List& list, handle::index iTargetNode, handle::index iNewNode ) noexcept;
+void            DisconnectNode      (       List& list, handle::index iNode )                   noexcept;
+const Node&     GetNode             ( const List& list, handle::index index, bool& o_success )  noexcept;
+Node&           GetNode             (       List& list, handle::index index, bool& o_success )  noexcept;
 const Node&     GetSentinelHead     ( const List& list ) noexcept;
 Node&           GetSentinelHead     (       List& list ) noexcept;
 const Node&     GetSentinelTail     ( const List& list ) noexcept;
