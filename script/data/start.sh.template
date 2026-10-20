@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# This script ensures, that working directory and environment variables are correctly set
+# This workaround is needed, so that installation is not required
+
+#find out script directory
+pushd $(dirname "${BASH_SOURCE[0]}") > /dev/null
+scriptdir=$(pwd)
+popd > /dev/null
+
+
+pushd "$scriptdir" > /dev/null
+
+# create dir in memory for logging
+#logfname=__CFG_TARGET_EXECUTABLE_NAME__.log_$(date "+%y%m%d_%H%M%S")
+#logdname=/dev/shm/pt
+#mkdir -p ${logdname}
+#./__CFG_TARGET_EXECUTABLE_NAME__ $@ 2>&1 | tee ${logdname}/${logfname}
+
+./__CFG_TARGET_EXECUTABLE_NAME__ $@
+
+popd > /dev/null

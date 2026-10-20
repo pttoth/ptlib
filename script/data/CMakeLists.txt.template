@@ -1,0 +1,91 @@
+cmake_minimum_required( VERSION 3.5 )
+
+project( cmake_template_project LANGUAGES C CXX )
+
+set( CMAKE_CXX_STANDARD 14 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+
+
+# setup directories
+set( DIR_PROJ_ROOT          ${PROJECT_SOURCE_DIR} )
+set( DIR_BIN                ${DIR_PROJ_ROOT}/bin/__CFG_PLATFORM__ )
+set( DIR_BIN_DEBUG          ${DIR_PROJ_ROOT}/bin/__CFG_PLATFORM___debug )
+set( DIR_BUILD              ${DIR_PROJ_ROOT}/build/__CFG_PLATFORM__ )
+
+
+
+# default output directory (when building from cmd with everything default)
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY             ${DIR_BIN} )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY             ${DIR_BIN} )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY             ${DIR_BIN} )
+
+# release build directory settings
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE     ${DIR_BIN} )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE     ${DIR_BIN} )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE     ${DIR_BIN} )
+
+# debug build directory settings
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG       ${DIR_BIN_DEBUG} )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG       ${DIR_BIN_DEBUG} )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG       ${DIR_BIN_DEBUG} )
+
+
+# TODO: delete( docu says, this shouldn't be modified )
+#set( CMAKE_CACHEFILE_DIR                       ${DIR_BUILD} )
+
+
+# common compile flags
+set( COMPILE_FLAGS_COMMON       "__CFG_COMPILE_FLAGS_COMMON__" )
+# platform specific compile flags
+set( COMPILE_FLAGS_PLATFORM     "__CFG_COMPILE_FLAGS__" )
+
+# apply compile flags
+set( COMPILE_FLAGS              "${COMPILE_FLAGS_PLATFORM} ${COMPILE_FLAGS_COMMON}" )
+set( CMAKE_C_FLAGS              "${COMPILE_FLAGS}" )
+set( CMAKE_CXX_FLAGS            "${COMPILE_FLAGS}" )
+
+
+#----- linux only -----
+set(CMAKE_INSTALL_RPATH "")
+
+# TODO: probably need to remove
+#   try using the starter script and set 
+#       LD_LIBRARY_PATH="/path/to/mydir:$LD_LIBRARY_PATH"
+if( ENABLE_TEST_RPATH )
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+endif()
+#----------------------
+
+
+add_executable( __CFG_TARGET_EXECUTABLE_NAME__
+
+__CFG_SOURCES__
+__CFG_SOURCES_COMMON__
+__CFG_HEADERS__
+__CFG_HEADERS_COMMON__
+
+)
+
+
+target_include_directories( __CFG_TARGET_EXECUTABLE_NAME__ PRIVATE
+
+__CFG_INCLUDE_DIRS__
+__CFG_INCLUDE_DIRS_COMMON__
+
+)
+
+
+#guide to set up library linking paths
+#  directories and library names both come here
+#target_link_libraries( __CFG_TARGET_EXECUTABLE_NAME__
+#   -L<directory>
+#   -l<applib>
+#)
+
+#set up library linking paths
+target_link_libraries( __CFG_TARGET_EXECUTABLE_NAME__
+
+__CFG_LINK__
+__CFG_LINK_COMMON__
+
+)
