@@ -153,15 +153,15 @@ Search( const List& list, Handle h ) noexcept
 }
 
 
-// TODO: reorder
+//--------------------------------------------------
+// list::priv::
 pt::handle::index pt::list::priv::
 PrepareFreeNode( List& list ) noexcept
 {
     handle::index   currentIndex    = List::stInvalidIndex;
     Node*           currentNode     = &GetSentinelHeadFree( list );
 
-    bool found = false;
-    while( !found ){
+    while( true ){
         bool suc;
         currentIndex = currentNode->mNextIndex;
         currentNode = &GetNode( list, currentIndex, suc );
@@ -192,9 +192,8 @@ PrepareFreeNode( List& list ) noexcept
 
         // found usable node
         }else{
-            found = true;   // not really needed
             DisconnectNode( list, currentIndex );
-            currentNode->mHandle = Handle{0};   // should be redundant
+            currentNode->mHandle = Handle{0};
             return currentIndex;
         }
     }
