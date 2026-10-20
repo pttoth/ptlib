@@ -36,7 +36,7 @@ fi
 
 #--------------------------------------------------
 # setup in userspace
-./obtain_ptlib.sh
+# ...
 
 
 # build project
