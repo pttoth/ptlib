@@ -12,7 +12,7 @@
 //       63   58 57          44 43                24 23                     0
 
 //    Index:    Identifies storage index.
-//    Age:      Generation counter. Prevents use-after-delete (when Valid(handle) is used).
+//    Age:      Generation counter. Prevents use-after-delete.
 //                (Dangling handles could otherwise access instances that are stored in reused indices.)
 //                Age counter is increased, when object instance is logically deleted.
 //                If Age hits max, the storage slot (index) is marked exhausted.
@@ -24,7 +24,7 @@
 //                  0 is reserved for identifying invalid (default) handle.
 //                  1 is reserved for unknown/don't care, but valid type.
 //                If types are not strictly tracked, just set this to 1, when in use.
-//    Free:     Reserved for custom use.
+//    Free:     Reserved for custom/future use.
 //                Possible practical use-case: handle versioning during serialization.
 
 // Usage recommendations:
