@@ -59,8 +59,6 @@ namespace pt{
         using type      = u16;  // create a custom enum
 
         // TODO: unify caming with c or st prefix
-        const       age ageMax        = UINT32_MAX;
-
         constexpr   u8 bitcount_index   = 24;
         constexpr   u8 bitcount_age     = 20;
         constexpr   u8 bitcount_type    = 14;
@@ -74,6 +72,10 @@ namespace pt{
         constexpr   value mask_index    = (value{1} << bitcount_index) - 1;
         constexpr   value mask_age      = (value{1} << bitcount_age)   - 1;
         constexpr   value mask_type     = (value{1} << bitcount_type)  - 1;
+
+        constexpr   index index_max     = (index{1} << bitcount_index) - 1;
+        constexpr   age   age_max       = (age{1}   << bitcount_age)   - 1;
+        constexpr   type  type_max      = (type{1}  << bitcount_type)  - 1;
 
         // validation
         static_assert( bitcount_index <= sizeof(index) * 8,
@@ -111,8 +113,8 @@ namespace pt{
         void SetIndex   ( handle::index index   ) noexcept;
         void SetType    ( handle::type  type    ) noexcept;
 
-        constexpr Handle() noexcept = default;
-        constexpr Handle( handle::value rhs ) noexcept:
+        PT_FORCE_INLINE constexpr Handle() noexcept = default;
+        PT_FORCE_INLINE constexpr Handle( handle::value rhs ) noexcept:
             mVal( rhs )
         {}
 
@@ -142,11 +144,11 @@ namespace pt{
     //  - Type not null
     //  - Index is within bounds
     //  - Age matches instance Age
-    extern bool     Valid( Handle h ) noexcept;
+    //extern bool     Valid( Handle h ) noexcept;
 
     // Resolves the handle to a pointer.
     //  Type can be inferred from Type bits or Handle child type.
-    extern void*    GetPtr( Handle h ) noexcept;
+    //extern void*    GetPtr( Handle h ) noexcept;
     //-------------------------
 
 } // end of namespace 'pt'

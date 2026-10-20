@@ -9,38 +9,38 @@ Init( List& list ) noexcept
     if( priv::Initialized( list ) ) return;
 
     priv::GetSentinelHead( list ) =
-        Node{ .mHandle  = 0,
-              .mNextH   = List::stTailHandle,
-              .mPrevH   = 0,
-              .mAge     = 0 };
+        Node{ .mHandle      = Handle{0},
+              .mNextIndex   = List::stTailHandle.Index(),
+              .mPrevIndex   = List::stInvalidIndex,
+              .mAge         = 0 };
 
     priv::GetSentinelTail( list ) =
-        Node{ .mHandle  = 0,
-              .mNextH   = 0,
-              .mPrevH   = List::stHeadHandle,
-              .mAge     = 0 };
+        Node{ .mHandle      = Handle{0},
+              .mNextIndex   = List::stInvalidIndex,
+              .mPrevIndex   = List::stHeadHandle.Index(),
+              .mAge         = 0 };
 
     priv::GetSentinelHeadFree( list ) =
-        Node{ .mHandle  = 0,
-              .mNextH   = List::stTailFreeHandle,
-              .mPrevH   = 0,
-              .mAge     = 0 };
+        Node{ .mHandle      = Handle{0},
+              .mNextIndex   = List::stTailFreeHandle.Index(),
+              .mPrevIndex   = List::stInvalidIndex,
+              .mAge         = 0 };
 
     priv::GetSentinelTailFree( list ) =
-        Node{ .mHandle  = 0,
-              .mNextH   = 0,
-              .mPrevH   = List::stHeadFreeHandle,
-              .mAge     = 0 };
+        Node{ .mHandle      = Handle{0},
+              .mNextIndex   = List::stInvalidIndex,
+              .mPrevIndex   = List::stHeadFreeHandle.Index(),
+              .mAge         = 0 };
 
-    list.mStubRO = Node{ .mHandle   = 0,
-                         .mNextH    = 0,
-                         .mPrevH    = 0,
-                         .mAge      = 0 };
+    list.mStubRO = Node{ .mHandle       = Handle{0},
+                         .mNextIndex    = List::stInvalidIndex,
+                         .mPrevIndex    = List::stInvalidIndex,
+                         .mAge          = 0 };
 
-    list.mStubRW = Node{ .mHandle   = 0,
-                         .mNextH    = 0,
-                         .mPrevH    = 0,
-                         .mAge      = 0 };
+    list.mStubRW = Node{ .mHandle       = Handle{0},
+                         .mNextIndex    = List::stInvalidIndex,
+                         .mPrevIndex    = List::stInvalidIndex,
+                         .mAge          = 0 };
 
 }
 
@@ -48,100 +48,157 @@ Init( List& list ) noexcept
 void pt::list::
 PushBack( List& list, Handle h ) noexcept
 {
-    assert( priv::Initialized( list ) );
-    HNode   hNode   = priv::TakeFreeNode( list );
-    Node&   node    = GetRef( list, hNode );
+    IF_UNLIKELY( !priv::Initialized( list ) ){
+        Init( list );
+    }
 
-    if( IsStub( node ) ) return;
+    handle::index   iFreeNode   = priv::PrepareFreeNode( list );
+    IF_UNLIKELY( List::stInvalidIndex == iFreeNode ){
+        // TODO: log error
+        return;
+    }
 
+    bool suc;
+    Node&   node    = priv::GetNode( list, iFreeNode, suc );
     node.mHandle = h;
 
-    priv::DisconnectNode( list, hNode );
-    priv::ConnectBeforeNode( list, list.stTailHandle, hNode );
+    priv::ConnectBeforeNode( list, list.stTailHandle.Index(), iFreeNode );
 }
 
 
 void pt::list::
 PushFront( List& list, Handle h ) noexcept
 {
-    assert( priv::Initialized( list ) );
-    HNode   hFreeNode   = priv::TakeFreeNode( list );
-    Node&   node        = GetRef( list, hFreeNode );
+    IF_UNLIKELY( !priv::Initialized( list ) ){
+        Init( list );
+    }
 
-    if( IsStub( node ) ) return;
+    handle::index   iFreeNode   = priv::PrepareFreeNode( list );
+    IF_UNLIKELY( List::stInvalidIndex == iFreeNode ){
+        // TODO: log error
+        return;
+    }
 
+    bool suc;
+    Node&   node    = priv::GetNode( list, iFreeNode, suc );
     node.mHandle = h;
 
-    priv::DisconnectNode( list, hFreeNode );
-    priv::ConnectAfterNode( list, list.stHeadHandle, hFreeNode );
+    priv::ConnectAfterNode( list, list.stHeadHandle.Index(), iFreeNode );
 }
 
 
 void pt::list::
 Remove( List& list, HNode hNode )  noexcept
 {
+    IF_UNLIKELY( !priv::Initialized( list ) ){
+        Init( list );
+    }
+
+    bool badHandle = ( !priv::ValidHNode( hNode ) )
+                  || ( List::stHeadHandle == hNode )
+                  || ( List::stTailHandle == hNode )
+                  || ( List::stHeadFreeHandle == hNode )
+                  || ( List::stTailFreeHandle == hNode );
+    IF_UNLIKELY( badHandle ) return;
+
     Node& node = GetRef( list, hNode );
-    if( IsStub( node ) ) return;
+    IF_UNLIKELY( IsStub( node ) ) return;
 
-    priv::DisconnectNode( list, hNode );
-    priv::ConnectAfterNode( list, list.stHeadFreeHandle, hNode );
-    // TODO: need generation increase here
-    // TODO: need some guarantee, that node is part of the active chain
-
+    priv::DisconnectNode( list, hNode.Index() );
+    IncrementAge( node );
+    priv::ConnectBeforeNode( list, list.stTailFreeHandle.Index(), hNode.Index() );
 }
 
 
 pt::list::HNode pt::list::
-Search( const List& list, Handle hNode ) noexcept
+Search( const List& list, Handle h ) noexcept
 {
-    assert( priv::Initialized( list ) );
-    if( IsStub( hNode ) ) return HNode{0};
+    IF_UNLIKELY( !priv::Initialized( list ) ){
+        assert( false );
+        return HNode{0};
+    }
 
-    HNode hCurrentNode = priv::GetSentinelHead( list ).mNextH;
+    handle::index iCurrentNode = priv::GetSentinelHead( list ).mNextIndex;
     u64 failsafeCount = 0;
+    u64 failsafeMax   = Size( list.mNodes ) + 1;
 
     // traverse list
-    while( hCurrentNode != list.stTailHandle ){
-        // failsafe to prevent infinite loops if errors occur
-        // TODO: need to count for sentinels too
-        bool error = ( Size( list.mNodes ) < failsafeCount );
+    while( true ){
+        // error in chain, or over-iteration, exit
+        bool error = (List::stInvalidIndex == iCurrentNode);
         assert( !error );
-        if( error ) return HNode{0};
+        IF_UNLIKELY( error ) return HNode{0};
 
+        // reached tail
+        if( List::stTailHandle.Index() == iCurrentNode ) return HNode{0};
 
-        const Node* currentNode = &GetRef( list, hCurrentNode );
-        if( hNode == currentNode->mHandle ){
-            return hCurrentNode;
+        // found item
+        bool suc;
+        const Node& node = priv::GetNode( list, iCurrentNode, suc );
+        if( node.mHandle == h ){
+            return CreateHandle( 1, node.mAge, iCurrentNode );
         }
 
-        hCurrentNode = currentNode->mNextH;
+        // not found item
+        iCurrentNode = node.mNextIndex;
         ++failsafeCount;
+
+        // failsafe: iteration got lost (wrong chain, or some error too weird)
+        bool failsafeTriggered = ( failsafeCount >= failsafeMax );
+        assert( !failsafeTriggered );
+        IF_UNLIKELY( failsafeTriggered ) return HNode{0};
     }
 
     return HNode{0};
 }
 
 
-pt::list::HNode pt::list::priv::
-TakeFreeNode( List& list ) noexcept
+// TODO: reorder
+pt::handle::index pt::list::priv::
+PrepareFreeNode( List& list ) noexcept
 {
-    const Node& headFreeNode = GetSentinelHeadFree( list );
+    handle::index   currentIndex    = List::stInvalidIndex;
+    Node*           currentNode     = &GetSentinelHeadFree( list );
 
-    // check for available free nodes
-    if( headFreeNode.mNextH == list.stTailFreeHandle ){
-        // add empty node
-        handle::index index = Size( list.mNodes );
-        bool err_OutOfIndexSpace = ( List::stMinSentinelIndex <= index );
-        assert( !err_OutOfIndexSpace );
-        if( err_OutOfIndexSpace ) return HNode{0};
+    bool found = false;
+    while( !found ){
+        bool suc;
+        currentIndex = currentNode->mNextIndex;
+        currentNode = &GetNode( list, currentIndex, suc );
 
-        EmplaceBack( list.mNodes );
-        HNode newNode = CreateHandle( handle::type{1}, handle::age{0}, index );
-        ConnectAfterNode( list, list.stHeadFreeHandle, newNode );
+        // no empty nodes available
+        if( currentIndex == List::stTailFreeHandle.Index() ){
+            // add empty node
+            handle::index index = Size( list.mNodes );
+            bool outOfIndexSpace = ( index >= List::stMinSentinelIndex );
+            IF_UNLIKELY( outOfIndexSpace ){
+                // TODO: log error message "pt::List has ran out of index space"
+                //  debug stacktrace
+                return List::stInvalidIndex;
+            }
+
+            EmplaceBack( list.mNodes );
+            ConnectAfterNode( list, list.stHeadFreeHandle.Index(), index );
+
+        // found node, but exhausted
+        }else if( Exhausted( *currentNode ) ){
+            // Fully disconnect the exhausted Node
+            DisconnectNode( list, currentIndex );
+            // Disconnect() broke the chain here
+            //  all previous elements have been removed here so far,
+            //  so headFree is definitely the previous node, restore that
+            currentIndex = List::stHeadFreeHandle.Index();
+            currentNode  = &GetSentinelHeadFree( list );
+
+        // found usable node
+        }else{
+            found = true;   // not really needed
+            DisconnectNode( list, currentIndex );
+            currentNode->mHandle = Handle{0};   // should be redundant
+            return currentIndex;
+        }
     }
 
-    HNode hNode = headFreeNode.mNextH;
-    // Func earlier ensured that a node is available, so no tail-check needed
-    DisconnectNode( list, hNode );
-    return hNode;
+    assert( false );    // unknown error, should not be reached
+    return List::stInvalidIndex;
 }
