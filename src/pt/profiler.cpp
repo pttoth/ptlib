@@ -1,6 +1,6 @@
 #include "pt/profiler.h"
 
-#include "pt/alias.h"
+#include "pt/def_minimal.h"
 
 #include <assert.h>
 #include <vector>

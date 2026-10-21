@@ -1,16 +1,23 @@
-#include "pt/macros.h"
+#include "pt/def.h"
 
 #include "pt/logging.h"
 #include "pt/utility.hpp"
 
+#include <boost/stacktrace.hpp>
+
+
 void pt::helper::
-PrintStackTrace( const char* message ){
-    pt::PrintStackTrace( message );
+FatalError( const char* message ) noexcept
+{
+    using namespace boost;
+    const std::string trace = stacktrace::to_string( stacktrace::stacktrace() );
+    PT_LOG_ERR( "Fatal Error: " << message << "\n" << trace.c_str() );
+    exit( EXIT_FAILURE );
 }
 
 
 void pt::helper::
-WarnUnimplementedFunction()
+WarnUnimplementedFunction() noexcept
 {
     pt::PrintStackTrace( "Unimplemented/unfinished function called" );
     //TODO: use logging instead
@@ -19,7 +26,7 @@ WarnUnimplementedFunction()
 
 
 void pt::helper::
-WarnDeprecatedFunction()
+WarnDeprecatedFunction() noexcept
 {
     pt::PrintStackTrace( "Called function is marked deprecated" );
     //TODO: use logging instead

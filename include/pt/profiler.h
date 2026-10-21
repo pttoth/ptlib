@@ -1,16 +1,13 @@
-/*
- * -------------------------------------------------------------------------
- * FILE:    profiler.h
- * AUTHOR:  Peter Toth
- * E-MAIL:  peter.t.toth92@gmail.com
- * PURPOSE: Performance profiler class.
- *            Constructor starts the measurement.
- *            Destructor stops and records the measurement.
- *          If 'PT_MEASURE_PERFORMANCE' is not defined, the profiling macros have zero overhead.
- * USAGE:   PERF_WATCH( "foo_measurement", foo( param1, param2, ... ) )
- * -------------------------------------------------------------------------
- */
-
+//-------------------------------------------------------------------------
+//  FILE:    profiler.h
+//  AUTHOR:  Peter Toth
+//  E-MAIL:  peter.t.toth92@gmail.com
+//  PURPOSE: Performance profiler class.
+//             Constructor starts the measurement.
+//             Destructor stops and records the measurement.
+//           If 'PT_MEASURE_PERFORMANCE' is not defined, the profiling macros have zero overhead.
+//  USAGE:   PERF_WATCH( "foo_measurement", foo( param1, param2, ... ) )
+//-------------------------------------------------------------------------
 #include "pt/name.h"
 
 #include <chrono>

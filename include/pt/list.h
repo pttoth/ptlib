@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "macros.h"
+#include "def_minimal.h"
 #include "handle.h"
 #include "stdutil.h"
 #include <cassert>

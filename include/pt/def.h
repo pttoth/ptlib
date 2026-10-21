@@ -1,78 +1,49 @@
-/** -----------------------------------------------------------------------------
-  * FILE:    def.h
-  * AUTHOR:  ptoth
-  * EMAIL:   peter.t.toth92@gmail.com
-  * PURPOSE: Standalone macros and definitions for project-wide use.
-  *          (They have no include dependencies)
-  * -----------------------------------------------------------------------------
-  */
-
+//-----------------------------------------------------------------------------
+//  FILE:    def.h
+//  AUTHOR:  ptoth
+//  EMAIL:   peter.t.toth92@gmail.com
+//  PURPOSE: Macros, definitions and aliases.
+//-----------------------------------------------------------------------------
 #pragma once
 
-#include <cstdint>
+#include "def_minimal.h"
+#include <memory>
+#include <mutex>
 
-//---------------------------------------------------
-//  platform definitions:
-//---------------------------------------------------
+//-----------------------------------
+// Paranoid guard against exotic platforms
+static_assert( std::numeric_limits<f32>::is_iec559,  "float is not IEEE 754 binary32" );
+static_assert( std::numeric_limits<f32>::digits10 == 6,  "unexpected float precision" );
+static_assert( std::numeric_limits<f64>::is_iec559, "double is not IEEE 754 binary64" );
+static_assert( std::numeric_limits<f64>::digits10 == 15, "unexpected double precision" );
 
-//-----Linux-----------------------------------------
-#if defined (__linux__) || defined (__linux) || defined (linux)
-    #define PT_PLATFORM_LINUX
+//-----------------------------------
+//  MutexLock / MutexLockGuard
+namespace pt{
+    using MutexLock         = std::unique_lock< std::mutex >;
+    using MutexLockGuard    = std::lock_guard< std::mutex >;
+    // TODO: add C++17 detector macro here
+    //using MutexScopedLock = std::scoped_lock< std::mutex >;
+}
 
-#endif
+//-----------------------------------
+// PT_FORWARD_DECLARE_CLASS / _STRUCT
 
-//-----WINDOWS---------------------------------------
-#if defined(WIN64) || defined(_WIN64) || defined(__WIN64__) \
-    || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) \
-    || defined(__TOS_WIN__) || defined(__WINDOWS__) \
-    || defined(__CYGWIN__)
-
-    #define PT_PLATFORM_WINDOWS
-#endif
-
-//-----Mac-------------------------------------------
-#if defined (__APPLE__) || defined (__MACH__)
-    #define PT_PLATFORM_MAC
-
-#endif
-//---------------------------------------------------
-
-#if !defined (PT_PLATFORM_LINUX) && !defined (PT_PLATFORM_WINDOWS) && !defined (PT_PLATFORM_MAC)
-    #error "Unknown platform!"
-#endif
-
-#if defined PT_PLATFORM_LINUX   && defined PT_PLATFORM_WINDOWS \
- || defined PT_PLATFORM_LINUX   && defined PT_PLATFORM_MAC \
- || defined PT_PLATFORM_WINDOWS && defined PT_PLATFORM_MAC \
-
-    #error "Multiple platforms are detected at the same time!"
-
-#endif
-
-//---------------------------------------------------
-//  generic definitions:
-//---------------------------------------------------
-
-#ifndef PT_DEBUG_NOAUTO
-    #ifndef NDEBUG
-        #define PT_DEBUG_ENABLED
-    #endif
-#endif
+#define PT_FORWARD_DECLARE_CLASS( CLASSNAME ) \
+class CLASSNAME; \
+using CLASSNAME##Ptr          = std::shared_ptr< CLASSNAME >; \
+using Const##CLASSNAME##Ptr   = std::shared_ptr< const CLASSNAME >; \
+using CLASSNAME##WPtr         = std::weak_ptr< CLASSNAME >; \
+using Const##CLASSNAME##WPtr  = std::weak_ptr< const CLASSNAME >; \
+using CLASSNAME##UPtr         = std::unique_ptr< CLASSNAME >; \
+using Const##CLASSNAME##UPtr  = std::unique_ptr< const CLASSNAME >;
 
 
-// TODO: add correct definition
-#define PT_FORCE_INLINE inline
-
-
-using u8    = uint8_t;
-using u16   = uint16_t;
-using u32   = uint32_t;
-using u64   = uint64_t;
-
-using s8    = int8_t;
-using s16   = int16_t;
-using s32   = int32_t;
-using s64   = int64_t;
-
-using f32   = float;
-using f64   = double;
+#define PT_FORWARD_DECLARE_STRUCT( STRUCTNAME ) \
+struct STRUCTNAME; \
+using STRUCTNAME##Ptr          = std::shared_ptr< STRUCTNAME >; \
+using Const##STRUCTNAME##Ptr   = std::shared_ptr< const STRUCTNAME >; \
+using STRUCTNAME##WPtr         = std::weak_ptr< STRUCTNAME >; \
+using Const##STRUCTNAME##WPtr  = std::weak_ptr< const STRUCTNAME >; \
+using STRUCTNAME##UPtr         = std::unique_ptr< STRUCTNAME >; \
+using Const##STRUCTNAME##UPtr  = std::unique_ptr< const STRUCTNAME >;

@@ -1,11 +1,10 @@
-/*
- * -------------------------------------------------------------------------
- * FILE:    logging.h
- * AUTHOR:  Peter Toth
- * E-MAIL:  peter.t.toth92@gmail.com
- * PURPOSE: Multiprocess logger, that writes simultaneously to std::cout and a log file.
- * -------------------------------------------------------------------------
- */
+//-------------------------------------------------------------------------
+//  FILE:    logging.h
+//  AUTHOR:  Peter Toth
+//  E-MAIL:  peter.t.toth92@gmail.com
+//  PURPOSE: Multiprocess logger, that writes simultaneously to std::cout and a log file.
+//-------------------------------------------------------------------------
+
 
 #pragma once
 
@@ -99,9 +98,9 @@ extern logstream err;
 #define PT_LOG_ONCE_DEBUG(expr) __PT_LOG_ONCE( pt::log::debug, expr )
 #define PT_LOG_LIMITED_DEBUG(log_limit, expr) __PT_LOG_LIMITED( pt::log::debug, log_limit, expr )
 #else
-#define PT_LOG_DEBUG(expr) (__PT_VOID_CAST (0))
-#define PT_LOG_ONCE_DEBUG(expr) (__PT_VOID_CAST (0))
-#define PT_LOG_LIMITED_DEBUG(log_limit, expr) (__PT_VOID_CAST (0))
+#define PT_LOG_DEBUG(expr) static_cast<void>
+#define PT_LOG_ONCE_DEBUG(expr) static_cast<void>
+#define PT_LOG_LIMITED_DEBUG(log_limit, expr) static_cast<void>
 #endif
 
 } //end of namespace 'pt'

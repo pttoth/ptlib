@@ -14,6 +14,7 @@ packages="$packages git"
 packages="$packages git-lfs"
 packages="$packages cmake"
 packages="$packages build-essential"
+packages="$packages libboost-stacktrace-dev"
 
 #--------------------------------------------------
 # config (auto-set)

@@ -1,19 +1,15 @@
-/** -----------------------------------------------------------------------------
-  * FILE:    utility.hpp
-  * AUTHOR:  ptoth
-  * EMAIL:   peter.t.toth92@gmail.com
-  * PURPOSE: Contains some utility functions for which
-  *          the standard STL methods are more or less messy
-  * -----------------------------------------------------------------------------
-  */
-
+//-----------------------------------------------------------------------------
+//  FILE:    utility.hpp
+//  AUTHOR:  ptoth
+//  EMAIL:   peter.t.toth92@gmail.com
+//  PURPOSE: Contains some utility functions for which
+//             the standard STL methods are more or less messy
+//-----------------------------------------------------------------------------
 #pragma once
 
-#include "pt/def.h"
-#include "pt/macros.h"
+#include "pt/def_minimal.h"
 
 #include <cstddef>
-#include <cstdint>
 #include <exception>
 #include <memory>
 #include <string>
