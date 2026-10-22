@@ -43,6 +43,6 @@ cat "./script/data/start.sh.template" \
     | tr '\r' '\n' \
     > "./bin/$platform/start_$fname.sh"
 
-chmod -v +x "./bin/$platform/start_$fname.sh"   || true
+chmod -v +x "./bin/$platform/start_$fname.sh"
 
 popd > /dev/null
