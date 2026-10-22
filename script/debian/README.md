@@ -19,9 +19,6 @@ This tutorial will guide you through installing the following tools and compilin
 - install system dependencies
   * (sudo) run `script/debian/install_dependencies.sh`
 
-- download and build project dependencies
-  * run `script/debian/obtain_ptlib.sh`
-
 - build project
   * run `script/build_debian.sh` or `script/build_debian_debug.sh`
 
