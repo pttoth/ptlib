@@ -8,11 +8,14 @@ This tutorial will guide you through installing the following tools and compilin
 
 #### Apt package dependencies
 - git
+- git-lfs
 - cmake
 - build-essential
+- libboost-stacktrace-dev
+
 
 ### Additional libraries
-- ptlib (https://github.com/pttoth/ptlib)
+
 
 # Setup steps
 
@@ -20,7 +23,7 @@ This tutorial will guide you through installing the following tools and compilin
   * (sudo) run `script/debian/install_dependencies.sh`
 
 - build project
-  * run `script/build_debian.sh` or `script/build_debian_debug.sh`
+  * run `script/build_debian_<arch>.sh` or `script/build_debian_<arch>.sh debug`
 
 - the built binaries can be found in `bin/<platform>/` or `bin/<platform>_debug/`
 - recommend using the startup script `bin/<platform>/start_<projectname>.sh` next to the binary for launching (has workarounds so that install is not required)
