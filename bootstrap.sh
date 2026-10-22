@@ -5,6 +5,7 @@ pushd $(dirname "${BASH_SOURCE[0]}") > /dev/null
 scriptdir=$(pwd)
 popd > /dev/null
 
+project_root="$scriptdir"
 
 if [ "$EUID" -eq 0 ]; then
     echo "Don't run this as root."
@@ -12,12 +13,12 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
-pushd "${scriptdir}" > /dev/null
+pushd "$project_root" > /dev/null
 
 # autoconfig results
 cfg_system=""
-cfg_arch=""
-
+arch=""
+arch_forced=""
 
 echo -n "Identifying system... "
 
@@ -31,23 +32,20 @@ if grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease 2>/dev/null ||
 elif [ -f /etc/debian_version ]; then
     echo "Debian"
     cfg_system=debian
-    cfg_arch=$(dpkg --print-architecture 2>/dev/null)
+    arch=$( {project_root}/script/debian/detect_arch.sh )
+    arch_forced=$( {project_root}/script/debian/detect_arch.sh force )
 
-    # amd64
-    if [ "$cfg_arch" = "amd64" ]; then
-        echo "Executing '${scriptdir}/script/debian_amd64/bootstrap_debian.sh'"
-        "${scriptdir}"/script/debian_amd64/bootstrap_debian.sh
-
-    # arm64
-    elif [ "$cfg_arch" = "arm64" ]; then
-        echo "This architecture is not supported: '$cfg_arch'"
+    # check that platform is supported
+    if [[ "$arch" == "unsupported" ]]; then
+        echo "This architecture is not supported: '$arch_forced'"
         exit 1
-
-    # other
-    else
-        echo "This architecture is not supported: '$cfg_arch'"
+    elif [[ "$arch" = "arm64" ]]; then
+        echo "This architecture is not supported: '$arch_forced'"
         exit 1
     fi
+
+    echo "Executing '${project_root}/script/debian_amd64/bootstrap_debian.sh'"
+    "${project_root}"/script/debian_amd64/bootstrap_debian.sh $arch
 
 # other
 else
@@ -56,4 +54,4 @@ else
     exit 1
 fi
 
-popd > /dev/null # from 'scriptdir'
+popd > /dev/null # from 'project_root'

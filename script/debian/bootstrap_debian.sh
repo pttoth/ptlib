@@ -5,6 +5,7 @@ pushd $(dirname "${BASH_SOURCE[0]}") > /dev/null
 scriptdir=$(pwd)
 popd > /dev/null
 
+project_root="$scriptdir/../.."
 
 if [ "$EUID" -eq 0 ]; then
     echo "Don't run this as root."
@@ -12,7 +13,26 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
-pushd "${scriptdir}" > /dev/null
+#-------------------------
+# read and validate architeture param
+cfg_arch=$1
+arch=""
+if [ -z "$cfg_arch" ]; then
+    cfg_arch=$( "${project_root}"/script/debian/detect_arch.sh )
+    echo "No architecture defined, '$cfg_arch' detected"
+fi
+
+if ! "${project_root}"/script/debian/validate_arch.sh $cfg_arch; then
+    echo "Unknown architecture: '$cfg_arch'"
+    exit 1
+fi
+
+arch=$cfg_arch
+
+#-------------------------
+
+
+pushd "${project_root}/script/debian" > /dev/null
 
 
 #--------------------------------------------------
@@ -36,13 +56,13 @@ fi
 
 #--------------------------------------------------
 # setup in userspace
-# ...
+./obtain_ptlib.sh
 
 
 # build project
-../generate_project.sh debian_amd64
-../build_debian_amd64.sh
-../copy_startup_script.sh debian_amd64
+../generate_project.sh debian_$arch
+../build_debian_$arch.sh
+../copy_startup_script.sh debian_$arch
 
 
 popd > /dev/null # from 'scriptdir'
