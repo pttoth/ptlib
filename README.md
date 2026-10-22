@@ -25,3 +25,7 @@ In later versions this will be moved out into a separate logging process.
 ### Utilities
 
 Various generic-purpose functions, that simplify the usage of STL solutions to problems.
+
+## How to build
+
+Call `bootstrap.sh`
