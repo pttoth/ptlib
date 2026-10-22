@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 #find out script directory
 pushd $(dirname "${BASH_SOURCE[0]}") > /dev/null
 scriptdir=$(pwd)
@@ -15,7 +17,7 @@ fi
 
 #-------------------------
 # read and validate architeture param
-cfg_arch=$1
+cfg_arch=${1:-}
 arch=""
 if [ -z "$cfg_arch" ]; then
     cfg_arch=$( "${project_root}"/script/debian/detect_arch.sh )
@@ -31,8 +33,7 @@ arch=$cfg_arch
 
 #-------------------------
 
-
-pushd "${project_root}/script/debian" > /dev/null
+pushd "${scriptdir}" > /dev/null
 
 
 #--------------------------------------------------
