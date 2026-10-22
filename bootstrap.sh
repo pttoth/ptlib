@@ -32,17 +32,15 @@ if grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease 2>/dev/null ||
 elif [ -f /etc/debian_version ]; then
     echo "Debian"
     cfg_system=debian
-    arch=$( {project_root}/script/debian/detect_arch.sh )
-    arch_forced=$( {project_root}/script/debian/detect_arch.sh force )
+    cfg_arch=$( "${project_root}"/script/debian/detect_arch.sh )
+    arch_forced=$( "${project_root}"/script/debian/detect_arch.sh force )
 
-    # check that platform is supported
-    if [[ "$arch" == "unsupported" ]]; then
-        echo "This architecture is not supported: '$arch_forced'"
-        exit 1
-    elif [[ "$arch" = "arm64" ]]; then
-        echo "This architecture is not supported: '$arch_forced'"
+    if ! "${project_root}"/script/debian/validate_arch.sh $cfg_arch; then
+        echo "Unknown architecture: '$arch_forced'"
         exit 1
     fi
+
+    arch=$cfg_arch
 
     echo "Executing '${project_root}/script/debian_amd64/bootstrap_debian.sh'"
     "${project_root}"/script/debian_amd64/bootstrap_debian.sh $arch
