@@ -3,8 +3,8 @@
 #include "Test.hpp"
 #include "pt/event.hpp"
 
+#include <cstdint>
 #include <string>
-
 #include <iostream>
 
 class TestEvent: public Test
