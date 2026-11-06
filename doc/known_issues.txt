@@ -9,10 +9,48 @@ build:
                 might be the reason (bug) why it doesn't look for freshly built libs as dependencies
     need to switch from Windows dev env to cross-compiled builds in Docker
         ...because MinGW's toolsets are no longer maintained on Windows (stays at 8.1.0, should use 11.0.0 or 12.0.0 instead)
+    
+    Claude:
+    boost::stacktrace (src/pt/def_minimal.cpp, FatalError) is used unconditionally, but the build doesn't set it up
+        win64 config has no Boost include / link setup -> missing <boost/stacktrace.hpp>
+        __CFG_LINK_COMMON__ lacks -ldl -> undefined 'dladdr' on glibc older than 2.34
+    script/data/CMakeLists.txt.template
+        last line hardcodes 'add_dependencies(ptlib_test ptlib)' instead of using the target name macros
+    script/data/start.sh.template (line 20)
+        '$@' is unquoted, arguments containing spaces get split (should be "$@")
+
+scripts:
+    bootstrap.sh (line 29)
+        WSL branch prints 'ERROR: WSL is not yet supported!' but doesn't exit -> returns status 0
+        Debian branch hardcodes 'script/debian_amd64/bootstrap_debian.sh' regardless of detected arch
+        prints $arch_forced while validating $cfg_arch
+        detect_arch.sh and validate_arch.sh disagree on supported archs (arm64 detected, then rejected)
+    script/debian/bootstrap_debian.sh (line 42)
+        exits early when EUID is 0, so the later root-only install branch is dead code
+        with 'set -e', the dependency dry-run check aborts the whole bootstrap if any package is missing
 
 generic:
     - various camelcase problems
     - add documentation for non-obvious functions
+
+    Claude:
+    - def.h uses std::numeric_limits without including <limits>
+        only compiles because <memory> / <mutex> pull it in (same kind of issue as the missing <cstdint> on WSL-Debian)
+    - def_minimal.h: release PT_WARN_DEPRECATED_FUNCTION expands to a bare 'static_cast<void>' (no operand)
+        compile error in release builds wherever it's used (old form was '__PT_VOID_CAST (0);')
+    - def_minimal.h: PT_UNIMPLEMENTED_FUNCTION calls FatalError (exits) unconditionally
+        contradicts its comment ("In release, it produces a warning")
+        replaced the catchable std::logic_error, callers can no longer recover
+
+list (Claude):
+    - PushBack silently drops the insert when the free list is empty (src/pt/list.cpp, PrepareFreeNode, line 172)
+        a new node is added, but currentNode stays on the tail-free sentinel
+        next iteration follows its invalid next-index and returns stInvalidIndex
+        fix: reset currentNode / currentIndex to the head-free sentinel after ConnectAfterNode
+    - static constexpr HNode members (stHeadHandle, stTailHandle, ...) are ODR-used, but have no out-of-class definition
+        project is C++14, where they aren't implicitly inline -> 'undefined reference' at link time in -O0 Debug builds
+    - Init uses C++20 designated initializers ('Node{ .mHandle = ... }') in a C++14 project
+        Clang warns (-Wc++20-designator), MSVC in C++14 mode rejects it
 
 event:
     - current entry key-pair (instance ptr, function ptr) violates cpp standard
@@ -42,6 +80,9 @@ logging:
         c++14 + 'experimental/filesystem' is also inadequate
     - isn't multiprocess yet
     - can't create folders on Windows yet
+(Claude)
+    - release (NDEBUG) PT_LOG_DEBUG, PT_LOG_ONCE_DEBUG, PT_LOG_LIMITED_DEBUG expand to a bare 'static_cast<void>'
+        the '(0)' is missing, so any use fails to compile in Release builds (logging.h, line 101)
 
 utility:
     SplitString
