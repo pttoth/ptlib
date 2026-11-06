@@ -9,7 +9,7 @@ build:
                 might be the reason (bug) why it doesn't look for freshly built libs as dependencies
     need to switch from Windows dev env to cross-compiled builds in Docker
         ...because MinGW's toolsets are no longer maintained on Windows (stays at 8.1.0, should use 11.0.0 or 12.0.0 instead)
-    
+
     Claude:
     boost::stacktrace (src/pt/def_minimal.cpp, FatalError) is used unconditionally, but the build doesn't set it up
         win64 config has no Boost include / link setup -> missing <boost/stacktrace.hpp>
@@ -34,10 +34,6 @@ generic:
     - add documentation for non-obvious functions
 
     Claude:
-    - def.h uses std::numeric_limits without including <limits>
-        only compiles because <memory> / <mutex> pull it in (same kind of issue as the missing <cstdint> on WSL-Debian)
-    - def_minimal.h: release PT_WARN_DEPRECATED_FUNCTION expands to a bare 'static_cast<void>' (no operand)
-        compile error in release builds wherever it's used (old form was '__PT_VOID_CAST (0);')
     - def_minimal.h: PT_UNIMPLEMENTED_FUNCTION calls FatalError (exits) unconditionally
         contradicts its comment ("In release, it produces a warning")
         replaced the catchable std::logic_error, callers can no longer recover
@@ -81,8 +77,6 @@ logging:
     - isn't multiprocess yet
     - can't create folders on Windows yet
 (Claude)
-    - release (NDEBUG) PT_LOG_DEBUG, PT_LOG_ONCE_DEBUG, PT_LOG_LIMITED_DEBUG expand to a bare 'static_cast<void>'
-        the '(0)' is missing, so any use fails to compile in Release builds (logging.h, line 101)
 
 utility:
     SplitString

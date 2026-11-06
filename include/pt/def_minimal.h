@@ -136,7 +136,7 @@ void WarnDeprecatedFunction() noexcept;
     #define PT_WARN_DEPRECATED_FUNCTION \
         pt::helper::WarnDeprecatedFunction();
 #else
-    #define PT_WARN_DEPRECATED_FUNCTION static_cast<void>
+    #define PT_WARN_DEPRECATED_FUNCTION static_cast<void>(0);
 #endif
 
 

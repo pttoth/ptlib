@@ -98,9 +98,9 @@ extern logstream err;
 #define PT_LOG_ONCE_DEBUG(expr) __PT_LOG_ONCE( pt::log::debug, expr )
 #define PT_LOG_LIMITED_DEBUG(log_limit, expr) __PT_LOG_LIMITED( pt::log::debug, log_limit, expr )
 #else
-#define PT_LOG_DEBUG(expr) static_cast<void>
-#define PT_LOG_ONCE_DEBUG(expr) static_cast<void>
-#define PT_LOG_LIMITED_DEBUG(log_limit, expr) static_cast<void>
+#define PT_LOG_DEBUG(expr) static_cast<void>(0)
+#define PT_LOG_ONCE_DEBUG(expr) static_cast<void>(0)
+#define PT_LOG_LIMITED_DEBUG(log_limit, expr) static_cast<void>(0)
 #endif
 
 } //end of namespace 'pt'
