@@ -7,6 +7,7 @@
 #pragma once
 
 #include "def_minimal.h"
+#include <limits>
 #include <memory>
 #include <mutex>
 
