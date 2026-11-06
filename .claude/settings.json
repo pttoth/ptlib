@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git blame *)",
+      "Bash(git branch --list *)",
+      "Bash(git diff *)",
+      "Bash(git help *)",
+      "Bash(git log *)",
+      "Bash(git ls-files *)",
+      "Bash(git rev-parse *)",
+      "Bash(git show *)",
+      "Bash(git status *)"
+    ],
+    "deny": [
+      "Bash(git add *)",
+      "Bash(git checkout *)",
+      "Bash(git cherry-pick *)",
+      "Bash(git clean *)",
+      "Bash(git commit *)",
+      "Bash(git config *)",
+      "Bash(git fetch *)",
+      "Bash(git gc *)",
+      "Bash(git merge *)",
+      "Bash(git mv *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git rebase *)",
+      "Bash(git restore *)",
+      "Bash(git reset *)",
+      "Bash(git revert *)",
+      "Bash(git rm *)",
+      "Bash(git stash *)",      
+      "Bash(git switch *)",
+      "Bash(git tag *)",
+      "Bash(git update-ref *)",
+      "Edit(.git/**)",
+      "Write(.git/**)"
+    ]
+  }
+}
