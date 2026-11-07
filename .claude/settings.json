@@ -4,6 +4,7 @@
       "Bash(git blame *)",
       "Bash(git branch --list *)",
       "Bash(git diff *)",
+      "Bash(git grep *)",
       "Bash(git help *)",
       "Bash(git log *)",
       "Bash(git ls-files *)",
