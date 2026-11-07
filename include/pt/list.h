@@ -116,24 +116,29 @@ void    Reset       (       Node& node ) noexcept;
 namespace pt{
 namespace list{
 
-//-----
+//---------------
 // These functions can be called from outside.
 //  Therefore all incoming data and logic sanitization need to happen here.
 // NOTE: Passing to these functions a 'hNode', that is not part of 'list' is Undefined Behavior!
 const Node& GetRef      ( const List& list, const HNode& hNode  )  noexcept;
 Node&       GetRef      (       List& list, HNode       hNode   )  noexcept;
 void        Init        (       List& list                      )  noexcept;
-void        PushBack    (       List& list, Handle      hData   )  noexcept;
-void        PushFront   (       List& list, Handle      hData   )  noexcept;
-void        Remove      (       List& list, HNode       hNode   )  noexcept;
 
-//-----
+// PushBack/PushFront:
+//  Returns the node's handle in which 'hData' was inserted.
+HNode       PushBack    (       List& list, Handle      hData   )  noexcept;
+HNode       PushFront   (       List& list, Handle      hData   )  noexcept;
+
+// Remove:
+//  Returns 'true' when node was removed, 'false' on errors.
+bool        Remove      (       List& list, HNode       hNode   )  noexcept;
+
 // Search: O(n)
 //  When found, returns handle to node containing the searched handle.
 //  When not found, returns an invalid handle.
 //    Can check with:   IsStub( retval ) == true;
 HNode       Search      ( const List& list, Handle      h       )  noexcept;
-
+//---------------
 
 namespace priv{
 // These functions are considered private and not to be called from outside.

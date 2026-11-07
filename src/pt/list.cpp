@@ -45,7 +45,7 @@ Init( List& list ) noexcept
 }
 
 
-void pt::list::
+pt::list::HNode pt::list::
 PushBack( List& list, Handle hData ) noexcept
 {
     IF_UNLIKELY( !priv::IsInitialized( list ) ){
@@ -55,7 +55,7 @@ PushBack( List& list, Handle hData ) noexcept
     handle::index   iFreeNode   = priv::PrepareFreeNode( list );
     IF_UNLIKELY( List::stInvalidIndex == iFreeNode ){
         // TODO: log error
-        return;
+        return HNode{0};
     }
 
     bool suc;
@@ -63,10 +63,12 @@ PushBack( List& list, Handle hData ) noexcept
     node.mHandle = hData;
 
     priv::ConnectBeforeNode( list, list.stTailHandle.Index(), iFreeNode );
+
+    return CreateHandle( 1, node.mAge, iFreeNode );
 }
 
 
-void pt::list::
+pt::list::HNode pt::list::
 PushFront( List& list, Handle hData ) noexcept
 {
     IF_UNLIKELY( !priv::IsInitialized( list ) ){
@@ -76,7 +78,7 @@ PushFront( List& list, Handle hData ) noexcept
     handle::index   iFreeNode   = priv::PrepareFreeNode( list );
     IF_UNLIKELY( List::stInvalidIndex == iFreeNode ){
         // TODO: log error
-        return;
+        return HNode{0};
     }
 
     bool suc;
@@ -84,10 +86,12 @@ PushFront( List& list, Handle hData ) noexcept
     node.mHandle = hData;
 
     priv::ConnectAfterNode( list, list.stHeadHandle.Index(), iFreeNode );
+
+    return CreateHandle( 1, node.mAge, iFreeNode );
 }
 
 
-void pt::list::
+bool pt::list::
 Remove( List& list, HNode hNode )  noexcept
 {
     IF_UNLIKELY( !priv::IsInitialized( list ) ){
@@ -99,10 +103,10 @@ Remove( List& list, HNode hNode )  noexcept
                   || ( List::stTailHandle == hNode )
                   || ( List::stHeadFreeHandle == hNode )
                   || ( List::stTailFreeHandle == hNode );
-    IF_UNLIKELY( badHandle ) return;
+    IF_UNLIKELY( badHandle ) return false;
 
     Node& node = GetRef( list, hNode );
-    IF_UNLIKELY( IsStub( node ) ) return;
+    IF_UNLIKELY( IsStub( node ) ) return false;
 
     priv::DisconnectNode( list, hNode.Index() );
     IncrementAge( node );
@@ -110,6 +114,8 @@ Remove( List& list, HNode hNode )  noexcept
 
     // place it to the free queue
     priv::ConnectBeforeNode( list, list.stTailFreeHandle.Index(), hNode.Index() );
+
+    return true;
 }
 
 
