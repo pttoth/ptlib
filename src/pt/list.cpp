@@ -186,7 +186,7 @@ PrepareFreeNode( List& list ) noexcept
             }
 
             EmplaceBack( list.mNodes );
-            ConnectAfterNode( list, list.stHeadFreeHandle.Index(), index );
+            return index;
 
         // found node, but exhausted
         }else if( Exhausted( *currentNode ) ){

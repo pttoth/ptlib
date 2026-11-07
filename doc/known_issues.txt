@@ -34,10 +34,6 @@ generic:
     - add documentation for non-obvious functions
 
 list (Claude):
-    - PushBack silently drops the insert when the free list is empty (src/pt/list.cpp, PrepareFreeNode, line 172)
-        a new node is added, but currentNode stays on the tail-free sentinel
-        next iteration follows its invalid next-index and returns stInvalidIndex
-        fix: reset currentNode / currentIndex to the head-free sentinel after ConnectAfterNode
     - static constexpr HNode members (stHeadHandle, stTailHandle, ...) are ODR-used, but have no out-of-class definition
         project is C++14, where they aren't implicitly inline -> 'undefined reference' at link time in -O0 Debug builds
     - Init uses C++20 designated initializers ('Node{ .mHandle = ... }') in a C++14 project
