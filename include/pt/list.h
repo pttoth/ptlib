@@ -2,8 +2,22 @@
 //  FILE:    list.h
 //  AUTHOR:  ptoth
 //  EMAIL:   peter.t.toth92@gmail.com
-//  PURPOSE: Linked list class.
-//            Can only hold handles, no templates.
+//
+//  Linked list class.
+//
+//  Nodes can only hold handles, no templates.
+//  Therefore they are therefore lightweight, and are stored in a dynamic array.
+//  Two chains exist: Active, and Free (2-2 sentinel nodes).
+//  Active holds nodes with data, Free holds the removed nodes for reuse in FIFO manner.
+//
+//  ! The highest 4 index values in the handles index range are reserved for the 4 sentinel nodes.
+//  ! Removed nodes bump their age, so existing, stored handles will no longer resolve to them.
+//  ! list::priv:: contains list/node management functions beyond insert/search/delete.
+//  !   Mixing nodes from other list instances into the chain is possible with reckless usage.
+//  !   Doing so is undefined behavior.
+//  ! Error signaling mainly happens with printed warnings.
+//  ! In case of errors, returned values are stubs or invalid handles that resolve to stub instances.
+//  !   Functions ignore these. They can be passed along and used without error checking.
 //-----------------------------------------------------------------------------
 
 #pragma once
@@ -36,6 +50,7 @@ struct Node{
     Handle          mHandle     = Handle{0};
     handle::index   mNextIndex  = handle::index_max;
     handle::index   mPrevIndex  = handle::index_max;
+    // TODO:
     // Can add an mActive member to ensure the node is in use
     //  or some random generated u32/u64 val to ensure Node is actually part of List
 
@@ -101,16 +116,22 @@ void    Reset       (       Node& node ) noexcept;
 namespace pt{
 namespace list{
 
+//-----
 // These functions can be called from outside.
 //  Therefore all incoming data and logic sanitization need to happen here.
 // NOTE: Passing to these functions a 'hNode', that is not part of 'list' is Undefined Behavior!
 const Node& GetRef      ( const List& list, const HNode& hNode  )  noexcept;
 Node&       GetRef      (       List& list, HNode       hNode   )  noexcept;
 void        Init        (       List& list                      )  noexcept;
-void        PushBack    (       List& list, Handle      h       )  noexcept;
-void        PushFront   (       List& list, Handle      h       )  noexcept;
+void        PushBack    (       List& list, Handle      hData   )  noexcept;
+void        PushFront   (       List& list, Handle      hData   )  noexcept;
 void        Remove      (       List& list, HNode       hNode   )  noexcept;
+
+//-----
 // Search: O(n)
+//  When found, returns handle to node containing the searched handle.
+//  When not found, returns an invalid handle.
+//    Can check with:   IsStub( retval ) == true;
 HNode       Search      ( const List& list, Handle      h       )  noexcept;
 
 
@@ -133,7 +154,7 @@ const Node&     GetSentinelTailFree ( const List& list ) noexcept;
 Node&           GetSentinelTailFree (       List& list ) noexcept;
 const Node&     GetStub             ( const List& list ) noexcept;
 Node&           GetStub             (       List& list ) noexcept;
-bool            Initialized         ( const List& list ) noexcept;
+bool            IsInitialized       ( const List& list ) noexcept;
 handle::index   PrepareFreeNode     (       List& list ) noexcept;
 bool            ValidHNode          ( const HNode& hNode ) noexcept;
 
@@ -180,7 +201,7 @@ Reset( Node& node ) noexcept
 PT_FORCE_INLINE const pt::list::Node& pt::list::
 GetRef( const List& list, const HNode& hNode ) noexcept
 {
-    bool initialized = priv::Initialized( list );
+    bool initialized = priv::IsInitialized( list );
     bool validHNode  = priv::ValidHNode( hNode );
     IF_UNLIKELY( !initialized || !validHNode )  return priv::GetStub( list );
 
@@ -196,7 +217,7 @@ GetRef( const List& list, const HNode& hNode ) noexcept
 PT_FORCE_INLINE pt::list::Node& pt::list::
 GetRef( List& list, HNode hNode ) noexcept
 {
-    bool initialized = priv::Initialized( list );
+    bool initialized = priv::IsInitialized( list );
     bool validHNode  = priv::ValidHNode( hNode );
     IF_UNLIKELY( !initialized || !validHNode )  return priv::GetStub( list );
 
@@ -364,7 +385,7 @@ GetStub( List& list ) noexcept
 
 
 PT_FORCE_INLINE bool pt::list::priv::
-Initialized( const List& list ) noexcept
+IsInitialized( const List& list ) noexcept
 {
     return !IsStub( list.mSentinels[0] );
 }

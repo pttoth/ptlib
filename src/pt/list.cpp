@@ -6,7 +6,7 @@
 void pt::list::
 Init( List& list ) noexcept
 {
-    if( priv::Initialized( list ) ) return;
+    if( priv::IsInitialized( list ) ) return;
 
     priv::GetSentinelHead( list ) =
         Node{ .mHandle      = Handle{0},
@@ -46,9 +46,9 @@ Init( List& list ) noexcept
 
 
 void pt::list::
-PushBack( List& list, Handle h ) noexcept
+PushBack( List& list, Handle hData ) noexcept
 {
-    IF_UNLIKELY( !priv::Initialized( list ) ){
+    IF_UNLIKELY( !priv::IsInitialized( list ) ){
         Init( list );
     }
 
@@ -60,16 +60,16 @@ PushBack( List& list, Handle h ) noexcept
 
     bool suc;
     Node&   node    = priv::GetNode( list, iFreeNode, suc );
-    node.mHandle = h;
+    node.mHandle = hData;
 
     priv::ConnectBeforeNode( list, list.stTailHandle.Index(), iFreeNode );
 }
 
 
 void pt::list::
-PushFront( List& list, Handle h ) noexcept
+PushFront( List& list, Handle hData ) noexcept
 {
-    IF_UNLIKELY( !priv::Initialized( list ) ){
+    IF_UNLIKELY( !priv::IsInitialized( list ) ){
         Init( list );
     }
 
@@ -81,7 +81,7 @@ PushFront( List& list, Handle h ) noexcept
 
     bool suc;
     Node&   node    = priv::GetNode( list, iFreeNode, suc );
-    node.mHandle = h;
+    node.mHandle = hData;
 
     priv::ConnectAfterNode( list, list.stHeadHandle.Index(), iFreeNode );
 }
@@ -90,7 +90,7 @@ PushFront( List& list, Handle h ) noexcept
 void pt::list::
 Remove( List& list, HNode hNode )  noexcept
 {
-    IF_UNLIKELY( !priv::Initialized( list ) ){
+    IF_UNLIKELY( !priv::IsInitialized( list ) ){
         Init( list );
     }
 
@@ -106,6 +106,9 @@ Remove( List& list, HNode hNode )  noexcept
 
     priv::DisconnectNode( list, hNode.Index() );
     IncrementAge( node );
+    node.mHandle = Handle{0};
+
+    // place it to the free queue
     priv::ConnectBeforeNode( list, list.stTailFreeHandle.Index(), hNode.Index() );
 }
 
@@ -113,7 +116,7 @@ Remove( List& list, HNode hNode )  noexcept
 pt::list::HNode pt::list::
 Search( const List& list, Handle h ) noexcept
 {
-    IF_UNLIKELY( !priv::Initialized( list ) ){
+    IF_UNLIKELY( !priv::IsInitialized( list ) ){
         return HNode{0};
     }
 
