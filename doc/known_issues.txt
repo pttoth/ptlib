@@ -34,8 +34,6 @@ generic:
     - add documentation for non-obvious functions
 
 list (Claude):
-    - static constexpr HNode members (stHeadHandle, stTailHandle, ...) are ODR-used, but have no out-of-class definition
-        project is C++14, where they aren't implicitly inline -> 'undefined reference' at link time in -O0 Debug builds
     - Init uses C++20 designated initializers ('Node{ .mHandle = ... }') in a C++14 project
         Clang warns (-Wc++20-designator), MSVC in C++14 mode rejects it
 

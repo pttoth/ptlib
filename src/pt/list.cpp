@@ -1,5 +1,13 @@
 #include "pt/list.h"
 
+constexpr pt::handle::index pt::List::stInvalidIndex;
+constexpr pt::handle::index pt::List::stMaxIndex;
+constexpr pt::handle::index pt::List::stMinSentinelIndex;
+constexpr pt::List::HNode   pt::List::stHeadHandle;
+constexpr pt::List::HNode   pt::List::stTailHandle;
+constexpr pt::List::HNode   pt::List::stHeadFreeHandle;
+constexpr pt::List::HNode   pt::List::stTailFreeHandle;
+
 //--------------------------------------------------
 // List
 
