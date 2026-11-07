@@ -119,8 +119,7 @@ void WarnDeprecatedFunction() noexcept;
 //-----------------------------------
 // PT_UNIMPLEMENTED_FUNCTION / PT_WARN_UNIMPLEMENTED_FUNCTION:
 //  Quick-use placeholder to mark unimplemented functions.
-//  In debug, it crashes the program with a stacktrace.
-//  In release, it produces a warning.
+//  Crashes the program with a stacktrace. / Produces a warning and continues.
 #define PT_UNIMPLEMENTED_FUNCTION \
     pt::helper::FatalError( "Called function is not implemented" );
 

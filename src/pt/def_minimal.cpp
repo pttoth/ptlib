@@ -4,7 +4,7 @@
 #include "pt/utility.hpp"
 
 #include <boost/stacktrace.hpp>
-
+#include <cstdlib>
 
 void pt::helper::
 FatalError( const char* message ) noexcept

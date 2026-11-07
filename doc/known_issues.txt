@@ -33,11 +33,6 @@ generic:
     - various camelcase problems
     - add documentation for non-obvious functions
 
-    Claude:
-    - def_minimal.h: PT_UNIMPLEMENTED_FUNCTION calls FatalError (exits) unconditionally
-        contradicts its comment ("In release, it produces a warning")
-        replaced the catchable std::logic_error, callers can no longer recover
-
 list (Claude):
     - PushBack silently drops the insert when the free list is empty (src/pt/list.cpp, PrepareFreeNode, line 172)
         a new node is added, but currentNode stays on the tail-free sentinel
@@ -76,7 +71,7 @@ logging:
         c++14 + 'experimental/filesystem' is also inadequate
     - isn't multiprocess yet
     - can't create folders on Windows yet
-(Claude)
+
 
 utility:
     SplitString
