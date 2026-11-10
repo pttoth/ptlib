@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Non-persistent userspace environment setup
+#   for the app to not require installation.
+
+pushd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null
+
+./@TEST_APP_NAME@ "$@"
+retval=$?
+
+popd > /dev/null
+
+exit $retval

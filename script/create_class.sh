@@ -1,380 +1,276 @@
 #!/bin/bash
 
-#--------------------------------------------------
-#  global vars
-#--------------------------------------------------
+# NOTE: 'fnPrintUsage' prints this header, so altering this requires updating 'fnPrintUsage' line references
+# Creates the header and source files of a new class from
+#   'script/data/newclass.h.model' and 'script/data/newclass.cpp.model',
+#   then makes CMake reload the project.
+#
+# Usage:
+#   script/create_class.sh [options] <ClassName>
+#
+#   Runs with the defaults below, without questions. Interactive mode (missing class name or -i)
+#     asks for every value (Enter keeps the given parameter or default), then for confirmation.
+#
+#   <ClassName>                     class name (also used as file name)
+#   -P, --platform <platform>       common | linux | win64  (default: common)
+#   -p, --path <subdir>             sub directory inside 'include/' and 'src/' (default: pt)
+#       --hpp                       '.hpp' header extension (default: '.h')
+#   -d, --explicit-default          declare the special member functions as '= default'
+#   -i, --interactive               interactive mode
+#   -h, --help                      print this help
+#
+# Files are created in
+#   common:     include/<subdir>/                       src/<subdir>/
+#   platform:   include/platform/<platform>/<subdir>/   src/platform/<platform>/<subdir>/
 
-bIsHpp="false"
-bHasParent="false"
-bHasNamespace="false"
-bExplicitDefault="false"
+set -euo pipefail
 
-sHeaderExt=".h"
-sClassname="n/a"
-sFileNameH="n/a"
-sFileNameS="n/a"
-sInclPathH="n/a"
+scriptdir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+rootdir="$(cd -- "$scriptdir/.." && pwd)"
 
-sParentClassname="n/a"
-sNamespace="n/a"
+PLATFORMS=( common linux win64 )
 
-#TODO: read
-sFilePathH=""
-sFilePathS=""
-
-
-#--------------------------------------------------
-#  function definitions
-#--------------------------------------------------
-
-fnReadClassName()#CFG_START
-{
-	local sInBuffer=""
-
-	while [ -z $sInBuffer ];
-	do
-		echo -n "class name: "
-		read sInBuffer
-	done
-
-	sClassname=${sInBuffer}
-	sFileNameH=${sInBuffer}
-	sFileNameS=${sInBuffer}.cpp
-	#sFileNameH=$(echo $ClassName | tr [:upper:] [:lower:])
-	#sFileNameS=$(echo $ClassName | tr [:upper:] [:lower:])
-}
-
-
-fnReadHeaderExtension()
-{
-	local sInBuffer=""
-	local bValid=""
-
-	while [ -z $bValid ];
-	do
-		echo -n "Header is .h and NOT .hpp? (Y/n): "
-		read sInBuffer
-
-		if [ -z $sInBuffer ];
-		then
-			bValid=1
-		elif [ $sInBuffer == "y" ] || [ $sInBuffer == "Y" ];
-		then
-			bValid=1
-			bIsHpp="true"
-			sHeaderExt=".h"
-		elif [ $sInBuffer == "n" ] || [ $sInBuffer == "N" ] ;
-		then
-			bValid=1
-			bIsHpp="false"
-			sHeaderExt=".hpp"
-		else
-			bValid=""
-			echo "invalid parameter!"
-		fi
-	done
-	sFileNameH=${sFileNameH}${sHeaderExt}
-	sFilePathH=${sFileNameH}
-	sFilePathS=${sFileNameS}
-}
-
-
-fnReadFilePath()
-{
-	#check parameter count
-	if [[ "$#" != 1 ]];
-	then
-		echo "error: invalid argument count"
-		echo "  param1: path to project folder"
-		return 1
-	fi
-	
-	#local vars
-	local lsProjectPath=$1
-	local lsInBuffer=""
-	local lbValid="" # "" or 1
-	local lbFilesExist=0
-	local lsFilePathH=""
-	local lsFilePathS=""
-
-	while [ -z $lbValid ];
-	do
-		lbValid=""
-		lbFilesExist=0
-		lsInBuffer=""
-		echo -n "Path inside 'include/' and 'src/': "
-		read lsInBuffer
-
-		#TODO: check this, whether it defaults to root, etc.
-		#		it shouldn't do root, and give error instead
-		if [[ -n $lsInBuffer ]];
-		then
-			lsInBuffer=$lsInBuffer"/"
-		fi
-
-		lsFilePathH=${lsInBuffer}${sFileNameH}
-		lsFilePathS=${lsInBuffer}${sFileNameS}
-		sFilePathH='include/'${lsFilePathH}
-		sFilePathS='src/'${lsFilePathS}
-		sAbsPathH=${lsProjectPath}'/include/'${lsFilePathH}
-		sAbsPathS=${lsProjectPath}'/src/'${lsFilePathS}
-		
-		sInclPathH=${lsFilePathH}
-
-		
-		#check whether files exist
-		if [ -a $sAbsPathH ];
-		then
-			echo "ERROR: " $sAbsPathH " already exists!"
-			lbFilesExist=1
-			lbValid=""
-		fi
-
-		if [ -a $sAbsPathS ];
-		then
-			echo "ERROR: " $sAbsPathS " already exists!"
-			lbFilesExist=1
-			lbValid=""
-		fi
-
-
-		if [[ 0 == $lbFilesExist ]];
-		then
-			echo Header path: "include/"${lsFilePathH}
-			echo Source path: "src/"${lsFilePathS}
-			echo -n "OK? (Y/n) "
-
-			lsFilePathH="${ProjectDir}/include/"${lsInBuffer}${sFileNameH}
-			lsFilePathS="${ProjectDir}/src/"${lsInBuffer}${sFileNameS}
-
-
-			lsInBuffer=""
-			read lsInBuffer
-
-			if [ -z $lsInBuffer ] || [[ $lsInBuffer == "y" ]] || [[ $lsInBuffer == "Y" ]];
-			then
-				lbValid=1
-			else
-				if [[ $lsInBuffer == "n" ]] || [[ $lsInBuffer == "N" ]] ;
-				then
-					lbValid=""
-				else
-					echo "invalid parameter!"
-				fi
-			fi
-		fi
-	done
-}
-
-
-
-fnReadParentClass()
-{
-	local sInBuffer=""
-	local bValid=""
-
-	while [ -z $bValid ];
-	do
-		echo "Inherits from a class? (y/N) "
-		read sInBuffer
-
-		if [ -z $sInBuffer ];
-		then
-			bValid=1
-		elif [ $sInBuffer == "y" ] || [ $sInBuffer == "Y" ];
-		then
-			bValid=1
-			bHasParent="true"
-		elif [ $sInBuffer == "n" ] || [ $sInBuffer == "N" ];
-		then
-			bValid=1
-			bHasParent="false"
-			sParentClassname="n/a"
-		else
-			bValid=""
-			echo "invalid parameter!"
-		fi
-	done
-
-	sInBuffer=""
-	if [ $bHasParent == "true" ]
-	then
-		while [ -z $sInBuffer ]
-		do
-			echo "Parent class name:"
-			read sInBuffer
-		done
-
-		sParentClassname=$sInBuffer
-	fi
-}
-
-
-fnReadNamespace()
-{
-	local sInBuffer=""
-	local bValid=""
-
-	while [[ -z $bValid ]]
-	do
-		echo -n "Add under a namespace? (y/N) "
-		read sInBuffer
-
-		if [ -z $sInBuffer ];
-		then
-			bValid=1
-		elif [ $sInBuffer == "y" ] || [ $sInBuffer == "Y" ];
-		then
-			bValid=1
-			bHasNamespace="true"
-		elif [ $sInBuffer == "n" ] || [ $sInBuffer == "N" ];
-		then
-			bValid=1
-			bHasNamespace="false"
-			sNamespace="n/a"
-		else
-			bValid=""
-			echo "invalid parameter!"
-		fi
-	done
-
-	sInBuffer=""
-	if [ $bHasNamespace == "true" ]
-	then
-		while [[ -z $sInBuffer ]]
-		do
-			echo "Namespace name:"
-			read sInBuffer
-		done
-
-		sNamespace=$sInBuffer
-	fi	
-}
-
-
-fnReadExplicitFunctions()
-{
-	local sInBuffer=""
-	local bValid=""
-
-	while [[ -z $bValid ]]
-	do
-		echo -n "Make functions explicit default? (y/N) "
-		read sInBuffer
-		if [ -z $sInBuffer ];
-		then
-			bValid=1
-		elif [ $sInBuffer == "y" ] || [ $sInBuffer == "Y" ];
-		then
-			bValid=1
-			bExplicitDefault="true"
-		elif [ $sInBuffer == "n" ] || [ $sInBuffer == "N" ];
-		then
-			bValid=1
-			bExplicitDefault="false"
-		else
-			bValid=""
-			echo "invalid parameter!"
-		fi
-	done
-
-}
-
+# defaults
+classname=""
+platform=common
+subdir=pt
+hpp=false
+explicit_default=false
+interactive=false
 
 #--------------------------------------------------
-#  Script Start
+# helpers
 #--------------------------------------------------
+fnPrintUsage() {
+    # print the defined lines of this script
+    sed -n '4,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+}
 
-#find out script directory
-pushd $(dirname "${BASH_SOURCE[0]}") > /dev/null
-scriptdir=$(pwd)
-popd > /dev/null
+# fnRead <prompt> <variable name>   -> exits, if there is no more input
+fnRead() {
+    if ! read -r -p "$1" "$2"; then
+        echo
+        echo "ERROR: no input"
+        exit 1
+    fi
+}
 
-#at this point, the path is <projectpath>/script/..
-#fix it to <projectpath>
-ProjectDir=$(dirname $scriptdir)
+# fnAskYesNo <question> <default: y|n>   -> returns 0 for yes
+fnAskYesNo() {
+    local question="$1"
+    local default="$2"
+    local hint="(y/N)"
+    local answer
 
+    [[ "$default" == "y" ]] && hint="(Y/n)"
 
-#prompt the user for the class properties
-fnReadClassName
-fnReadHeaderExtension
-fnReadFilePath $ProjectDir
-#fnReadParentClass
-#fnReadNamespace
-fnReadExplicitFunctions
+    while true; do
+        fnRead "$question $hint " answer
+        answer="${answer:-$default}"
+        case "$answer" in
+            y|Y) return 0 ;;
+            n|N) return 1 ;;
+            *)   echo "invalid answer!" ;;
+        esac
+    done
+}
 
+# fnAsk <prompt> <variable name>   -> Enter keeps the variable's current value (shown as [default])
+fnAsk() {
+    local answer
+    fnRead "$1 [${!2}]: " answer
+    [[ -n "$answer" ]] && printf -v "$2" '%s' "$answer"
+    return 0
+}
 
-#print an overview of the answers
+# fnAskValid <prompt> <variable name> <check function>
+#   -> asks until the check passes, an invalid answer does not become the default
+fnAskValid() {
+    local default="${!2}"
+    fnAsk "$1" "$2"
+    while ! "$3" "${!2}"; do
+        echo "invalid value: '${!2}'"
+        printf -v "$2" '%s' "$default"
+        fnAsk "$1" "$2"
+    done
+}
+
+fnIsValidName() {
+    [[ "$1" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]
+}
+
+fnIsValidPlatform() {
+    local p
+    for p in "${PLATFORMS[@]}"; do
+        [[ "$1" == "$p" ]] && return 0
+    done
+    return 1
+}
+
+#--------------------------------------------------
+# read params
+#--------------------------------------------------
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -P|--platform)
+            platform="${2:-}"
+            shift
+            ;;
+        -p|--path)
+            subdir="${2:-}"
+            shift
+            ;;
+        --hpp)
+            hpp=true
+            ;;
+        -d|--explicit-default)
+            explicit_default=true
+            ;;
+        -i|--interactive)
+            interactive=true
+            ;;
+        -h|--help)
+            fnPrintUsage
+            exit 0
+            ;;
+        -*)
+            echo "Invalid parameter: '$1'"
+            fnPrintUsage
+            exit 1
+            ;;
+        *)
+            classname="$1"
+            ;;
+    esac
+    shift
+done
+
+#--------------------------------------------------
+# interactive mode: ask for every value, the current one (parameter or default) is the default answer
+#--------------------------------------------------
+[[ -z "$classname" ]] && interactive=true
+
+if [[ "$interactive" == true ]]; then
+    fnAskValid "class name"                 classname   fnIsValidName
+    fnAskValid "platform (${PLATFORMS[*]})" platform    fnIsValidPlatform
+
+    hpp_answer=n
+    [[ "$hpp" == true ]] && hpp_answer=y
+    if fnAskYesNo "Use '.hpp' header extension?" "$hpp_answer"; then
+        hpp=true
+    else
+        hpp=false
+    fi
+
+    # '/' stands for no path (shown as default instead of an empty []), normalized to "" below
+    subdir="${subdir:-/}"
+    fnAsk "path inside 'include/' and 'src/' ('/' for none)" subdir
+
+    explicit_default_answer=n
+    [[ "$explicit_default" == true ]] && explicit_default_answer=y
+    if fnAskYesNo "Make functions explicit default?" "$explicit_default_answer"; then
+        explicit_default=true
+    else
+        explicit_default=false
+    fi
+fi
+
+#--------------------------------------------------
+# validation
+#--------------------------------------------------
+header_ext=".h"
+[[ "$hpp" == true ]] && header_ext=".hpp"
+
+if ! fnIsValidName "$classname"; then
+    echo "ERROR: invalid class name: '$classname'"
+    exit 1
+fi
+
+if ! fnIsValidPlatform "$platform"; then
+    echo "ERROR: invalid platform: '$platform' (${PLATFORMS[*]})"
+    exit 1
+fi
+
+#--------------------------------------------------
+# paths
+#--------------------------------------------------
+# normalize sub directory: no leading/trailing '/', no '..'
+subdir="${subdir#/}"
+subdir="${subdir%/}"
+if [[ "/$subdir/" == *"/../"* ]]; then
+    echo "ERROR: '..' is not allowed in path: '$subdir'"
+    exit 1
+fi
+
+platform_dir=""
+[[ "$platform" != "common" ]] && platform_dir="platform/$platform/"
+
+# header path relative to the include directories
+include_path="${subdir:+$subdir/}${classname}${header_ext}"
+
+path_h="include/${platform_dir}${include_path}"
+path_s="src/${platform_dir}${subdir:+$subdir/}${classname}.cpp"
+
+for f in "$path_h" "$path_s"; do
+    if [[ -e "$rootdir/$f" ]]; then
+        echo "ERROR: '$f' already exists!"
+        exit 1
+    fi
+done
+
 echo "--------------------------------------------------"
-if [ $bHasNamespace == "true" ];
-then
-	echo "Namespace name:             " $sNamespace
-fi
-
-echo "Class name:                 " $sClassname
-echo "Header file name:           " $sFileNameH
-echo "Header file relative path:  " $sFilePathH
-echo "Source file name:           " $sFileNameS
-echo "Source file relative path:  " $sFilePathS
-
-if [ $bHasParent == "true" ];
-then
-	echo "Parent class name:          " $sParentClassname
-fi
-
-if [ $bExplicitDefault == "true" ];
-then
-	echo "Explicit default functions: " $bExplicitDefault
-fi
+echo "Class name:                  $classname"
+echo "Platform:                    $platform"
+echo "Header:                      $path_h"
+echo "Source:                      $path_s"
+echo "Explicit default functions:  $explicit_default"
 echo "--------------------------------------------------"
 
-
-
-#--------------------------------------------------
-#  create file
-#--------------------------------------------------
-
-mkdir -p $(dirname $sAbsPathH)
-mkdir -p $(dirname $sAbsPathS)
-
-#TODO: check again for existing files and silently rename them to <name>.bak, just in case someone created them since checking
-
-
-#set up substitutions for string patterns
-soParentInclude="\#include '$sParentClassname'.h"
-soNamespaceOpen="//namespace ClassNameSpace{"
-soNamespaceClose="//} // end of namespace 'ClassNameSpace'"
-soClassName=$sClassname
-soParentClassInherit=": public "$sParentClassname
-soDefDefault=" = default"
-
-
-if [[ bHasParent=="false" ]];
-then
-	soParentInclude=""
-	soParentClassInherit=""
+if [[ "$interactive" == true ]] && ! fnAskYesNo "OK?" y; then
+    echo "Aborted."
+    exit 1
 fi
 
+#--------------------------------------------------
+# create files
 
-if [[ bHasNamespace=="false" ]];
-then
-	soNamespace=""
-	#soNamespaceOpen=""
-	#soNamespaceClose=""
+# with '= default', the special member functions get no definition in the .cpp
+#   ('operator==' can't be defaulted before C++20, it is always defined)
+def_default=""
+[[ "$explicit_default" == true ]] && def_default=" = default"
+
+mkdir -p "$(dirname "$rootdir/$path_h")" "$(dirname "$rootdir/$path_s")"
+
+sed -e "s|__className__|$classname|g" \
+    -e "s|__defDefault__|$def_default|g" \
+    "$scriptdir/data/newclass.h.model" > "$rootdir/$path_h"
+
+if [[ "$explicit_default" == true ]]; then
+    # keep only the include and 'operator==' from the source model
+    sed -n -e '1,/^__usingNamespaceName__/p' -e '/^__usingNamespaceName__/{s/.*//;p;p}' \
+           -e '/^bool __className__::/,$p' \
+        "$scriptdir/data/newclass.cpp.model"
 else
-	#TODO: set up 'mkdir' for namespace paths
-	echo
-fi
+    cat "$scriptdir/data/newclass.cpp.model"
+fi \
+    | sed -e "s|__headerInclude__|#include \"$include_path\"|g" \
+          -e "s|__usingNamespaceName__|//using namespace ClassNameSpace;|g" \
+          -e "s|__className__|$classname|g" \
+    > "$rootdir/$path_s"
 
+echo "Created '$path_h'"
+echo "Created '$path_s'"
 
-if [[ bExplicitDefault=="false" ]];
-then
-	soDefDefault=""
-fi
+#--------------------------------------------------
+# make CMake reload the project
+#   CMakeLists.txt is a configure dependency: touching it makes the next build
+#   (and IDEs watching it, e.g. QtCreator) re-run CMake, which re-globs the sources.
+touch "$rootdir/CMakeLists.txt"
 
-sIncludeLine="#include \"$sInclPathH\""
-
-cat $scriptdir/data/newclass.h.model | sed "s/__parentInclude__/$soParentInclude/g" | sed "s|__namespaceOpen__|$soNamespaceOpen|g" | sed "s|__namespaceClose__|$soNamespaceClose|g" | sed "s/__className__/$soClassName/g" | sed "s/__parentClassInherit__/$soParentClassInherit/g" | sed "s/__defDefault__/$soDefDefault/g" > $scriptdir/../$sFilePathH
-#cat $scriptdir/data/newclass.cpp.model | sed "s/__headerInclude__/$sIncludeLine/g" | sed "s/__className__/$soClassName/g" | sed "s/__usingNamespaceName__/\#using namespace ClassNameSpace;/g" > $sFilePathS
-
-cat $scriptdir/data/newclass.cpp.model | sed -e "s|__headerInclude__|$sIncludeLine|g" | sed "s/__className__/$soClassName/g" | sed "s/__usingNamespaceName__/\/\/using namespace ClassNameSpace;/g" > $scriptdir/../$sFilePathS
+# reconfigure existing build directories right away
+for cache in "$rootdir"/build/*/CMakeCache.txt; do
+    [[ -e "$cache" ]] || continue
+    builddir="$(dirname "$cache")"
+    echo "Reloading CMake project in '${builddir#"$rootdir"/}'"
+    cmake -S "$rootdir" -B "$builddir" > /dev/null
+done

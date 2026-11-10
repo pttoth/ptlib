@@ -1,0 +1,44 @@
+Library dependencies for linux: examples and need-to-know.
+Add the code to 'cmake/platform/linux.cmake' (target: ${APP_EXECUTABLE_NAME}).
+
+#-----
+system library: link by name ( -lbar -> libbar.so / libbar.a )
+    target_link_libraries( ${APP_EXECUTABLE_NAME} PRIVATE bar )
+
+linking pre-built library in 'lib/linux/'
+
+  lib/linux/
+  ├── foo/include/foo.h
+  ├── foo/lib/libfoo.a        static
+  ├── bar/include/bar.h
+  └── bar/lib/libbar.so       shared
+
+  IMPORTED: (CMake tag) not a build-target library, it is already available.
+            Can define properties for it though.
+
+  static:
+    add_library( foo STATIC IMPORTED )
+    set_target_properties( foo PROPERTIES
+        IMPORTED_LOCATION               ${PROJECT_SOURCE_DIR}/lib/linux/foo/lib/libfoo.a
+        INTERFACE_INCLUDE_DIRECTORIES   ${PROJECT_SOURCE_DIR}/lib/linux/foo/include
+    )
+
+  shared:
+    add_library( bar SHARED IMPORTED )
+    set_target_properties( bar PROPERTIES
+        IMPORTED_LOCATION               ${PROJECT_SOURCE_DIR}/lib/linux/bar/lib/libbar.so
+        INTERFACE_INCLUDE_DIRECTORIES   ${PROJECT_SOURCE_DIR}/lib/linux/bar/include
+    )
+
+  link:
+    target_link_libraries( ${APP_EXECUTABLE_NAME} PRIVATE foo bar )
+    to support RPATH:
+        set_target_properties( ${APP_EXECUTABLE_NAME} PROPERTIES BUILD_RPATH "$ORIGIN" )
+
+  example:
+    add_library( <mylib> STATIC IMPORTED )
+    set_target_properties( <mylib> PROPERTIES
+        IMPORTED_LOCATION               ${PROJECT_SOURCE_DIR}/lib/linux/lib<mylib>.a
+        INTERFACE_INCLUDE_DIRECTORIES   ${PROJECT_SOURCE_DIR}/lib/linux/<mylib>/include
+    )
+    target_link_libraries( ${APP_EXECUTABLE_NAME} PRIVATE <mylib> )

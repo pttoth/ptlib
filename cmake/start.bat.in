@@ -1,0 +1,14 @@
+@echo off
+setlocal
+
+REM Non-persistent userspace environment setup
+REM   for the app to not require installation.
+
+pushd "%~dp0"
+
+"@TEST_APP_NAME@.exe" %*
+set retval=%ERRORLEVEL%
+
+popd
+
+exit /b %retval%

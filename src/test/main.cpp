@@ -1,8 +1,8 @@
 
-#include "TestLogger.hpp"
-#include "TestConfig.hpp"
-#include "TestEvent.hpp"
-#include "TestUtility.hpp"
+#include "test/TestLogger.hpp"
+#include "test/TestConfig.hpp"
+#include "test/TestEvent.hpp"
+#include "test/TestUtility.hpp"
 
 #include <iostream>
 

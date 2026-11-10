@@ -45,8 +45,3 @@ To build a specific platform: `script/build.sh [-u] [-d] [-p <platform>]` (-u: u
 - platforms: `linux` (native), `win64` (cross-compiled with MinGW-w64)
 - output: `bin/<platform>/` (debug: `bin/<platform>_debug/`): `libptlib.a` and the test app `ptlib_test`
 - headers: `include/`
-
-### Source layout
-- `include/pt/`, `src/pt/`: the library
-- `include/platform/<platform>/`, `src/platform/<platform>/`: library code only built for `<platform>`
-- the rest of `include/` and `src/`: the test app

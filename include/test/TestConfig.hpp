@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Test.hpp"
+#include "test/Test.hpp"
 #include "pt/config.h"
 #include "pt/utility.hpp"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Test.hpp"
+#include "test/Test.hpp"
 
 class TestUtility: public Test
 {

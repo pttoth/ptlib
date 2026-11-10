@@ -1,0 +1,70 @@
+Library dependencies for win64: examples and need-to-know.
+Add the code to 'cmake/platform/win64.cmake' (target: ${APP_EXECUTABLE_NAME}).
+
+#-----
+Windows system libraries (Win32 API: sockets, graphics, sound, ...)
+  e.g. ws2_32 (sockets), gdi32 (graphics), winmm (multimedia), opengl32
+  - the .dll is part of Windows: nothing to install or copy next to the .exe
+  - MinGW has the import library for linking ( /usr/x86_64-w64-mingw32/lib/libws2_32.a )
+)
+  - which one is needed: Microsoft's docs list it at the bottom of each function's page
+      ( WSAStartup -> "Library: Ws2_32.lib" -> ws2_32 )
+  - kernel32 and user32 are linked automatically
+  - missing one shows up as a link error: undefined reference to `__imp_WSAStartup'
+
+Linking Windows system libraries
+  problem: Windows has the shared lib (.dll), but not the import lib (.dll.a)
+    ..BUT: MinGW provides the .dll.a
+
+link by name, without 'lib' and extension
+  (eg.: 'mylibrary' is 'libmylibrary.a', use 'mylibrary', when referring)
+  target_link_libraries( ${APP_EXECUTABLE_NAME} PRIVATE mylibrary )
+
+#-----
+manage pre-built libraries (found in 'lib/win64/')
+  lib/win64/
+  ├── foo/lib/libfoo.a        static
+  ├── bar/lib/libbar.dll.a    shared: import library, used at link time
+  └── bar/bin/bar.dll         shared: used at runtime
+
+  IMPORTED: (CMake tag) not a build-target library, it is already available.
+            Can define properties for it though.
+
+  static:
+    add_library( foo STATIC IMPORTED )
+    set_target_properties( foo PROPERTIES
+        IMPORTED_LOCATION               ${PROJECT_SOURCE_DIR}/lib/win64/foo/bin/libfoo.a
+        INTERFACE_INCLUDE_DIRECTORIES   ${PROJECT_SOURCE_DIR}/lib/win64/foo/include
+    )
+
+
+  shared:
+    # a shared library on Windows = 2 files:
+    #   IMPORTED_IMPLIB ( .dll.a ) for linking,
+    #   IMPORTED_LOCATION ( .dll ) for running
+  
+    add_library( bar SHARED IMPORTED )
+    set_target_properties( bar PROPERTIES
+        IMPORTED_IMPLIB                 ${PROJECT_SOURCE_DIR}/lib/win64/bar/bin/libbar.dll.a
+        IMPORTED_LOCATION               ${PROJECT_SOURCE_DIR}/lib/win64/bar/bin/bar.dll
+        INTERFACE_INCLUDE_DIRECTORIES   ${PROJECT_SOURCE_DIR}/lib/win64/bar/include
+    )
+
+  link:
+    target_link_libraries( ${APP_EXECUTABLE_NAME} PRIVATE foo bar )
+
+  copy the .dll next to the .exe after each build:
+    add_custom_command( TARGET ${APP_EXECUTABLE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:bar>
+                $<TARGET_FILE_DIR:${APP_EXECUTABLE_NAME}>
+        VERBATIM
+    )
+
+    # cmake -E copy_if_different <file1> [<file2> ...] <destination>
+    # VERBATIM: copy the arguments exactly as specified (handling escaping and quoting correctly)
+
+NOTE:
+    some libraries need a define when linked statically (e.g. -DFOO_STATIC), 
+        see the library's docs:
+        target_compile_definitions( ${APP_EXECUTABLE_NAME} PRIVATE FOO_STATIC )
