@@ -1,3 +1,0 @@
--L"${DIR_BIN}"
--L"${DIR_BIN_DEBUG}"
--lptlib

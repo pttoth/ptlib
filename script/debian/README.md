@@ -1,8 +1,10 @@
 # Setup Debian build environment
 
+Works on native Debian and on Debian in WSL2.
+
 ## Dependencies
 
-This tutorial will guide you through installing the following tools and compiling the following libraries.
+This tutorial will guide you through installing the following tools.
 
 ### Tools
 
@@ -12,10 +14,7 @@ This tutorial will guide you through installing the following tools and compilin
 - cmake
 - build-essential
 - libboost-stacktrace-dev
-
-
-### Additional libraries
-
+- g++-mingw-w64-x86-64-posix (win64 cross-compiler)
 
 # Setup steps
 
@@ -23,7 +22,7 @@ This tutorial will guide you through installing the following tools and compilin
   * (sudo) run `script/debian/install_dependencies.sh`
 
 - build project
-  * run `script/build_debian_<arch>.sh` or `script/build_debian_<arch>.sh debug`
+  * run `script/build.sh -p linux` or `script/build.sh -p win64` ( `-u` unity build, `-d` debug build )
 
-- the built binaries can be found in `bin/<platform>/` or `bin/<platform>_debug/`
-- recommend using the startup script `bin/<platform>/start_<projectname>.sh` next to the binary for launching (has workarounds so that install is not required)
+- the built library (`libptlib.a`) and test app can be found in `bin/<platform>/` or `bin/<platform>_debug/`
+- recommend using the startup script `bin/linux/start_<executable>.sh` next to the binary for launching (has workarounds so that install is not required)

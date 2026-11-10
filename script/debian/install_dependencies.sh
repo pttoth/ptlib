@@ -9,12 +9,14 @@
 
 #--------------------------------------------------
 # config (manual)
-packages=""
-packages="$packages git"
-packages="$packages git-lfs"
-packages="$packages cmake"
-packages="$packages build-essential"
-packages="$packages libboost-stacktrace-dev"
+packages=(
+    git
+    git-lfs
+    cmake
+    build-essential
+    libboost-stacktrace-dev
+    g++-mingw-w64-x86-64-posix
+)
 
 #--------------------------------------------------
 # config (auto-set)
@@ -44,7 +46,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 
-"${scriptdir}/apt_installer.sh" $params_forwarded --packages $packages
+"${scriptdir}/apt_installer.sh" $params_forwarded --packages "${packages[@]}"
 errorcode=$?
 
 exit $errorcode

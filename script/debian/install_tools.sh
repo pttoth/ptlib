@@ -9,9 +9,10 @@
 
 #--------------------------------------------------
 # config (manual)
-packages=""
-packages="$packages kdiff3"
-packages="$packages qtcreator"
+packages=(
+    kdiff3
+    qtcreator
+)
 
 #--------------------------------------------------
 # config (auto-set)
@@ -41,7 +42,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 
-"${scriptdir}/apt_installer.sh" $params_forwarded --packages $packages
+"${scriptdir}/apt_installer.sh" $params_forwarded --packages "${packages[@]}"
 errorcode=$?
 
 exit $errorcode
