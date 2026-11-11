@@ -5,11 +5,11 @@
 # See help: cmake/platform/help.win64.txt
 #--------------------------------------------------
 
-# boost (header-only), from 'script/debian/mingw_cross/fetch_and_build_boost.sh'
+# boost (header-only), from 'script/debian/mingw_cross/fetch_boost.sh'
 #   the apt package's headers in '/usr/include' are only for the native compiler
 set( DIR_BOOST ${PROJECT_SOURCE_DIR}/lib/win64_mingw/boost/include )
 if( NOT EXISTS ${DIR_BOOST}/boost/stacktrace.hpp )
-    message( FATAL_ERROR "boost is missing from '${DIR_BOOST}', run 'script/debian/mingw_cross/fetch_and_build_boost.sh'" )
+    message( FATAL_ERROR "boost is missing from '${DIR_BOOST}', run 'script/debian/mingw_cross/fetch_boost.sh'" )
 endif()
 target_include_directories( ${LIB_NAME} SYSTEM PRIVATE ${DIR_BOOST} )
 
