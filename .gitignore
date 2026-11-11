@@ -5,6 +5,7 @@
 *.user
 bin/*
 build/*
+dl_cache/*
 lib/*
 log/*
 projects/build-*

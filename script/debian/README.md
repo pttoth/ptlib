@@ -12,6 +12,7 @@ This tutorial will guide you through installing the following tools.
 - git
 - git-lfs
 - cmake
+- curl
 - build-essential
 - libboost-stacktrace-dev
 - g++-mingw-w64-x86-64-posix (win64 cross-compiler)

@@ -5,6 +5,14 @@
 # See help: cmake/platform/help.win64.txt
 #--------------------------------------------------
 
+# boost (header-only), from 'script/debian/mingw_cross/fetch_and_build_boost.sh'
+#   the apt package's headers in '/usr/include' are only for the native compiler
+set( DIR_BOOST ${PROJECT_SOURCE_DIR}/lib/win64_mingw/boost/include )
+if( NOT EXISTS ${DIR_BOOST}/boost/stacktrace.hpp )
+    message( FATAL_ERROR "boost is missing from '${DIR_BOOST}', run 'script/debian/mingw_cross/fetch_and_build_boost.sh'" )
+endif()
+target_include_directories( ${LIB_NAME} SYSTEM PRIVATE ${DIR_BOOST} )
+
 # link the GCC and C++ runtimes statically,
 #   so the .exe runs without shipping MinGW DLLs next to it
 #   note: this links 'winpthreads' for posix compat
@@ -12,8 +20,9 @@ target_link_options( ${TEST_APP_NAME} PRIVATE
     -static
     -static-libgcc
     -static-libstdc++
+)
 
-# TODO: 
+# TODO:
 # MinGW - no console, look into this
 #   -Wl,--subsystem,console => Build for console subsystem.
 #   -Wl,--subsystem,windows => Build for window subsystem.
