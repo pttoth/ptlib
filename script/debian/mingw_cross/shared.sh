@@ -21,6 +21,15 @@ timestamp=$(date '+%y%m%d_%H%M%S')
 # helpers
 #--------------------------------------------------
 
+# fnPrintHeader <title>   -> prints a visible header, separates the output of the scripts
+fnPrintHeader() {
+    printf '\n\e[1;96m'      # bold bright cyan
+    echo "=================================================="
+    echo "  $1"
+    echo "=================================================="
+    printf '\e[0m\n'       # reset color
+}
+
 # fnDownloadFile_SHA256 <url> <sha256> <file>   -> downloads <url> into <file>, unless it's already there with matching checksum
 fnDownloadFile_SHA256() {
     local url="$1"

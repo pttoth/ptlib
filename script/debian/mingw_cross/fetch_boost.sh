@@ -16,6 +16,9 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/shared.sh"
 #   dir_dl_cache
 #   timestamp
 #   fnDownloadFile_SHA256
+#   fnPrintHeader
+
+fnPrintHeader "boost (headers)"
 
 #--------------------------------------------------
 # boost

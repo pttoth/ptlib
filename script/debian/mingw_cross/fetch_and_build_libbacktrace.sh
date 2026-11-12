@@ -14,6 +14,9 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/shared.sh"
 #   dir_tmp_build
 #   timestamp
 #   toolchain_prefix
+#   fnPrintHeader
+
+fnPrintHeader "libbacktrace (fetch + build)"
 
 #--------------------------------------------------
 # libbacktrace
