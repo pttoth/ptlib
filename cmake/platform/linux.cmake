@@ -16,7 +16,7 @@ target_link_libraries( ${LIB_NAME} PUBLIC
     backtrace
 )
 
-# startup script:  bin/linux[_debug]/start_<executable>.sh
+# startup script:  bin/linux[_<build type>]/start_<executable>.sh
 #   sets up - env vars to find libraries
 #           - the working directory
 #   to not require installation

@@ -33,11 +33,14 @@ message( STATUS "Build type: ${CMAKE_BUILD_TYPE}" )
 
 
 #--------------------------------------------------
-# output directory:  bin/<platform>[_debug]/
+# output directory:  bin/<platform>[_<build type>]/
+#   Release: no suffix
+#   others:  lowercase build type, e.g. _debug, _relwithdebinfo
 #--------------------------------------------------
 set( DIR_BIN ${PROJECT_SOURCE_DIR}/bin/${PLATFORM} )
-if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-    set( DIR_BIN ${DIR_BIN}_debug )
+if( NOT CMAKE_BUILD_TYPE STREQUAL "Release" )
+    string( TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE_LOWER )
+    set( DIR_BIN ${DIR_BIN}_${BUILD_TYPE_LOWER} )
 endif()
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${DIR_BIN} )

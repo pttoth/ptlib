@@ -51,7 +51,7 @@ target_link_options( ${TEST_APP_NAME} PRIVATE
 #   -Wl,--subsystem,windows => Build for window subsystem.
 #   https://caiorss.github.io/C-Cpp-Notes/compiler-flags-options.html
 
-# startup script:  bin/win64[_debug]/start_<executable>.bat
+# startup script:  bin/win64[_<build type>]/start_<executable>.bat
 #   sets up - env vars to find libraries
 #           - the working directory
 #   to not require installation

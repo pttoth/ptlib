@@ -41,7 +41,7 @@ MSVC build on Windows is not supported, but should work, if done manually.
 
 Call `bootstrap.sh` (Debian, native or WSL2). It checks the required apt packages and builds for the current system: `win64` in WSL, `linux` on native Linux.
 
-To build a specific platform: `script/build.sh [-u] [-d] [-p <platform>]` (-u: unity build, -d debug build)
+To build a specific platform: `script/build.sh [-u] [-d|-rd] [-p <platform>]` (-u: unity build, -d: debug build, -rd: release with debug info)
 - platforms: `linux` (native), `win64` (cross-compiled with MinGW-w64)
-- output: `bin/<platform>/` (debug: `bin/<platform>_debug/`): `libptlib.a` and the test app `ptlib_test`
+- output: `bin/<platform>/` (debug: `bin/<platform>_debug/`, release with debug info: `bin/<platform>_relwithdebinfo/`): `libptlib.a` and the test app `ptlib_test`
 - headers: `include/`

@@ -4,16 +4,17 @@
 # Configures and builds the project for a target platform.
 #
 # Usage:
-#   build.sh [-h|--help] [-u|-un] [-d] [-p platform]
+#   build.sh [-h|--help] [-u|-un] [-d|-rd] [-p platform]
 #
 #   -u,  --unity            unity build: source files are compiled in batches (faster full builds)
 #   -un, --no-unity         no unity build (default), takes precedence over -u
 #   -d,  --debug            debug build (default: release)
+#   -rd, --relwithdebinfo   release build with debug info (-O2 -g), the last of -d / -rd wins
 #   -p,  --platform <name>  linux | win64  (default: linux)
 #   -h,  --help             print this help
 #
-# Build directory:  build/<platform>[_debug]/
-# Output:           bin/<platform>[_debug]/  (libptlib.a, test app)
+# Build directory:  build/<platform>[_debug|_relwithdebinfo]/
+# Output:           bin/<platform>[_debug|_relwithdebinfo]/  (libptlib.a, test app)
 
 set -euo pipefail
 
@@ -22,12 +23,12 @@ dir_root="$(cd -- "$dir_script/.." && pwd)"
 
 fnPrintUsage() {
     # print the defined lines of this script
-    sed -n '4,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '4,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
 }
 
 platform=linux
 build_type=Release
-debug_suffix=""
+build_suffix=""
 unity_param_on=false
 unity_param_off=false
 
@@ -53,7 +54,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         -d|--debug)
             build_type=Debug
-            debug_suffix=_debug
+            build_suffix=_debug
+            ;;
+        -rd|--relwithdebinfo)
+            build_type=RelWithDebInfo
+            build_suffix=_relwithdebinfo
             ;;
         -h|--help)
             fnPrintUsage
@@ -92,7 +97,7 @@ esac
 #-------------------------
 
 
-dir_build="${dir_root}/build/${platform}${debug_suffix}"
+dir_build="${dir_root}/build/${platform}${build_suffix}"
 
 echo "Building '${platform}' (${build_type}, unity: ${unity_build}) in '${dir_build}'"
 
