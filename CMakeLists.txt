@@ -160,6 +160,14 @@ target_link_options( ${TEST_APP_NAME} PRIVATE
     $<$<CONFIG:Release>:-s>
 )
 
+# what 'src/test/TestStacktrace.cpp' should find, keep in sync with the strip / -g settings
+#   function names: not stripped (all but Release)
+#   file:line:      -g (Debug, RelWithDebInfo)
+target_compile_definitions( ${TEST_APP_NAME} PRIVATE
+    $<$<NOT:$<CONFIG:Release>>:PT_TEST_EXPECT_FUNCTION_NAMES>
+    $<$<CONFIG:Debug,RelWithDebInfo>:PT_TEST_EXPECT_SOURCE_LINES>
+)
+
 
 #--------------------------------------------------
 # platform specific dependencies

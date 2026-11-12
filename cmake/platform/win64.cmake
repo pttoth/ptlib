@@ -36,6 +36,14 @@ target_link_libraries( ${LIB_NAME} PUBLIC
     backtrace
 )
 
+# test app: 'src/test/TestStacktrace.cpp' uses boost.stacktrace directly
+target_include_directories( ${TEST_APP_NAME} SYSTEM PRIVATE
+    ${DIR_BOOST}
+)
+target_compile_definitions( ${TEST_APP_NAME} PRIVATE
+    BOOST_STACKTRACE_USE_BACKTRACE
+)
+
 # link the GCC and C++ runtimes statically,
 #   so the .exe runs without shipping MinGW DLLs next to it
 #   note: this links 'winpthreads' for posix compat

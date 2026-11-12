@@ -16,6 +16,11 @@ target_link_libraries( ${LIB_NAME} PUBLIC
     backtrace
 )
 
+# test app: 'src/test/TestStacktrace.cpp' uses boost.stacktrace directly
+target_compile_definitions( ${TEST_APP_NAME} PRIVATE
+    BOOST_STACKTRACE_USE_BACKTRACE
+)
+
 # startup script:  bin/linux[_<build type>]/start_<executable>.sh
 #   sets up - env vars to find libraries
 #           - the working directory
