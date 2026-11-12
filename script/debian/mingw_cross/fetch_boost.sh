@@ -21,17 +21,17 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/shared.sh"
 # boost
 #   checksum source: <url>.json  (official, published with the release)
 #--------------------------------------------------
-boost_version=1.83.0
-boost_sha256=c0685b68dd44cc46574cce86c4e17c0f611b15e195be9848dfd0769a0a207628
-boost_name="boost_${boost_version//./_}"
-boost_url="https://archives.boost.io/release/${boost_version}/source/${boost_name}.tar.gz"
+version=1.83.0
+sha256=c0685b68dd44cc46574cce86c4e17c0f611b15e195be9848dfd0769a0a207628
+name="boost_${version//./_}"
+url="https://archives.boost.io/release/${version}/source/${name}.tar.gz"
 dir_boost="${dir_root}/lib/win64_mingw/boost"
 
 #--------------------------------------------------
 # boost: headers only
 #--------------------------------------------------
-archive="${dir_dl_cache}/${boost_name}.tar.gz"
-fnDownloadFile_SHA256 "$boost_url" "$boost_sha256" "$archive"
+archive="${dir_dl_cache}/${name}.tar.gz"
+fnDownloadFile_SHA256 "$url" "$sha256" "$archive"
 
 # always re-extracted: the result matches the archive, even if the dir was modified or is from an older version
 # keep the previous one as backup: <dir>.bak_YYMMDD_HHMMSS
@@ -49,4 +49,4 @@ fi
 
 echo "Extracting boost headers into '${dir_boost#"$dir_root"/}'"
 mkdir -p "${dir_boost}/include"
-tar -xzf "$archive" -C "${dir_boost}/include" --strip-components=1 "${boost_name}/boost"
+tar -xzf "$archive" -C "${dir_boost}/include" --strip-components=1 "${name}/boost"
