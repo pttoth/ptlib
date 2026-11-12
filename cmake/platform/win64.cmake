@@ -11,7 +11,30 @@ set( DIR_BOOST ${PROJECT_SOURCE_DIR}/lib/win64_mingw/boost/include )
 if( NOT EXISTS ${DIR_BOOST}/boost/stacktrace.hpp )
     message( FATAL_ERROR "boost is missing from '${DIR_BOOST}', run 'script/debian/mingw_cross/fetch_boost.sh'" )
 endif()
-target_include_directories( ${LIB_NAME} SYSTEM PRIVATE ${DIR_BOOST} )
+target_include_directories( ${LIB_NAME} SYSTEM PRIVATE
+    ${DIR_BOOST}
+)
+
+# boost.stacktrace: function names (and file:line with debug info) via libbacktrace
+#   from 'script/debian/mingw_cross/fetch_and_build_libbacktrace.sh'
+#   PUBLIC: anything linking the library needs it too
+set( DIR_LIBBACKTRACE ${PROJECT_SOURCE_DIR}/lib/win64_mingw/libbacktrace )
+if( NOT EXISTS ${DIR_LIBBACKTRACE}/lib/libbacktrace.a )
+    message( FATAL_ERROR "libbacktrace is missing from '${DIR_LIBBACKTRACE}', run 'script/debian/mingw_cross/fetch_and_build_libbacktrace.sh'" )
+endif()
+add_library( backtrace STATIC IMPORTED )
+set_target_properties( backtrace PROPERTIES
+    IMPORTED_LOCATION               ${DIR_LIBBACKTRACE}/lib/libbacktrace.a
+    INTERFACE_INCLUDE_DIRECTORIES   ${DIR_LIBBACKTRACE}/include
+)
+
+target_compile_definitions( ${LIB_NAME} PRIVATE
+    BOOST_STACKTRACE_USE_BACKTRACE
+)
+
+target_link_libraries( ${LIB_NAME} PUBLIC
+    backtrace
+)
 
 # link the GCC and C++ runtimes statically,
 #   so the .exe runs without shipping MinGW DLLs next to it

@@ -142,9 +142,10 @@ foreach( target ${LIB_NAME} ${TEST_APP_NAME} )
 endforeach()
 
 # strip release binaries
-target_link_options( ${TEST_APP_NAME} PRIVATE
-    $<$<CONFIG:Release>:-s>
-)
+#   disabled: stacktraces need the symbols for function names (boost.stacktrace + libbacktrace)
+#target_link_options( ${TEST_APP_NAME} PRIVATE
+#    $<$<CONFIG:Release>:-s>
+#)
 
 
 #--------------------------------------------------
