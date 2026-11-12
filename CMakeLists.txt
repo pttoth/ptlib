@@ -60,9 +60,18 @@ set( LIB_GLOBS )
 set( PLATFORM_GLOBS )
 set( TEST_GLOBS )
 foreach( pattern ${SOURCE_PATTERNS} )
-    list( APPEND LIB_GLOBS      src/pt/${pattern} include/pt/${pattern} )
-    list( APPEND PLATFORM_GLOBS src/platform/${PLATFORM}/${pattern} include/platform/${PLATFORM}/${pattern} )
-    list( APPEND TEST_GLOBS     src/test/${pattern} include/test/${pattern} )
+    list( APPEND LIB_GLOBS
+        src/pt/${pattern}
+        include/pt/${pattern}
+    )
+    list( APPEND PLATFORM_GLOBS
+        src/platform/${PLATFORM}/${pattern}
+        include/platform/${PLATFORM}/${pattern}
+    )
+    list( APPEND TEST_GLOBS
+        src/test/${pattern}
+        include/test/${pattern}
+    )
 endforeach()
 
 
