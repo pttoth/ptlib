@@ -15,3 +15,36 @@ Whenever you update `.claude/settings.json`, insert the allow and block rules al
 ## Git aliases
 
 Never run git aliases.
+
+# CMake style
+
+## Function calls with list elements
+
+When list elements are passed to a function, use this layout:
+
+```cmake
+fn( ${TARGET} [modifiers]
+    list_element1
+    list_element2
+)
+```
+
+e.g.:
+
+```cmake
+target_link_libraries( ${LIB_NAME} PUBLIC
+    backtrace
+    ptlib
+)
+```
+
+Exception: multiple modifier groups in one call.
+Each modifier starts its own group on a new line, its elements aligned after it:
+
+```cmake
+target_include_directories( ${LIB_NAME}
+    PUBLIC  ${PROJECT_SOURCE_DIR}/include
+            ${PROJECT_SOURCE_DIR}/include/platform/${PLATFORM}
+    PRIVATE ${PROJECT_SOURCE_DIR}/src/pch
+)
+```
