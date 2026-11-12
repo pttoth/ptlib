@@ -23,7 +23,7 @@ Never run git aliases.
 When list elements are passed to a function, use this layout:
 
 ```cmake
-fn( ${TARGET} [modifiers]
+fn( <target|variable> [modifiers]
     list_element1
     list_element2
 )
@@ -35,6 +35,11 @@ e.g.:
 target_link_libraries( ${LIB_NAME} PUBLIC
     backtrace
     ptlib
+)
+
+list( APPEND LIB_GLOBS
+    src/${pattern}
+    include/${pattern}
 )
 ```
 
