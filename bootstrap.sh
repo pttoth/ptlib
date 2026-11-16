@@ -38,7 +38,7 @@ fi
 
 # WSL: the kernel version contains 'microsoft'
 if grep -qi microsoft /proc/sys/kernel/osrelease; then
-    "${project_root}/script/debian/mingw_cross/set_up_all.sh"
+    "${project_root}/script/debian/mingw_cross/set_up_required.sh"
     "${project_root}/script/build.sh" -p win64
 else
     "${project_root}/script/build.sh" -p linux

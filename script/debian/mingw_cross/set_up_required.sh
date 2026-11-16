@@ -7,5 +7,7 @@ set -euo pipefail
 
 dir_script="$(dirname -- "${BASH_SOURCE[0]}")"
 
-"${dir_script}/fetch_boost.sh"
-"${dir_script}/fetch_and_build_libbacktrace.sh"
+pushd "$dir_script"
+
+./fetch_boost.sh
+#./fetch_and_build_libbacktrace.sh
