@@ -3,15 +3,13 @@
 #include "pt/logging.h"
 #include "pt/utility.hpp"
 
-#include <boost/stacktrace.hpp>
 #include <cstdlib>
 
 void pt::helper::
 FatalError( const char* message ) noexcept
 {
-    using namespace boost;
-    const std::string trace = stacktrace::to_string( stacktrace::stacktrace() );
-    PT_LOG_ERR( "Fatal Error: " << message << "\n" << trace.c_str() );
+    PT_LOG_ERR( "Fatal Error: " << message );
+    pt::PrintStackTrace();
     exit( EXIT_FAILURE );
 }
 

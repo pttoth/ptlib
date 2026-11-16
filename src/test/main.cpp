@@ -3,7 +3,6 @@
 #include "test/TestConfig.hpp"
 #include "test/TestEvent.hpp"
 #include "test/TestUtility.hpp"
-#include "test/TestStacktrace.hpp"
 
 #include <iostream>
 
@@ -56,18 +55,6 @@ int main()
             std::cout << "Utility test: SUCCESS\n\n\n\n";
         }else{
             std::cout << "Utility test: FAILED\n\n\n\n";
-        }
-    }
-
-
-    {
-        TestStacktrace ts;
-        bool success = ts.run();
-
-        if(success){
-            std::cout << "Stacktrace test: SUCCESS\n\n\n\n";
-        }else{
-            std::cout << "Stacktrace test: FAILED\n\n\n\n";
         }
     }
 

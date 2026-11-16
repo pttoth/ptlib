@@ -15,7 +15,6 @@ packages=(
     cmake
     curl
     build-essential
-    libboost-stacktrace-dev
     g++-mingw-w64-x86-64-posix
 )
 
