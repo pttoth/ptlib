@@ -1,0 +1,87 @@
+Stacktrace research: lightweight, traceable stacktraces
+==================================================
+
+Requirements
+--------------------------------------------------
+  must have:      traceable addresses (module+offset), usable when a user sends the trace
+  nice to have:   printed function names
+  constraint:     lightweight; used at critical failures (signal caught -> trace + message -> exit)
+                  -> no dynamic allocation while printing
+
+Approach: print module+offset in the crash handler, resolve names offline on the dev machine.
+
+
+Reconstructing names from a trace a user sends
+--------------------------------------------------
+All methods need the unstripped binary of exactly the build the user ran, or its debug file.
+-> keep one per release (the one hard requirement)
+
+  addr2line
+    gives:  function, file:line, inlined frames
+    usage:  addr2line -f -C -i -e app 0x1b2c4 0x1a0f1 ...     (all addresses in one call)
+            linux (PIE): the offset as printed
+            windows:     0x140000000 (exe's preferred base) + offset
+    notes:  comes with binutils, works for ELF and PE
+
+  separate debug file
+    gives:  same as addr2line
+    usage:  objcopy --only-keep-debug app app.debug
+            strip app (ship this)
+            addr2line -e app.debug ...
+    notes:  users get the small stripped binary, you keep app.debug
+            works for MinGW .exe files too
+
+  llvm-symbolizer
+    gives:  function, file:line, inlined frames
+    notes:  nicer output, reads addresses from stdin, handles ELF and PE
+            alternative to addr2line
+
+  gdb
+    gives:  same
+    usage:  gdb -batch -ex 'info line *0x1b2c4' app
+    notes:  fine for one-offs
+
+  map file (-Wl,-Map=app.map)  or  nm -C -n app > app.syms
+    gives:  function names only
+    notes:  plain text table of function addresses
+            find the closest lower address by hand or with a 5-line script
+            no tools needed later, tiny to archive
+
+  minidumps, Breakpad, Crashpad
+    gives:  full crash state
+    notes:  far beyond lightweight
+            minidumps also expect PDB files, which MinGW doesn't produce
+
+
+Making it reliable
+--------------------------------------------------
+  - identify the build in the trace
+      print a version, git hash or build ID as the trace's first line,
+      so you know which archived binary to use
+      linux: --build-id (Debian turns it on by default); MinGW ld supports it too
+  - a small resolve script
+      paste the trace in; it picks the archived binary for that version,
+      pulls out the module+offset lines, runs addr2line once, prints the result
+      frames from system libraries stay module+offset, which is fine
+
+
+The lightweight crash handler (no allocation while printing)
+--------------------------------------------------
+  - capture
+      _Unwind_Backtrace:          both platforms
+      RtlCaptureStackBackTrace:   windows
+      backtrace() (glibc):        linux; call it once at startup:
+                                  its first call loads libgcc and may allocate
+  - module base
+      linux:    dladdr isn't guaranteed safe inside a signal handler
+                -> record the loaded modules' address ranges once at startup
+                   with dl_iterate_phdr, into a static array, and look addresses up there
+      windows:  GetModuleHandleExW (FROM_ADDRESS) is fine in an exception handler,
+                or use the same table recorded at startup
+  - printing
+      format the hex by hand into a fixed buffer on the stack
+      linux: write(2, ...)    windows: WriteFile
+      no printf, no std::string, no streams
+
+  About a hundred lines with no dependencies: no boost, no libbacktrace.
+  Names then come only from the offline step, which matches the priorities above.

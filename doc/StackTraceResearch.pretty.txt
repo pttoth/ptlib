@@ -1,0 +1,87 @@
+Stacktrace research: lightweight, traceable stacktraces
+==================================================
+
+Requirements
+--------------------------------------------------
+  must have:      traceable addresses (module+offset), usable when a user sends the trace
+  nice to have:   printed function names
+  constraint:     lightweight; used at critical failures (signal caught -> trace + message -> exit)
+                  -> no dynamic allocation while printing
+
+The cheapest workable setup: print module+offset in the crash handler,
+and do all the name lookup on your own machine afterwards.
+
+
+Reconstructing names from a trace a user sends
+--------------------------------------------------
+All of these need the unstripped binary of exactly the build the user ran, or its debug file.
+Keep one per release; that's the one hard requirement.
+
+┌────────────────────────┬────────────────────┬──────────────────────────────────────────────────┐
+│ Method                 │ What you get       │ Notes                                            │
+╞────────────────────────╪────────────────────╪──────────────────────────────────────────────────╡
+│ addr2line              │ function,          │ addr2line -f -C -i -e app 0x1b2c4 0x1a0f1 ...    │
+│                        │ file:line, inlined │ (all addresses in one call). Linux PIE: the      │
+│                        │ frames             │ offset as printed. Windows: 0x140000000 +        │
+│                        │                    │ offset. Comes with binutils, works for ELF and   │
+│                        │                    │ PE.                                              │
+├────────────────────────┼────────────────────┼──────────────────────────────────────────────────┤
+│ Separate debug file    │ same as addr2line  │ objcopy --only-keep-debug app app.debug, then    │
+│                        │                    │ strip app for shipping. Users get the small      │
+│                        │                    │ stripped binary, you keep app.debug and run      │
+│                        │                    │ addr2line -e app.debug. Works for MinGW .exe     │
+│                        │                    │ files too.                                       │
+├────────────────────────┼────────────────────┼──────────────────────────────────────────────────┤
+│ llvm-symbolizer        │ function,          │ nicer output, reads addresses from stdin,        │
+│                        │ file:line, inlined │ handles ELF and PE. An alternative to addr2line. │
+│                        │ frames             │                                                  │
+├────────────────────────┼────────────────────┼──────────────────────────────────────────────────┤
+│ gdb                    │ same               │ gdb -batch -ex 'info line *0x1b2c4' app. Fine    │
+│                        │                    │ for one-offs.                                    │
+├────────────────────────┼────────────────────┼──────────────────────────────────────────────────┤
+│ Map file               │ function names     │ a plain text table of function addresses. You    │
+│ (-Wl,-Map=app.map) or  │ only               │ find the closest lower address by hand or with a │
+│ nm -C -n app >         │                    │ 5-line script. No tools needed later, tiny to    │
+│ app.syms               │                    │ archive.                                         │
+├────────────────────────┼────────────────────┼──────────────────────────────────────────────────┤
+│ Minidumps, Breakpad,   │ full crash state   │ far beyond lightweight. Minidumps also expect    │
+│ Crashpad               │                    │ PDB files, which MinGW doesn't produce.          │
+└────────────────────────┴────────────────────┴──────────────────────────────────────────────────┘
+
+
+Making it reliable
+--------------------------------------------------
+  - Identify the build in the trace.
+      Print a version, git hash or build ID as the trace's first line,
+      so you know which archived binary to use.
+      Linux has --build-id (Debian turns it on by default), and MinGW ld supports it too.
+  - Use a small resolve script.
+      Paste the trace in; the script picks the archived binary for that version,
+      pulls out the module+offset lines, runs addr2line once and prints the result.
+      Frames from system libraries stay as module+offset, which is fine.
+
+
+The lightweight crash handler (no allocation while printing)
+--------------------------------------------------
+┌────────────────────────┬────────────────────────────────────────────────────────────────────────┐
+│ Part                   │ How                                                                    │
+╞────────────────────────╪────────────────────────────────────────────────────────────────────────╡
+│ Capture                │ _Unwind_Backtrace works on both platforms. RtlCaptureStackBackTrace    │
+│                        │ also works on Windows, and glibc's backtrace() on Linux. Call          │
+│                        │ backtrace() once at startup: its first call loads libgcc and may       │
+│                        │ allocate.                                                              │
+├────────────────────────┼────────────────────────────────────────────────────────────────────────┤
+│ Module base (linux)    │ dladdr isn't guaranteed safe inside a signal handler. Instead, record  │
+│                        │ the loaded modules' address ranges once at startup with                │
+│                        │ dl_iterate_phdr, into a static array, and look addresses up there.     │
+├────────────────────────┼────────────────────────────────────────────────────────────────────────┤
+│ Module base (windows)  │ GetModuleHandleExW (FROM_ADDRESS) is fine in an exception handler, or  │
+│                        │ use the same table recorded at startup.                                │
+├────────────────────────┼────────────────────────────────────────────────────────────────────────┤
+│ Printing               │ format the hex by hand into a fixed buffer on the stack, then use      │
+│                        │ write(2, ...) on Linux or WriteFile on Windows. No printf, no          │
+│                        │ std::string, no streams.                                               │
+└────────────────────────┴────────────────────────────────────────────────────────────────────────┘
+
+This is about a hundred lines with no dependencies: no boost, no libbacktrace.
+Names then come only from the offline step, which matches the priorities above.
