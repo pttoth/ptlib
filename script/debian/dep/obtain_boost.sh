@@ -10,7 +10,9 @@
 
 set -euo pipefail
 
-source "$(dirname -- "${BASH_SOURCE[0]}")/shared.sh"
+dir_script=$(dirname -- "${BASH_SOURCE[0]}")
+
+source "${dir_script}/../shared.sh"
 # inherited vars / functions:
 #   dir_root
 #   dir_dl_cache

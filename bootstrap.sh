@@ -9,6 +9,11 @@ set -euo pipefail
 
 project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
+source "${project_root}/script/debian/shared.sh"
+# inherited vars / functions:
+#   fnDetectArch
+#   fnValidateArch
+
 if [ "$EUID" -eq 0 ]; then
     echo "Don't run this as root."
     echo "  The script will clearly state what to run as sudo, if needed."
@@ -25,8 +30,8 @@ if [ ! -f /etc/debian_version ]; then
     exit 1
 fi
 
-if ! "${project_root}/script/debian/validate_arch.sh" "$( "${project_root}/script/debian/detect_arch.sh" )"; then
-    echo "Unsupported architecture: '$( "${project_root}/script/debian/detect_arch.sh" --force )'"
+if ! fnValidateArch "$( fnDetectArch )"; then
+    echo "Unsupported architecture: '$( fnDetectArch )'"
     exit 1
 fi
 
@@ -38,8 +43,9 @@ fi
 
 # WSL: the kernel version contains 'microsoft'
 if grep -qi microsoft /proc/sys/kernel/osrelease; then
-    "${project_root}/script/debian/mingw_cross/set_up_required.sh"
+    "${project_root}/script/debian/obtain_deps_mingw.sh"
     "${project_root}/script/build.sh" -p win64
 else
+    "${project_root}/script/debian/obtain_deps_debian.sh"
     "${project_root}/script/build.sh" -p linux
 fi
