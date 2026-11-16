@@ -1,4 +1,41 @@
-added project generation
+newCppProject
+    add ptlib scripts
 
+    mingw builder, etc.
+
+--------------------------
+obtain_ptlib.sh
+    libbacktrace needed in newCppProject, if ptlib is used
+        add libbacktrace getter?
+        ptlib getter should solve it?
+
+--------------------------
+'event.hpp:215' and ':234'
+    give -Wpmf-conversions warnings.
+        SOLVED in ptlib2
+--------------------------
+add octtree from boid sim
+--------------------------
+add stuff from ninja proj, if needed
+--------------------------
+implement prototypes
+    mem mgr
+    arena
+    perf profiler
+    what else?
+    make string
+    context mgmt
+--------------------------
+
+
+
+--------------------------
+unicode output gets mangled
+    árvíztűrő tükörfúrógép
+and upper lowercase transformations too
+    just printed output, or data too?
+
+
+--------------------------
 remove doc/ garbage
 
